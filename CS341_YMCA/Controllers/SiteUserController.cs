@@ -49,7 +49,8 @@ namespace CS341_YMCA.Controllers
         {
             try
             {
-                Sql.ExecuteProcedure<object>("SiteUser_Authenticate",
+                Sql.ExecuteProcedure<object>(
+                    "SiteUser_Authenticate",
                     new SiteUserAuthenticateRequest()
                     {
                         Email = Email,
@@ -84,7 +85,8 @@ namespace CS341_YMCA.Controllers
             try
             {
                 SiteUserRegisterResult? _Result = null;
-                Sql.ExecuteProcedure<SiteUserRegisterResult>("SiteUser_Register",
+                Sql.ExecuteProcedure<SiteUserRegisterResult>(
+                    "SiteUser_Register",
                     new SiteUserRegisterRequest()
                     {
                         FirstName = FirstName,
@@ -123,7 +125,8 @@ namespace CS341_YMCA.Controllers
             try
             {
                 UserRequestResetResult? _Result = null;
-                Sql.ExecuteProcedure<UserRequestResetResult>("SiteUser_RequestReset",
+                Sql.ExecuteProcedure<UserRequestResetResult>(
+                    "SiteUser_RequestReset",
                     new UserRequestResetRequest()
                     {
                         Email = Email
@@ -160,7 +163,8 @@ namespace CS341_YMCA.Controllers
         {
             try
             {
-                Sql.ExecuteProcedure<object>("SiteUser_ResetPassword",
+                Sql.ExecuteProcedure<object>(
+                    "SiteUser_ResetPassword",
                     new SiteUserResetPasswordRequest()
                     {
                         ResetToken = ResetToken,
