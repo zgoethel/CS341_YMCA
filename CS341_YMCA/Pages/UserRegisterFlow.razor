@@ -1,0 +1,106 @@
+﻿@using CS341_YMCA.Controllers
+@using CS341_YMCA.Data
+@using CS341_YMCA.Pages
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components
+@using System.ComponentModel.DataAnnotations
+@using System.Data.SqlClient
+@using System.Security.Cryptography
+@using System.Text
+
+@page "/SiteUser/RegisterFlow"
+@layout SimplifiedLayout
+
+@inject Database Sql
+@inject SiteUserController SiteUsers
+
+<PageTitle>Member Registration</PageTitle>
+
+@if (!string.IsNullOrEmpty(ValidationMessage))
+{
+    <div class="alert alert-danger">@ValidationMessage</div>
+}
+
+@if (string.IsNullOrEmpty(SuccessMessage))
+{
+    <div style="max-width: 30em;">
+        <h2>Member Registration</h2>
+
+        <p class="mt-4">
+            Please provide the following details to create your account.
+            Use an email which you use regularly, as some important messages
+            may be sent there.
+        </p>
+
+        <p class="mt-2">
+            Please provide the following details:
+        </p>
+    </div>
+
+    <EditForm Model=FormBind style="max-width: 27em;">
+        <label>First Name:</label>
+        <InputText class="form-control mb-2"
+            type="text"
+            @bind-Value=FormBind.FirstName
+            @onchange=StateHasChanged />
+
+        <label>Last Name:</label>
+        <InputText class="form-control mb-2"
+            type="text" 
+            @bind-Value=FormBind.LastName
+            @onchange=StateHasChanged />
+
+        <label>Email:</label>
+        <InputText class="form-control"
+            type="text" 
+            @bind-Value=FormBind.Email
+            @onchange=StateHasChanged />
+
+        <button class="btn btn-primary mt-4" type="submit" @onclick=SubmitRegistration>Create Account</button>
+    </EditForm>
+} else
+{
+    <div class="alert alert-success">@SuccessMessage</div>
+}
+
+@code {
+    private class FormBinding
+    {
+        [Required]
+        public string FirstName = "";
+
+        [Required]
+        public string LastName = "";
+
+        [Required]
+        public string Email = "";
+    }
+
+    private FormBinding FormBind = new();
+    private string SuccessMessage = "";
+    private string ValidationMessage = "";
+
+    private void SubmitRegistration()
+    {
+        if (string.IsNullOrEmpty(FormBind.FirstName)
+            || string.IsNullOrEmpty(FormBind.LastName)
+            || string.IsNullOrEmpty(FormBind.Email))
+        {
+            ValidationMessage = "Please fill in all of the form values.";
+            return;
+        }
+
+        var Result = SiteUsers.SiteUser_Register(FormBind.FirstName, FormBind.LastName, FormBind.Email);
+
+        if (Result.Success)
+        {
+            ValidationMessage = "";
+            SuccessMessage = "A confirmation email has been sent to you. Check your inbox to continue the registration process.";
+        } else
+        {
+            SuccessMessage = "";
+            ValidationMessage = Result.Error;
+        }
+    }
+}
