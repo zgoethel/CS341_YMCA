@@ -1,19 +1,62 @@
-﻿@inherits LayoutComponentBase
+﻿@using CS341_YMCA.Data
+
+@inherits LayoutComponentBase
+
+@inject AuthenticationStateProvider AuthState
+@inject LinkGenerator Links
+@inject NavigationManager Nav
+@inject IHttpContextAccessor Con
 
 <PageTitle>YMCA Enrollment Portal</PageTitle>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<AuthorizeView>
+<Authorized>
+    <style>
+        body
+        {
+            font-family: system-ui;
+        }
+    </style>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+    <div class="page">
+        <div class="sidebar">
+            <NavMenu />
         </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+        <main>
+            <div class="top-row px-4">
+                <button @onclick=LogOutClick class="btn btn-primary">Log out</button>
+            </div>
+
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+    </div>
+</Authorized>
+<NotAuthorized>
+
+</NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter]
+    protected Task<AuthenticationState>? Auth { get; set; }
+
+    protected override void OnAfterRender(bool FirstRender)
+    {
+        base.OnAfterRender(FirstRender);
+
+        if (!Auth.Result.User.Identity.IsAuthenticated)
+        {
+            var Path = Links.GetPathByAction(Con.HttpContext, "LoginFlow", "SiteUser");
+            Nav.NavigateTo(Path);
+        }
+    }
+
+    void LogOutClick()
+    {
+        var _AuthState = AuthState as AuthStateProvider;
+        _AuthState?.LogOut();
+    }
+}
