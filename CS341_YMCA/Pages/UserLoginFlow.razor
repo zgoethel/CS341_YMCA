@@ -16,6 +16,7 @@
 @inject IHttpContextAccessor Con
 @inject LinkGenerator Links
 @inject AuthenticationStateProvider AuthState
+@inject SiteUserController SiteUsers
 
 <PageTitle>Login</PageTitle>
 
@@ -77,10 +78,8 @@
 
     private void GoToRegister()
     {
-        Nav.NavigateTo(Links.GetPathByAction(
-            Con.HttpContext ?? throw new Exception("There is no current HTTP context."),
-            "RegisterFlow", "SiteUser"
-        ) ?? "/SiteUser/RegisterFlow");
+        var Path = Links.GetPathByAction(Con.HttpContext, "RegisterFlow", "SiteUser");
+        Nav.NavigateTo(Path);
     }
 
     private void SubmitLogin()
@@ -92,10 +91,17 @@
             return;
         }
 
-        var _AuthState = AuthState as AuthStateProvider;
-        _AuthState.LogIn(FormBind.Email, FormBind.Password);
-        _AuthState.GetAuthenticationStateAsync().Wait();
+        var Result = SiteUsers.SiteUser_Authenticate(FormBind.Email, FormBind.Password.CalculateSha512());
 
-        Nav.NavigateTo(Nav.BaseUri);
+        if (Result.Success)
+        {
+            var _AuthState = AuthState as AuthStateProvider;
+            _AuthState.LogIn(FormBind.Email, FormBind.Password);
+
+            Nav.NavigateTo(Nav.BaseUri);
+        } else
+        {
+            ValidationMessage = Result.Error;
+        }
     }
 }

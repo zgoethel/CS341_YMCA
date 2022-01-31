@@ -44,7 +44,7 @@ namespace CS341_YMCA.Data
 
             var Result = new AuthenticationState(new ClaimsPrincipal(Identity));
             var ResultTask = Task.FromResult(Result);
-
+            
             return await ResultTask;
         }
     }

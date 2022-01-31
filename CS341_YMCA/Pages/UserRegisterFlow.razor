@@ -92,10 +92,8 @@
 
     private void GoToLogin()
     {
-        Nav.NavigateTo(Links.GetPathByAction(
-            Con.HttpContext ?? throw new Exception("There is no current HTTP context."),
-            "LoginFlow", "SiteUser"
-        ) ?? "/SiteUser/LoginFlow");
+        var Path = Links.GetPathByAction(Con.HttpContext, "LoginFlow", "SiteUser");
+        Nav.NavigateTo(Path);
     }
 
     private void SubmitRegistration()
