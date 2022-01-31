@@ -1,0 +1,101 @@
+﻿@using CS341_YMCA.Controllers
+@using CS341_YMCA.Data
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components
+@using System.ComponentModel.DataAnnotations
+@using System.Data.SqlClient
+@using System.Security.Cryptography
+@using System.Text
+
+@page "/SiteUser/LoginFlow"
+@layout SimplifiedLayout
+
+@inject NavigationManager Nav
+@inject Database Sql
+@inject IHttpContextAccessor Con
+@inject LinkGenerator Links
+@inject AuthenticationStateProvider AuthState
+
+<PageTitle>Login</PageTitle>
+
+@if (!string.IsNullOrEmpty(ValidationMessage))
+{
+    <div class="alert alert-danger">@ValidationMessage</div>
+}
+
+@if(string.IsNullOrEmpty(ErrorMessage))
+{
+    <div style="max-width: 30em;">
+        <h2>Login</h2>
+
+        <p class="mt-4">Welcome!</p>
+        <p class="mt-2">
+            Please provide your credentials to log in.
+        </p>
+    </div>
+        
+    <EditForm Model=FormBind style="max-width: 27em;">
+        <label>Email:</label>
+        <InputText class="form-control mb-2"
+            type="text"
+            @bind-Value=FormBind.Email
+            @onchange=StateHasChanged />
+
+        <label>Password:</label>
+        <InputText class="form-control"
+            type="password" 
+            @bind-Value=FormBind.Password
+            @onchange=StateHasChanged />
+
+        <button class="btn btn-primary mt-4" type="submit" @onclick=SubmitLogin>Log In</button>&nbsp;
+        <button class="btn btn-secondary mt-4"
+            type="button"
+            @onclick=GoToRegister>
+            
+            Register
+        </button>
+    </EditForm>
+} else
+{
+    <div class="alert alert-danger">@ErrorMessage</div>
+}
+
+@code {
+    private class FormBinding
+    {
+        [Required]
+        public string Email = "";
+
+        [Required]
+        public string Password = "";
+    }
+
+    private FormBinding FormBind = new();
+    private string ErrorMessage = "";
+    private string ValidationMessage = "";
+
+    private void GoToRegister()
+    {
+        Nav.NavigateTo(Links.GetPathByAction(
+            Con.HttpContext ?? throw new Exception("There is no current HTTP context."),
+            "RegisterFlow", "SiteUser"
+        ) ?? "/SiteUser/RegisterFlow");
+    }
+
+    private void SubmitLogin()
+    {
+        if (string.IsNullOrEmpty(FormBind.Email)
+            || string.IsNullOrEmpty(FormBind.Password))
+        {
+            ValidationMessage = "Please provide all the login details.";
+            return;
+        }
+
+        var _AuthState = AuthState as AuthStateProvider;
+        _AuthState.LogIn(FormBind.Email, FormBind.Password);
+        _AuthState.GetAuthenticationStateAsync().Wait();
+
+        Nav.NavigateTo(Nav.BaseUri);
+    }
+}

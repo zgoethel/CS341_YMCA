@@ -1,6 +1,17 @@
-﻿@inherits LayoutComponentBase
+﻿@using CS341_YMCA.Data
+
+@inherits LayoutComponentBase
+
+@inject AuthenticationStateProvider AuthState
 
 <PageTitle>YMCA Enrollment Portal</PageTitle>
+
+<style>
+    body
+    {
+        font-family: system-ui;
+    }
+</style>
 
 <div class="page">
     <div class="sidebar">
@@ -21,6 +32,7 @@
 @code {
     void LogOutClick()
     {
-        
+        var _AuthState = AuthState as AuthStateProvider;
+        _AuthState?.LogOut();
     }
 }

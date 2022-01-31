@@ -37,7 +37,7 @@ namespace CS341_YMCA.Controllers
                     <p>Thank you for showing interest in our service.</p>
                     <p>Please click on <a href='" + ResetLink + @"'>this link</a> to set a new password. If
                     the link does not work, try copying and pasting the whole URL below:</p>
-                    <br/><br/>
+                    <br/>
 
                     <p><a href='" + ResetLink + @"'>" + ResetLink + @"</a></p>
                 ");

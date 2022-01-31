@@ -1,5 +1,6 @@
 using CS341_YMCA.Data;
 using CS341_YMCA.Controllers;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var Builder = WebApplication.CreateBuilder(args);
 
@@ -7,9 +8,13 @@ var Builder = WebApplication.CreateBuilder(args);
 Builder.Services.AddHttpContextAccessor();
 Builder.Services.AddRazorPages();
 Builder.Services.AddServerSideBlazor();
+Builder.Services.AddAuthorizationCore();
+
 Builder.Services.AddTransient<Database>();
 Builder.Services.AddTransient<EmailSender>();
 Builder.Services.AddTransient<SiteUserController>();
+
+Builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 
 var App = Builder.Build();
 

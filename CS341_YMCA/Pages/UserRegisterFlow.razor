@@ -14,6 +14,9 @@
 
 @inject Database Sql
 @inject SiteUserController SiteUsers
+@inject NavigationManager Nav
+@inject IHttpContextAccessor Con
+@inject LinkGenerator Links
 
 <PageTitle>Member Registration</PageTitle>
 
@@ -58,6 +61,12 @@
             @onchange=StateHasChanged />
 
         <button class="btn btn-primary mt-4" type="submit" @onclick=SubmitRegistration>Create Account</button>
+        <button class="btn btn-secondary mt-4"
+            type="button"
+            @onclick=GoToLogin>
+            
+            Sign In
+        </button>
     </EditForm>
 } else
 {
@@ -80,6 +89,14 @@
     private FormBinding FormBind = new();
     private string SuccessMessage = "";
     private string ValidationMessage = "";
+
+    private void GoToLogin()
+    {
+        Nav.NavigateTo(Links.GetPathByAction(
+            Con.HttpContext ?? throw new Exception("There is no current HTTP context."),
+            "LoginFlow", "SiteUser"
+        ) ?? "/SiteUser/LoginFlow");
+    }
 
     private void SubmitRegistration()
     {

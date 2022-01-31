@@ -1,3 +1,27 @@
 ﻿@page "/schedule"
 
+@inject AuthenticationStateProvider AuthState
+@inject LinkGenerator Links
+@inject NavigationManager Nav
+@inject IHttpContextAccessor Con
+
 <PageTitle>Edit Schedule</PageTitle>
+
+<AuthorizeView>
+<Authorized>
+
+</Authorized>
+<NotAuthorized>
+    @code {
+        protected override void OnAfterRender(bool FirstRender)
+        {
+            base.OnAfterRender(FirstRender);
+
+            Nav.NavigateTo(Links.GetPathByAction(
+                Con.HttpContext ?? throw new Exception("There is no current HTTP context."),
+                "LoginFlow", "SiteUser"
+            ) ?? "/SiteUser/LoginFlow");
+        }
+    }
+</NotAuthorized>
+</AuthorizeView>
