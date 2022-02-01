@@ -1,10 +1,18 @@
+div#greeting {
+    color: white;
+    padding-left: 1em;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
 .navbar-toggler {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgb(67 80 173 / 30%);
 }
 
 .top-row {
-    height: 3.5rem;
-    background-color: rgba(0,0,0,0.4);
+    height: 10em;
+    background-color: white;
+    border-right: 1em solid #009fff;
 }
 
 .navbar-brand {
@@ -51,6 +59,11 @@
 }
 
 @media (min-width: 641px) {
+    div#greeting {
+        position: absolute;
+        bottom: 0;
+    }
+
     .navbar-toggler {
         display: none;
     }

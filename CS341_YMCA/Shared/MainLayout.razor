@@ -24,10 +24,6 @@
         </div>
 
         <main>
-            <div class="top-row px-4">
-                <button @onclick=LogOutClick class="btn btn-primary">Log out</button>
-            </div>
-
             <article class="content px-4">
                 @Body
             </article>
@@ -47,16 +43,10 @@
     {
         base.OnAfterRender(FirstRender);
 
-        if (!Auth.Result.User.Identity.IsAuthenticated)
+        if (!Auth!.Result.User.Identity!.IsAuthenticated)
         {
-            var Path = Links.GetPathByAction(Con.HttpContext, "LoginFlow", "SiteUser");
-            Nav.NavigateTo(Path);
+            var Path = Links.GetPathByAction(Con.HttpContext!, "LoginFlow", "SiteUser");
+            Nav.NavigateTo(Path!);
         }
-    }
-
-    void LogOutClick()
-    {
-        var _AuthState = AuthState as AuthStateProvider;
-        _AuthState?.LogOut();
     }
 }
