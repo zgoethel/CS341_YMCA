@@ -27,46 +27,36 @@
 
 @if (string.IsNullOrEmpty(SuccessMessage))
 {
-    <div style="max-width: 30em;">
-        <h2>Member Registration</h2>
+    <h2>Member Registration</h2>
 
-        <p class="mt-4">
-            Please provide the following details to create your account.
-            Use an email which you use regularly, as some important messages
-            may be sent there.
-        </p>
+    <p class="mt-4">
+        Please provide the following details to create your account.
+        Use an email which you use regularly, as some important messages
+        may be sent there.
+    </p>
 
-        <p class="mt-2">
-            Please provide the following details:
-        </p>
-    </div>
+    <p class="mt-2">
+        Please provide the following details:
+    </p>
 
-    <EditForm Model=FormBind style="max-width: 27em;">
+    <EditForm Model=FormBind>
         <label>First Name:</label>
         <InputText class="form-control mb-2"
             type="text"
-            @bind-Value=FormBind.FirstName
-            @onchange=StateHasChanged />
+            @bind-Value=FormBind.FirstName />
 
         <label>Last Name:</label>
         <InputText class="form-control mb-2"
             type="text" 
-            @bind-Value=FormBind.LastName
-            @onchange=StateHasChanged />
+            @bind-Value=FormBind.LastName />
 
         <label>Email:</label>
         <InputText class="form-control"
             type="text" 
-            @bind-Value=FormBind.Email
-            @onchange=StateHasChanged />
+            @bind-Value=FormBind.Email />
 
         <button class="btn btn-primary mt-4" type="submit" @onclick=SubmitRegistration>Create Account</button>
-        <button class="btn btn-secondary mt-4"
-            type="button"
-            @onclick=GoToLogin>
-            
-            Sign In
-        </button>
+        <button class="btn btn-secondary mt-4" type="button" @onclick=GoToLogin>Sign In</button>
     </EditForm>
 } else
 {
@@ -92,15 +82,16 @@
 
     private void GoToLogin()
     {
-        var Path = Links.GetPathByAction(Con.HttpContext, "LoginFlow", "SiteUser");
-        Nav.NavigateTo(Path);
+        var Path = Links.GetPathByAction(Con.HttpContext!, "LoginFlow", "SiteUser");
+        Nav.NavigateTo(Path!);
     }
 
     private void SubmitRegistration()
     {
         if (string.IsNullOrEmpty(FormBind.FirstName)
             || string.IsNullOrEmpty(FormBind.LastName)
-            || string.IsNullOrEmpty(FormBind.Email))
+            || string.IsNullOrEmpty(FormBind.Email)
+        )
         {
             ValidationMessage = "Please fill in all of the form values.";
             return;
@@ -111,11 +102,11 @@
         if (Result.Success)
         {
             ValidationMessage = "";
-            SuccessMessage = "A confirmation email has been sent to you. Check your inbox to continue the registration process.";
+            SuccessMessage = "A confirmation email has been sent to you. Check your inbox to continue the registration process; the message may be incorrectly marked as spam.";
         } else
         {
             SuccessMessage = "";
-            ValidationMessage = Result.Error;
+            ValidationMessage = Result.Error!;
         }
     }
 }

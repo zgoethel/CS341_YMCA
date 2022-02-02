@@ -1,5 +1,8 @@
 ﻿@inherits LayoutComponentBase
 
+@inject IHttpContextAccessor Con
+@inject LinkGenerator Links
+
 <PageTitle>YMCA Enrollment Portal</PageTitle>
 
 <style>
@@ -11,8 +14,14 @@
 
 <div class="page">
     <main>
+        <div class="top-row px-4">
+            <a href="@Links.GetPathByAction(Con.HttpContext!, "LoginFlow", "SiteUser")">Log in</a>
+            <a href="@Links.GetPathByAction(Con.HttpContext!, "RegisterFlow", "SiteUser")">New member registration</a>
+        </div>
+
         <article class="content px-4">
             <div class="container">
+                <img src="images/ymca_icon.jpg" id="ymca-icon" />
                 @Body
             </div>
         </article>

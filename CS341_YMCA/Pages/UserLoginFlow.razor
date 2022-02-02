@@ -27,35 +27,26 @@
 
 @if(string.IsNullOrEmpty(ErrorMessage))
 {
-    <div style="max-width: 30em;">
-        <h2>Login</h2>
+    <h2>Login</h2>
 
-        <p class="mt-4">Welcome!</p>
-        <p class="mt-2">
-            Please provide your credentials to log in.
-        </p>
-    </div>
+    <p class="mt-4">Welcome!</p>
+    <p class="mt-2">
+        Please provide your credentials to log in.
+    </p>
         
-    <EditForm Model=FormBind style="max-width: 27em;">
+    <EditForm Model=FormBind>
         <label>Email:</label>
         <InputText class="form-control mb-2"
             type="text"
-            @bind-Value=FormBind.Email
-            @onchange=StateHasChanged />
+            @bind-Value=FormBind.Email />
 
         <label>Password:</label>
         <InputText class="form-control"
             type="password" 
-            @bind-Value=FormBind.Password
-            @onchange=StateHasChanged />
+            @bind-Value=FormBind.Password />
 
         <button class="btn btn-primary mt-4" type="submit" @onclick=SubmitLogin>Log In</button>&nbsp;
-        <button class="btn btn-secondary mt-4"
-            type="button"
-            @onclick=GoToRegister>
-            
-            Register
-        </button>
+        <button class="btn btn-secondary mt-4" type="button" @onclick=GoToRegister>Register</button>
     </EditForm>
 } else
 {
@@ -78,14 +69,15 @@
 
     private void GoToRegister()
     {
-        var Path = Links.GetPathByAction(Con.HttpContext, "RegisterFlow", "SiteUser");
-        Nav.NavigateTo(Path);
+        var Path = Links.GetPathByAction(Con.HttpContext!, "RegisterFlow", "SiteUser");
+        Nav.NavigateTo(Path!);
     }
 
     private void SubmitLogin()
     {
         if (string.IsNullOrEmpty(FormBind.Email)
-            || string.IsNullOrEmpty(FormBind.Password))
+            || string.IsNullOrEmpty(FormBind.Password)
+        )
         {
             ValidationMessage = "Please provide all the login details.";
             return;
@@ -96,12 +88,12 @@
         if (Result.Success)
         {
             var _AuthState = AuthState as AuthStateProvider;
-            _AuthState.LogIn(FormBind.Email, FormBind.Password);
+            _AuthState!.LogIn(FormBind.Email, FormBind.Password);
 
             Nav.NavigateTo(Nav.BaseUri);
         } else
         {
-            ValidationMessage = Result.Error;
+            ValidationMessage = Result.Error!;
         }
     }
 }
