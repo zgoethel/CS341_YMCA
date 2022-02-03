@@ -14,6 +14,7 @@ namespace CS341_YMCA.Controllers
         private readonly EmailSender Smtp;
         private readonly IHttpContextAccessor Con;
         private readonly LinkGenerator Links;
+
         public SiteUserController(Database Sql, EmailSender Smtp, IHttpContextAccessor Con, LinkGenerator Links)
         {
             this.Sql = Sql;

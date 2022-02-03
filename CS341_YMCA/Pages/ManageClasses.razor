@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/ManageClasses"
 
 @using CS341_YMCA.Data
 
@@ -22,11 +22,17 @@
         });
 }
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Manage Classes</PageTitle>
 
-<h1>Howdy, <strong>@SiteUser!.FirstName</strong>!</h1>
-<hr />
-<h3>We're glad you stopped by.</h3>
+@if (SiteUser!.IsAdmin)
+{
+    <h1>Manage Classes</h1>
+    <hr />
+    <h3>Create and edit the classes which members can join</h3>
+} else
+{
+    <div class="alert alert-danger">You are <strong>not</strong> an admin user and cannot access this page.</div>
+}
 
 @code {
     [CascadingParameter]
