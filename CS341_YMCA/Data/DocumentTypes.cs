@@ -39,5 +39,18 @@
         public string PasswordHash { get; set; } = "";
     }
 
+    public class SiteUserDBO
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; } = "";
+        public string? LastName { get; set; }
+        public string Email { get; set; } = "";
+        public bool HasPassword { get; set; }
+        public bool HasPendingReset { get; set; }
+        public bool IsAdmin { get; set; }
+        public DateTime Created { get; set; }
+        public DateTime Modified { get; set; }
+    }
+
     #endregion
 }
