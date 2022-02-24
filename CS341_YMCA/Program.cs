@@ -13,6 +13,7 @@ Builder.Services.AddAuthorizationCore();
 Builder.Services.AddTransient<Database>();
 Builder.Services.AddTransient<EmailSender>();
 Builder.Services.AddTransient<SiteUserController>();
+Builder.Services.AddTransient<ClassController>();
 
 Builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 
