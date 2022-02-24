@@ -15,6 +15,9 @@ namespace CS341_YMCA.Controllers
         private readonly IHttpContextAccessor Con;
         private readonly LinkGenerator Links;
 
+        private string Env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
+        private bool IsDevelopment => Env.Equals("Development");
+
         public SiteUserController(Database Sql, EmailSender Smtp, IHttpContextAccessor Con, LinkGenerator Links)
         {
             this.Sql = Sql;
@@ -68,10 +71,10 @@ namespace CS341_YMCA.Controllers
             {
                 Result.Success = false;
                 Result.Error = Ex.Message;
-            } catch (Exception)
+            } catch (Exception Ex)
             {
                 Result.Success = false;
-                Result.Error = "An unexpected error has occurred.";
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
             }
 
             return Result;
@@ -111,7 +114,7 @@ namespace CS341_YMCA.Controllers
             } catch (Exception Ex)
             {
                 Result.Success = false;
-                Result.Error = Ex.ToString();
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
             }
 
             return Result;
@@ -142,10 +145,10 @@ namespace CS341_YMCA.Controllers
             {
                 Result.Success = false;
                 Result.Error = Ex.Message;
-            } catch (Exception)
+            } catch (Exception Ex)
             {
                 Result.Success = false;
-                Result.Error = "An unexpected error has occurred.";
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
             }
 
             return Result;
@@ -176,10 +179,10 @@ namespace CS341_YMCA.Controllers
             {
                 Result.Success = false;
                 Result.Error = Ex.Message;
-            } catch (Exception)
+            } catch (Exception Ex)
             {
                 Result.Success = false;
-                Result.Error = "An unexpected error has occurred.";
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
             }
 
             return Result;
