@@ -1,0 +1,72 @@
+﻿@using CS341_YMCA.Data
+
+@inject IJSRuntime Js
+
+<div class="card class-list-item">
+    @if(LoggedIn?.IsAdmin ?? false)
+    {
+        <div class="class-list-admin-actions">
+            <p><strong>Admin actions</strong></p>
+
+            <i class="oi oi-pencil" style="float: right;" @onclick=OnEditClick title="Edit this class"></i>
+        </div>
+    }
+    <img class="card-img-top" src="images/stripe_pattern.jpg" alt="Class image is missing">
+    <div class="card-body">
+        <h5 class="card-title">@Class?.ClassName</h5>
+        <p class="card-text">Description unavailable</p>
+        <a href="Enroll/@Class?.Id" class="btn btn-primary">Learn more</a>
+    </div>
+</div>
+
+@code
+{
+    [Parameter]
+    public ClassDBO? Class { get; set; }
+    [CascadingParameter]
+    public SiteUserDBO? LoggedIn { get; set; }
+
+    private void OnEditClick()
+    {
+        if (!(LoggedIn?.IsAdmin ?? false))
+            return;
+
+        // Navigate to admin editor
+    }
+
+    protected override void OnAfterRender(bool FirstRender)
+    {
+        base.OnAfterRender(FirstRender);
+
+        if (FirstRender)
+        {
+            Js.InvokeVoidAsync("RenderTooltips");
+        }
+    }
+}
+
+<style>
+    div.class-list-item
+    {
+        width: 15em;
+        display: inline-block;
+        margin: 1em;
+    }
+
+    div.class-list-admin-actions
+    {
+        background: red;
+        color: white;
+        font-size: 1.2em;
+        padding: 1em;
+        padding-bottoM: 2em;
+        cursor: pointer;
+    }
+
+    div.class-list-admin-actions p
+    {
+        float: left;
+        margin-bottom: 0;
+        margin-top: -0.2em;
+    }
+</style>

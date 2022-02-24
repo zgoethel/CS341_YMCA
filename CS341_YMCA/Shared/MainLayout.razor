@@ -2,9 +2,10 @@
 
 @inherits LayoutComponentBase
 
-@inject AuthenticationStateProvider AuthState
 @inject LinkGenerator Links
 @inject NavigationManager Nav
+@inject Database Sql
+@inject AuthenticationStateProvider AuthState
 @inject IHttpContextAccessor Con
 
 <PageTitle>YMCA Enrollment Portal</PageTitle>
@@ -19,15 +20,17 @@
     </style>
 
     <div class="page">
-        <div class="sidebar">
-            <NavMenu />
-        </div>
+        <CascadingValue Value=LoggedIn>
+            <div class="sidebar">
+                <NavMenu />
+            </div>
 
-        <main>
-            <article class="content px-4">
-                @Body
-            </article>
-        </main>
+            <main>
+                <article class="content px-4">
+                    @Body
+                </article>
+            </main>
+        </CascadingValue>
     </div>
 </Authorized>
 <NotAuthorized>
@@ -39,11 +42,26 @@
     [CascadingParameter]
     protected Task<AuthenticationState>? Auth { get; set; }
 
+    protected SiteUserDBO? LoggedIn { get; set; }
+    protected bool Authenticated => Auth!.Result.User.Identity!.IsAuthenticated;
+
     protected override void OnAfterRender(bool FirstRender)
     {
         base.OnAfterRender(FirstRender);
-
-        if (!Auth!.Result.User.Identity!.IsAuthenticated)
+        
+        if (FirstRender && Authenticated)
+            Sql.ExecuteProcedure<SiteUserDBO>(
+                "SiteUser_GetByEmail",
+                new
+                {
+                    Email = Auth!.Result.User.Identity!.Name
+                },
+                (Result) =>
+                {
+                    LoggedIn = Result;
+                    StateHasChanged();
+                });
+        else if (!Authenticated)
         {
             var Path = Links.GetPathByAction(Con.HttpContext!, "LoginFlow", "SiteUser");
             Nav.NavigateTo(Path!);

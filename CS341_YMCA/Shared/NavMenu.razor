@@ -6,21 +6,6 @@
 @inject AuthenticationStateProvider AuthState
 @inject Database Sql
 
-@{
-    SiteUserDBO? SiteUser = null;
-    if (Auth!.Result.User.Identity!.IsAuthenticated)
-        Sql.ExecuteProcedure<SiteUserDBO>(
-            "SiteUser_GetByEmail",
-            new
-            {
-                Email = Auth!.Result.User.Identity!.Name
-            },
-            (Result) =>
-            {
-                SiteUser = Result;
-            });
-}
-
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="@Nav.BaseUri.ToString()">
@@ -49,7 +34,7 @@
                 <span class="oi oi-pencil" aria-hidden="true"></span> Edit Schedule
             </NavLink>
         </div>
-        @if(SiteUser?.IsAdmin ?? false)
+        @*if(LoggedIn?.IsAdmin ?? false)
         {
             <div class="nav-item px-3">
                 <style>
@@ -62,10 +47,10 @@
                     <span class="oi oi-star" aria-hidden="true"></span> Manage Classes
                 </NavLink>
             </div>
-        }
+        }*@
     </nav>
     <div id="greeting">
-        <p>Hi, <strong>@((SiteUser?.FirstName + " " + SiteUser?.LastName).Trim())</strong>!</p>
+        <p>Hi, <strong>@((LoggedIn?.FirstName + " " + LoggedIn?.LastName).Trim())</strong>!</p>
         <button @onclick=LogOutClick class="btn btn-primary">Log out</button>
         <a class="btn btn-secondary" href="Settings"><span class="oi oi-wrench" style="margin-top: 0.4em;"></span></a>
     </div>
@@ -74,6 +59,9 @@
 @code {
     [CascadingParameter]
     protected Task<AuthenticationState>? Auth { get; set; }
+
+    [CascadingParameter]
+    protected SiteUserDBO? LoggedIn { get; set; }
 
     private bool CollapseNavmenu = true;
     private string? NavMenuCssClass => CollapseNavmenu ? "collapse" : null;

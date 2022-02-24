@@ -2,33 +2,13 @@
 
 @using CS341_YMCA.Data
 
-@inject NavigationManager Nav
-@inject IHttpContextAccessor Con
-@inject LinkGenerator Links
-@inject AuthenticationStateProvider AuthState
-@inject Database Sql
-
-@{
-    SiteUserDBO? SiteUser = null;
-    Sql.ExecuteProcedure<SiteUserDBO>(
-        "SiteUser_GetByEmail",
-        new
-        {
-            Email = Auth!.Result.User.Identity!.Name
-        },
-        (Result) =>
-        {
-            SiteUser = Result;
-        });
-}
-
 <PageTitle>Home</PageTitle>
 
-<h1>Howdy, <strong>@SiteUser!.FirstName</strong>!</h1>
+<h1>Howdy, <strong>@LoggedIn?.FirstName</strong>!</h1>
 <hr />
 <h3>We're glad you stopped by.</h3>
 
 @code {
     [CascadingParameter]
-    protected Task<AuthenticationState>? Auth { get; set; }
+    protected SiteUserDBO? LoggedIn { get; set; }
 }

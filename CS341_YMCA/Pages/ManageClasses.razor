@@ -1,30 +1,13 @@
 ﻿@page "/ManageClasses"
 
 @using CS341_YMCA.Data
+@using CS341_YMCA.Controllers
 
-@inject NavigationManager Nav
-@inject IHttpContextAccessor Con
-@inject LinkGenerator Links
-@inject AuthenticationStateProvider AuthState
-@inject Database Sql
-
-@{
-    SiteUserDBO? SiteUser = null;
-    Sql.ExecuteProcedure<SiteUserDBO>(
-        "SiteUser_GetByEmail",
-        new
-        {
-            Email = Auth!.Result.User.Identity!.Name
-        },
-        (Result) =>
-        {
-            SiteUser = Result;
-        });
-}
+@inject ClassController Classes
 
 <PageTitle>Manage Classes</PageTitle>
 
-@if (SiteUser!.IsAdmin)
+@if (LoggedIn?.IsAdmin ?? false)
 {
     <h1>Manage Classes</h1>
     <hr />
@@ -36,5 +19,5 @@
 
 @code {
     [CascadingParameter]
-    protected Task<AuthenticationState>? Auth { get; set; }
+    protected SiteUserDBO? LoggedIn { get; set; }
 }

@@ -12,11 +12,8 @@
 @page "/SiteUser/RegisterFlow"
 @layout SimplifiedLayout
 
-@inject Database Sql
 @inject SiteUserController SiteUsers
 @inject NavigationManager Nav
-@inject IHttpContextAccessor Con
-@inject LinkGenerator Links
 
 <PageTitle>Member Registration</PageTitle>
 
@@ -56,7 +53,7 @@
             @bind-Value=FormBind.Email />
 
         <button class="btn btn-primary mt-4" type="submit" @onclick=SubmitRegistration>Create Account</button>
-        <button class="btn btn-secondary mt-4" type="button" @onclick=GoToLogin>Sign In</button>
+        <a class="btn btn-secondary mt-4" type="button" href="SiteUser/LoginFlow">Sign In</a>
     </EditForm>
 } else
 {
@@ -79,12 +76,6 @@
     private FormBinding FormBind = new();
     private string SuccessMessage = "";
     private string ValidationMessage = "";
-
-    private void GoToLogin()
-    {
-        var Path = Links.GetPathByAction(Con.HttpContext!, "LoginFlow", "SiteUser");
-        Nav.NavigateTo(Path!);
-    }
 
     private void SubmitRegistration()
     {

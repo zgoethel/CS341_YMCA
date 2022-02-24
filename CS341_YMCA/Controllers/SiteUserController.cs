@@ -50,7 +50,7 @@ namespace CS341_YMCA.Controllers
         /**
          * User authentication endpoint to check credentials.
          */
-        [Route("/SiteUser/Authenticate")]
+        //[Route("/SiteUser/Authenticate")]
         public EndpointResultToken SiteUser_Authenticate(
             string Email,
             string PasswordHash
@@ -84,7 +84,7 @@ namespace CS341_YMCA.Controllers
          * User registration endpoint to make member accounts. Does not expose
          * ability to create admin users.
          */
-        [Route("/SiteUser/Register")]
+        //[Route("/SiteUser/Register")]
         public EndpointResultToken SiteUser_Register(
             string FirstName,
             string? LastName,
@@ -123,7 +123,7 @@ namespace CS341_YMCA.Controllers
         /**
          * Endpoint which allows the user to request a password reset.
          */
-        [Route("/SiteUser/RequestReset")]
+        //[Route("/SiteUser/RequestReset")]
         public EndpointResultToken SiteUser_RequestReset(
             string Email
         )
@@ -158,7 +158,7 @@ namespace CS341_YMCA.Controllers
          * Endpoint which allows users to complete their password resets (by
          * clicking on a link sent via email).
          */
-        [Route("/SiteUser/ResetPassword")]
+        //[Route("/SiteUser/ResetPassword")]
         public EndpointResultToken SiteUser_ResetPassword(
             Guid ResetToken,
             string PasswordHash
