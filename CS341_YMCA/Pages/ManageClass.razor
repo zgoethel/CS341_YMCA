@@ -12,7 +12,16 @@
 {
     <h1>Class Editor</h1>
     <hr />
-    <h3>Manage details for '@ActiveClass?.ClassName'</h3>
+    <h3>Manage details for '@ActiveClass.ClassName'</h3>
+
+    <EditForm Model=ActiveClass>
+        <div class="row mt-4">
+            <div class="col-5">
+                <label>Class name:</label>
+                <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.ClassName />
+            </div>
+        </div>
+    </EditForm>
 } else
 {
     <div class="alert alert-danger">You are <strong>not</strong> an admin user and cannot access this page.</div>
@@ -24,7 +33,7 @@
     [Parameter]
     public string? Id { get; set; }
 
-    protected ClassDBO? ActiveClass { get; set; }
+    private ClassDBO ActiveClass = new();
 
     protected override void OnAfterRender(bool FirstRender)
     {
