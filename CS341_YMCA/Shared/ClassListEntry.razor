@@ -8,7 +8,7 @@
         <div class="class-list-admin-actions">
             <p><strong>Admin actions</strong></p>
 
-            <i class="oi oi-pencil" style="float: right;" @onclick=OnEditClick title="Edit this class"></i>
+            <a href="ManageClasses/@Class?.Id"><i class="oi oi-pencil" style="float: right;" title="Edit this class"></i></a>
         </div>
     }
     <img class="card-img-top" src="images/stripe_pattern.jpg" alt="Class image is missing">
@@ -25,14 +25,6 @@
     public ClassDBO? Class { get; set; }
     [CascadingParameter]
     public SiteUserDBO? LoggedIn { get; set; }
-
-    private void OnEditClick()
-    {
-        if (!(LoggedIn?.IsAdmin ?? false))
-            return;
-
-        // Navigate to admin editor
-    }
 
     protected override void OnAfterRender(bool FirstRender)
     {
@@ -60,6 +52,12 @@
         font-size: 1.2em;
         padding: 1em;
         padding-bottoM: 2em;
+        cursor: pointer;
+    }
+
+    div.class-list-admin-actions *
+    {
+        color: white;
         cursor: pointer;
     }
 

@@ -1,0 +1,46 @@
+﻿@page "/ManageClasses/{Id}"
+
+@using CS341_YMCA.Data
+@using CS341_YMCA.Controllers
+
+@inject ClassController Classes
+@inject Database Sql
+
+<PageTitle>Manage Class</PageTitle>
+
+@if (LoggedIn?.IsAdmin ?? false)
+{
+    <h1>Class Editor</h1>
+    <hr />
+    <h3>Manage details for '@ActiveClass?.ClassName'</h3>
+} else
+{
+    <div class="alert alert-danger">You are <strong>not</strong> an admin user and cannot access this page.</div>
+}
+
+@code {
+    [CascadingParameter]
+    protected SiteUserDBO? LoggedIn { get; set; }
+    [Parameter]
+    public string? Id { get; set; }
+
+    protected ClassDBO? ActiveClass { get; set; }
+
+    protected override void OnAfterRender(bool FirstRender)
+    {
+        base.OnAfterRender(FirstRender);
+
+        if (FirstRender)
+        {
+            Sql.ExecuteProcedure<ClassDBO>(
+                "Class_GetById", new
+                {
+                    Id = int.Parse(Id)
+                }, (Result) =>
+                {
+                    ActiveClass = Result;
+                    StateHasChanged();
+                });
+        }
+    }
+}
