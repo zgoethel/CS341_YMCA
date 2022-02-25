@@ -1,0 +1,91 @@
+﻿@using CS341_YMCA.Controllers
+@using CS341_YMCA.Data
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components
+@using System.ComponentModel.DataAnnotations
+@using System.Data.SqlClient
+@using System.Security.Cryptography
+@using System.Text
+
+@page "/SiteUser/LoginFlow"
+@layout SimplifiedLayout
+
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthState
+@inject SiteUserController SiteUsers
+
+<PageTitle>Login</PageTitle>
+
+@if (!string.IsNullOrEmpty(ValidationMessage))
+{
+    <div class="alert alert-danger">@ValidationMessage</div>
+}
+
+@if(string.IsNullOrEmpty(ErrorMessage))
+{
+    <h2>Login</h2>
+
+    <p class="mt-4">Welcome!</p>
+    <p class="mt-2">
+        Please provide your credentials to log in.
+    </p>
+        
+    <EditForm Model=FormBind>
+        <label>Email:</label>
+        <InputText class="form-control mb-2"
+            type="text"
+            @bind-Value=FormBind.Email />
+
+        <label>Password:</label>
+        <InputText class="form-control"
+            type="password" 
+            @bind-Value=FormBind.Password />
+
+        <a href="SiteUser/RequestPasswordResetFlow" style="margin-top: 2em;color: black;float: right;">Forgot password?</a>
+        <button class="btn btn-primary mt-4" type="submit" @onclick=SubmitLogin>Log In</button>&nbsp;
+        <a class="btn btn-secondary mt-4" type="button" href="SiteUser/RegisterFlow">Register</a>
+    </EditForm>
+} else
+{
+    <div class="alert alert-danger">@ErrorMessage</div>
+}
+
+@code {
+    private class FormBinding
+    {
+        [Required]
+        public string Email = "";
+
+        [Required]
+        public string Password = "";
+    }
+
+    private FormBinding FormBind = new();
+    private string ErrorMessage = "";
+    private string ValidationMessage = "";
+
+    private void SubmitLogin()
+    {
+        if (string.IsNullOrEmpty(FormBind.Email)
+            || string.IsNullOrEmpty(FormBind.Password)
+        )
+        {
+            ValidationMessage = "Please provide all the login details.";
+            return;
+        }
+
+        var Result = SiteUsers.SiteUser_Authenticate(FormBind.Email, FormBind.Password.CalculateSha512());
+
+        if (Result.Success)
+        {
+            var _AuthState = AuthState as AuthStateProvider;
+            _AuthState!.LogIn(FormBind.Email, FormBind.Password);
+
+            Nav.NavigateTo(Nav.BaseUri);
+        } else
+        {
+            ValidationMessage = Result.Error!;
+        }
+    }
+}

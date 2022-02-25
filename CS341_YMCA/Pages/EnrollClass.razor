@@ -1,0 +1,34 @@
+﻿@page "/Enroll/{Id}"
+
+@using CS341_YMCA.Data
+@using CS341_YMCA.Controllers
+
+@inject ClassController Classes
+@inject Database Sql
+
+<PageTitle>Manage Class</PageTitle>
+
+<h1>@ActiveClass?.ClassName</h1>
+<hr />
+<h3>Short description</h3>
+
+
+@code {
+    [CascadingParameter]
+    protected SiteUserDBO? LoggedIn { get; set; }
+    [Parameter]
+    public string? Id { get; set; }
+
+    protected ClassDBO? ActiveClass { get; set; }
+
+    protected override void OnAfterRender(bool FirstRender)
+    {
+        base.OnAfterRender(FirstRender);
+
+        if (FirstRender)
+        {
+            ActiveClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
+            StateHasChanged();
+        }
+    }
+}

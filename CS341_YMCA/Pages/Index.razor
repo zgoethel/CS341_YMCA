@@ -1,9 +1,14 @@
 ﻿@page "/"
 
-<PageTitle>Index</PageTitle>
+@using CS341_YMCA.Data
 
-<h1>Hello, world!</h1>
+<PageTitle>Home</PageTitle>
 
-Welcome to your new app.
+<h1>Howdy, <strong>@LoggedIn?.FirstName</strong>!</h1>
+<hr />
+<h3>We're glad you stopped by.</h3>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+@code {
+    [CascadingParameter]
+    protected SiteUserDBO? LoggedIn { get; set; }
+}

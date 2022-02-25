@@ -1,0 +1,21 @@
+﻿@using CS341_YMCA.Data
+@using CS341_YMCA.Controllers
+
+@page "/Enroll"
+
+@inject ClassController Classes
+
+<PageTitle>Browse and Enroll</PageTitle>
+
+<h1>Browse and Enroll</h1>
+<hr />
+<h3>Find fun new classes to add to your schedule</h3>
+
+@{
+    var ClassList = Classes.Class_List(IncludeDisabled: false).Get()!;
+}
+
+@foreach (var Class in ClassList)
+{
+    <ClassListEntry Class=@Class></ClassListEntry>
+}
