@@ -69,11 +69,9 @@
 
         if (Result.Success)
         {
-            Console.WriteLine("Success");
             Nav.NavigateTo("/ManageClasses");
         } else
         {
-            Console.WriteLine("Failure");
             ValidationMessage = Result.Error!;
         }
     }
