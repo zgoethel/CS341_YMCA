@@ -10,29 +10,38 @@ namespace CS341_YMCA.Controllers
      */
     public class SiteUserController : Controller
     {
+        private readonly LinkGenerator Links;
+        private readonly IHttpContextAccessor Con;
         private readonly Database Sql;
         private readonly EmailSender Smtp;
 
-        public SiteUserController(Database Sql, EmailSender Smtp)
+        private readonly string Env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
+        private bool IsDevelopment => Env.Equals("Development");
+
+        public SiteUserController(Database Sql, EmailSender Smtp, IHttpContextAccessor Con, LinkGenerator Links)
         {
             this.Sql = Sql;
             this.Smtp = Smtp;
+            this.Con = Con;
+            this.Links = Links;
         }
 
-        private void SendResetEmail(string Email, Guid Token)
+        private void SendResetEmail(string Email, Guid ResetToken)
         {
-            var ResetLink = Request.Scheme.ToString()
-                + "://"
-                + Request.Host.ToString()
-                + "/SiteUser/ResetPasswordFlow?ResetToken="
-                + Token.ToString();
+            var Context = Con.HttpContext ?? throw new Exception("There is no active HTTP context.");
+            var ResetLink = Links.GetUriByAction(
+                Context, "ResetPasswordFlow", "SiteUser",
+                new
+                {
+                    ResetToken
+                });
 
             Smtp.SendEmail(null, Email, "Your account's password reset link",
                 @"
                     <p>Thank you for showing interest in our service.</p>
                     <p>Please click on <a href='" + ResetLink + @"'>this link</a> to set a new password. If
                     the link does not work, try copying and pasting the whole URL below:</p>
-                    <br/><br/>
+                    <br/>
 
                     <p><a href='" + ResetLink + @"'>" + ResetLink + @"</a></p>
                 ");
@@ -41,50 +50,51 @@ namespace CS341_YMCA.Controllers
         /**
          * User authentication endpoint to check credentials.
          */
-        [Route("/SiteUser/Authenticate")]
-        public IActionResult SiteUser_Authenticate(
+        public EndpointResultToken<object> SiteUser_Authenticate(
             string Email,
             string PasswordHash
         )
         {
+            EndpointResultToken<object> Result = new();
+
             try
             {
-                Sql.ExecuteProcedure<object>("SiteUser_Authenticate",
+                Sql.ExecuteProcedure<object>(
+                    "SiteUser_Authenticate",
                     new SiteUserAuthenticateRequest()
                     {
                         Email = Email,
                         PasswordHash = PasswordHash
                     }, (_) => { });
-
-                return Json(new
-                {
-                    Success = true
-                });
             } catch (SqlException Ex)
             {
-                return Json(new
-                {
-                    Success = false,
-                    Error = Ex.Message
-                });
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
             }
+
+            return Result;
         }
 
         /**
          * User registration endpoint to make member accounts. Does not expose
          * ability to create admin users.
          */
-        [Route("/SiteUser/Register")]
-        public IActionResult SiteUser_Register(
+        public EndpointResultToken<object> SiteUser_Register(
             string FirstName,
             string? LastName,
             string Email
         )
         {
+            EndpointResultToken<object> Result = new();
+
             try
             {
-                SiteUserRegisterResult? _Result = null;
-                Sql.ExecuteProcedure<SiteUserRegisterResult>("SiteUser_Register",
+                Sql.ExecuteProcedure<SiteUserRegisterResult>(
+                    "SiteUser_Register",
                     new SiteUserRegisterRequest()
                     {
                         FirstName = FirstName,
@@ -93,92 +103,124 @@ namespace CS341_YMCA.Controllers
                         IsAdmin = false
                     }, (Result) =>
                     {
-                        _Result = Result;
+                        this.SendResetEmail(Email, Result.ResetToken);
                     });
-
-                this.SendResetEmail(Email, _Result?.ResetToken ?? throw new Exception("Generated token not found for request"));
-
-                return Json(new
-                {
-                    Success = true
-                });
             } catch (SqlException Ex)
             {
-                return Json(new
-                {
-                    Success = false,
-                    Error = Ex.Message
-                });
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
             }
+
+            return Result;
         }
 
         /**
          * Endpoint which allows the user to request a password reset.
          */
-        [Route("/SiteUser/RequestReset")]
-        public IActionResult SiteUser_RequestReset(
+        public EndpointResultToken<object> SiteUser_RequestReset(
             string Email
         )
         {
+            EndpointResultToken<object> Result = new();
+
             try
             {
-                UserRequestResetResult? _Result = null;
-                Sql.ExecuteProcedure<UserRequestResetResult>("SiteUser_RequestReset",
+                Sql.ExecuteProcedure<UserRequestResetResult>(
+                    "SiteUser_RequestReset",
                     new UserRequestResetRequest()
                     {
                         Email = Email
                     }, (Result) =>
                     {
-                        _Result = Result;
+                        this.SendResetEmail(Email, Result.ResetToken);
                     });
-
-                this.SendResetEmail(Email, _Result?.ResetToken ?? throw new Exception("Generated token not found for request"));
-
-                return Json(new
-                {
-                    Success = true
-                });
             } catch (SqlException Ex)
             {
-                return Json(new
-                {
-                    Success = false,
-                    Error = Ex.Message
-                });
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
             }
+
+            return Result;
         }
 
         /**
          * Endpoint which allows users to complete their password resets (by
          * clicking on a link sent via email).
          */
-        [Route("/SiteUser/ResetPassword")]
-        public IActionResult SiteUser_ResetPassword(
+        public EndpointResultToken<object> SiteUser_ResetPassword(
             Guid ResetToken,
             string PasswordHash
         )
         {
+            EndpointResultToken<object> Result = new();
+
             try
             {
-                Sql.ExecuteProcedure<object>("SiteUser_ResetPassword",
+                Sql.ExecuteProcedure<object>(
+                    "SiteUser_ResetPassword",
                     new SiteUserResetPasswordRequest()
                     {
                         ResetToken = ResetToken,
                         PasswordHash = PasswordHash
                     }, (_) => { });
-
-                return Json(new
-                {
-                    Success = true
-                });
             } catch (SqlException Ex)
             {
-                return Json(new
-                {
-                    Success = false,
-                    Error = Ex.Message
-                });
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
             }
+
+            return Result;
+        }
+
+        /**
+         * Gets user data associated with an email.
+         */
+        public EndpointResultToken<SiteUserDBO> SiteUser_GetByEmail(
+            string Email
+        )
+        {
+            EndpointResultToken<SiteUserDBO> Result = new();
+
+            try
+            {
+                Sql.ExecuteProcedure<SiteUserDBO>(
+                    "SiteUser_GetByEmail",
+                    new
+                    {
+                        Email
+                    }, (_Result) =>
+                    {
+                        Result.Value = _Result;
+                    });
+
+                if (Result.Value == null)
+                {
+                    Result.Success = false;
+                    Result.Error = "Record with given ID not found.";
+                }
+            } catch (SqlException Ex)
+            {
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+            }
+
+            return Result;
         }
     }
 }
