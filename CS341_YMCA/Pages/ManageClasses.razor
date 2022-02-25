@@ -1,40 +1,56 @@
-﻿@page "/ManageClasses"
+﻿@using CS341_YMCA.Data
+@using CS341_YMCA.Controllers
 
-@using CS341_YMCA.Data
+@page "/ManageClasses"
 
-@inject NavigationManager Nav
-@inject IHttpContextAccessor Con
-@inject LinkGenerator Links
-@inject AuthenticationStateProvider AuthState
-@inject Database Sql
-
-@{
-    SiteUserDBO? SiteUser = null;
-    Sql.ExecuteProcedure<SiteUserDBO>(
-        "SiteUser_GetByEmail",
-        new
-        {
-            Email = Auth!.Result.User.Identity!.Name
-        },
-        (Result) =>
-        {
-            SiteUser = Result;
-        });
-}
+@inject ClassController Classes
 
 <PageTitle>Manage Classes</PageTitle>
 
-@if (SiteUser!.IsAdmin)
-{
-    <h1>Manage Classes</h1>
-    <hr />
-    <h3>Create and edit the classes which members can join</h3>
-} else
-{
-    <div class="alert alert-danger">You are <strong>not</strong> an admin user and cannot access this page.</div>
+<h1>Manage Classes</h1>
+<hr />
+<h3>Create and modify classes available to Y patrons</h3>
+
+@{
+    var ClassList = Classes.Class_List(IncludeDisabled: false).Get()!;
 }
 
-@code {
-    [CascadingParameter]
-    protected Task<AuthenticationState>? Auth { get; set; }
-}
+<table class="table table-striped mt-4">
+    <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col" class="col-group" colspan=3>Seats</th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+        </tr>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Enrollment</th>
+            <th scope="col"># Sect.</th>
+            <th scope="col">Taken</th>
+            <th scope="col">Avail.</th>
+            <th scope="col">Total</th>
+            <th scope="col">Created</th>
+            <th scope="col">Modified</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var Class in ClassList)
+        {
+            <ManageClassesEntry Class=@Class></ManageClassesEntry>
+        }
+    </tbody>
+</table>
+
+<style>
+    th.col-group
+    {
+        background: #621414;
+        color: white;
+        text-align: center;
+    }
+</style>

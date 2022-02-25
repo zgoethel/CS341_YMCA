@@ -12,9 +12,6 @@
 @layout SimplifiedLayout
 
 @inject NavigationManager Nav
-@inject Database Sql
-@inject IHttpContextAccessor Con
-@inject LinkGenerator Links
 @inject AuthenticationStateProvider AuthState
 @inject SiteUserController SiteUsers
 
@@ -45,8 +42,9 @@
             type="password" 
             @bind-Value=FormBind.Password />
 
+        <a href="SiteUser/RequestPasswordResetFlow" style="margin-top: 2em;color: black;float: right;">Forgot password?</a>
         <button class="btn btn-primary mt-4" type="submit" @onclick=SubmitLogin>Log In</button>&nbsp;
-        <button class="btn btn-secondary mt-4" type="button" @onclick=GoToRegister>Register</button>
+        <a class="btn btn-secondary mt-4" type="button" href="SiteUser/RegisterFlow">Register</a>
     </EditForm>
 } else
 {
@@ -66,12 +64,6 @@
     private FormBinding FormBind = new();
     private string ErrorMessage = "";
     private string ValidationMessage = "";
-
-    private void GoToRegister()
-    {
-        var Path = Links.GetPathByAction(Con.HttpContext!, "RegisterFlow", "SiteUser");
-        Nav.NavigateTo(Path!);
-    }
 
     private void SubmitLogin()
     {

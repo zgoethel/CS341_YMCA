@@ -10,12 +10,12 @@ namespace CS341_YMCA.Controllers
      */
     public class SiteUserController : Controller
     {
+        private readonly LinkGenerator Links;
+        private readonly IHttpContextAccessor Con;
         private readonly Database Sql;
         private readonly EmailSender Smtp;
-        private readonly IHttpContextAccessor Con;
-        private readonly LinkGenerator Links;
 
-        private string Env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
+        private readonly string Env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
         private bool IsDevelopment => Env.Equals("Development");
 
         public SiteUserController(Database Sql, EmailSender Smtp, IHttpContextAccessor Con, LinkGenerator Links)
@@ -50,13 +50,12 @@ namespace CS341_YMCA.Controllers
         /**
          * User authentication endpoint to check credentials.
          */
-        [Route("/SiteUser/Authenticate")]
-        public EndpointResultToken SiteUser_Authenticate(
+        public EndpointResultToken<object> SiteUser_Authenticate(
             string Email,
             string PasswordHash
         )
         {
-            EndpointResultToken Result = new();
+            EndpointResultToken<object> Result = new();
 
             try
             {
@@ -84,14 +83,13 @@ namespace CS341_YMCA.Controllers
          * User registration endpoint to make member accounts. Does not expose
          * ability to create admin users.
          */
-        [Route("/SiteUser/Register")]
-        public EndpointResultToken SiteUser_Register(
+        public EndpointResultToken<object> SiteUser_Register(
             string FirstName,
             string? LastName,
             string Email
         )
         {
-            EndpointResultToken Result = new();
+            EndpointResultToken<object> Result = new();
 
             try
             {
@@ -123,12 +121,11 @@ namespace CS341_YMCA.Controllers
         /**
          * Endpoint which allows the user to request a password reset.
          */
-        [Route("/SiteUser/RequestReset")]
-        public EndpointResultToken SiteUser_RequestReset(
+        public EndpointResultToken<object> SiteUser_RequestReset(
             string Email
         )
         {
-            EndpointResultToken Result = new();
+            EndpointResultToken<object> Result = new();
 
             try
             {
@@ -158,13 +155,12 @@ namespace CS341_YMCA.Controllers
          * Endpoint which allows users to complete their password resets (by
          * clicking on a link sent via email).
          */
-        [Route("/SiteUser/ResetPassword")]
-        public EndpointResultToken SiteUser_ResetPassword(
+        public EndpointResultToken<object> SiteUser_ResetPassword(
             Guid ResetToken,
             string PasswordHash
         )
         {
-            EndpointResultToken Result = new();
+            EndpointResultToken<object> Result = new();
 
             try
             {
@@ -175,6 +171,45 @@ namespace CS341_YMCA.Controllers
                         ResetToken = ResetToken,
                         PasswordHash = PasswordHash
                     }, (_) => { });
+            } catch (SqlException Ex)
+            {
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+            }
+
+            return Result;
+        }
+
+        /**
+         * Gets user data associated with an email.
+         */
+        public EndpointResultToken<SiteUserDBO> SiteUser_GetByEmail(
+            string Email
+        )
+        {
+            EndpointResultToken<SiteUserDBO> Result = new();
+
+            try
+            {
+                Sql.ExecuteProcedure<SiteUserDBO>(
+                    "SiteUser_GetByEmail",
+                    new
+                    {
+                        Email
+                    }, (_Result) =>
+                    {
+                        Result.Value = _Result;
+                    });
+
+                if (Result.Value == null)
+                {
+                    Result.Success = false;
+                    Result.Error = "Record with given ID not found.";
+                }
             } catch (SqlException Ex)
             {
                 Result.Success = false;

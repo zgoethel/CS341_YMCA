@@ -3,7 +3,6 @@
 
 @page "/Enroll"
 
-@inject SiteUserController SiteUsers
 @inject ClassController Classes
 
 <PageTitle>Browse and Enroll</PageTitle>
@@ -13,26 +12,10 @@
 <h3>Find fun new classes to add to your schedule</h3>
 
 @{
-    var ClassList = Classes.Class_List(IncludeDisabled: false);
+    var ClassList = Classes.Class_List(IncludeDisabled: false).Get()!;
 }
 
 @foreach (var Class in ClassList)
 {
-    <div class="card class-list-item">
-        <img class="card-img-top" src="images/stripe_pattern.jpg" alt="Class image is missing">
-        <div class="card-body">
-            <h5 class="card-title">@Class.ClassName</h5>
-            <p class="card-text">Description unavailable</p>
-            <a href="Enroll/@Class.Id" class="btn btn-primary">Learn more</a>
-        </div>
-    </div>
+    <ClassListEntry Class=@Class></ClassListEntry>
 }
-
-<style>
-    div.class-list-item
-    {
-        width: 15em;
-        display: inline-block;
-        margin: 1em;
-    }
-</style>

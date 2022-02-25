@@ -1,0 +1,48 @@
+﻿@page "/ManageClasses/{Id}"
+
+@using CS341_YMCA.Data
+@using CS341_YMCA.Controllers
+
+@inject ClassController Classes
+@inject Database Sql
+
+<PageTitle>Manage Class</PageTitle>
+
+@if (LoggedIn?.IsAdmin ?? false)
+{
+    <h1>Class Editor</h1>
+    <hr />
+    <h3>Manage details for '@ActiveClass.ClassName'</h3>
+
+    <EditForm Model=ActiveClass>
+        <div class="row mt-4">
+            <div class="col-5">
+                <label>Class name:</label>
+                <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.ClassName />
+            </div>
+        </div>
+    </EditForm>
+} else
+{
+    <div class="alert alert-danger">You are <strong>not</strong> an admin user and cannot access this page.</div>
+}
+
+@code {
+    [CascadingParameter]
+    protected SiteUserDBO? LoggedIn { get; set; }
+    [Parameter]
+    public string? Id { get; set; }
+
+    private ClassDBO ActiveClass = new();
+
+    protected override void OnAfterRender(bool FirstRender)
+    {
+        base.OnAfterRender(FirstRender);
+
+        if (FirstRender)
+        {
+            ActiveClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
+            StateHasChanged();
+        }
+    }
+}
