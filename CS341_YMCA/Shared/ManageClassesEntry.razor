@@ -3,21 +3,22 @@
 <tr>
     <td>@Class?.ClassName</td>
     <td>
-        <h4>
+        <h5>
             @if(Class?.AllowEnrollment ?? false)
             {
-                <div class="badge bg-success _bg-success">Open</div>
+                <span class="badge bg-success _bg-success">Open</span>
             } else
             {
-                <div class="badge bg-danger _bg-danger">Closed</div>   
+                <span class="badge bg-danger _bg-danger">Closed</span>   
             }
-        </h4>
+        </h5>
     </td>
     <td>&mdash;</td>
     <td>&mdash;</td>
     <td>&mdash;</td>
-    <td>@Class.Created.ToShortDateString()<br />@Class.Created.ToShortTimeString()</td>
-    <td>@Class.Updated.ToShortDateString()<br />@Class.Updated.ToShortTimeString()</td>
+    <td>&mdash;</td>
+    <td>@Class?.Created.ToShortDateString()<br />@Class?.Created.ToShortTimeString()</td>
+    <td>@Class?.Updated.ToShortDateString()<br />@Class?.Updated.ToShortTimeString()</td>
     <td>
         <a href="ManageClasses/@Class?.Id" class="btn btn-primary">Editor</a>
         <a href="Enroll/@Class?.Id" class="btn btn-secondary">Enrollment page</a>

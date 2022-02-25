@@ -12,12 +12,13 @@
 <h3>Create and modify classes available to Y patrons</h3>
 
 @{
-    var ClassList = Classes.Class_List(IncludeDisabled: false);
+    var ClassList = Classes.Class_List(IncludeDisabled: false).Get()!;
 }
 
 <table class="table table-striped mt-4">
     <thead>
         <tr>
+            <th scope="col"></th>
             <th scope="col"></th>
             <th scope="col"></th>
             <th scope="col" class="col-group" colspan=3>Seats</th>
@@ -28,6 +29,7 @@
         <tr>
             <th scope="col">Name</th>
             <th scope="col">Enrollment</th>
+            <th scope="col">Sections</th>
             <th scope="col">Taken</th>
             <th scope="col">Available</th>
             <th scope="col">Total</th>

@@ -11,45 +11,51 @@ namespace CS341_YMCA.Controllers
     public class ClassController : Controller
     {
         private readonly Database Sql;
-        private readonly EmailSender Smtp;
-        private readonly IHttpContextAccessor Con;
-        private readonly LinkGenerator Links;
 
-        private string Env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
+        private readonly string Env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
         private bool IsDevelopment => Env.Equals("Development");
 
-        public ClassController(Database Sql, EmailSender Smtp, IHttpContextAccessor Con, LinkGenerator Links)
+        public ClassController(Database Sql)
         {
             this.Sql = Sql;
-            this.Smtp = Smtp;
-            this.Con = Con;
-            this.Links = Links;
         }
 
         /**
          * Allows creation and udpating of basic class data.
          */
-        public int Class_Set(
+        public EndpointResultToken<int> Class_Set(
             int? Id = null,
             string? ClassName = null,
             bool? AllowEnrollment = null,
             bool? Enabled = null
         )
         {
-            int Result = new();
+            EndpointResultToken<int> Result = new();
 
-            Sql.ExecuteProcedure<ClassSetResult>(
-                "Class_Set",
-                new ClassSetRequest()
-                {
-                    Id = Id,
-                    ClassName = ClassName,
-                    AllowEnrollment = AllowEnrollment,
-                    Enabled = Enabled
-                }, (_Result) =>
-                {
-                    Result = _Result.Id;
-                });
+            try
+            {
+                Sql.ExecuteProcedure<ClassSetResult>(
+                    "Class_Set",
+                    new ClassSetRequest()
+                    {
+                        Id = Id,
+                        ClassName = ClassName,
+                        AllowEnrollment = AllowEnrollment,
+                        Enabled = Enabled
+                    }, (_Result) =>
+                    {
+                        Result.Value = _Result.Id;
+                    });
+            }
+            catch (SqlException Ex)
+            {
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+            }
 
             return Result;
         }
@@ -57,27 +63,76 @@ namespace CS341_YMCA.Controllers
         /**
          * Lists classes according to provided filter parameters.
          */
-        public List<ClassDBO> Class_List(
+        public EndpointResultToken<List<ClassDBO>> Class_List(
             string? NameFilter = null,
-            bool? IncludeDisabled = null,
-            int? Top = null,
-            int? Skip = null
+            bool? IncludeDisabled = null
         )
         {
-            var Result = new List<ClassDBO>();
+            var Result = new EndpointResultToken<List<ClassDBO>>
+            {
+                Value = new()
+            };
 
-            Sql.ExecuteProcedure<ClassDBO>(
-                "Class_List",
-                new ClassListRequest()
+            try
+            {
+                Sql.ExecuteProcedure<ClassDBO>(
+                    "Class_List",
+                    new ClassListRequest()
+                    {
+                        NameFilter = NameFilter,
+                        IncludeDisabled = IncludeDisabled
+                    }, (_Result) =>
+                    {
+                        Result.Value.Add(_Result);
+                    });
+            } catch (SqlException Ex)
+            {
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+            }
+
+            return Result;
+        }
+
+        /**
+         * Gets class data associated with an ID.
+         */
+        public EndpointResultToken<ClassDBO> Class_GetById(
+            int Id
+        )
+        {
+            EndpointResultToken<ClassDBO> Result = new();
+
+            try
+            {
+                Sql.ExecuteProcedure<ClassDBO>(
+                    "Class_GetById",
+                    new
+                    {
+                        Id
+                    }, (_Result) =>
+                    {
+                        Result.Value = _Result;
+                    });
+
+                if (Result.Value == null)
                 {
-                    NameFilter = NameFilter,
-                    IncludeDisabled = IncludeDisabled,
-                    Top = Top,
-                    Skip = Skip
-                }, (_Result) =>
-                {
-                    Result.Add(_Result);
-                });
+                    Result.Success = false;
+                    Result.Error = "Record with given ID not found";
+                }
+            } catch (SqlException Ex)
+            {
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+            }
 
             return Result;
         }

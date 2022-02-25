@@ -74,14 +74,12 @@
     {
         public string? NameFilter { get; set; } = null;
         public bool? IncludeDisabled { get; set; } = null;
-        public int? Top { get; set; } = null;
-        public int? Skip { get; set; } = null;
     }
 
     public class ClassDBO
     {
         public int Id { get; set; }
-        public string ClassName { get; set; }
+        public string ClassName { get; set; } = "";
         public bool AllowEnrollment { get; set; }
         public bool Enabled { get; set; }
         public DateTime Created { get; set; }

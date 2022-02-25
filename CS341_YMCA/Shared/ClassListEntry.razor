@@ -1,7 +1,5 @@
 ﻿@using CS341_YMCA.Data
 
-@inject IJSRuntime Js
-
 <div class="card class-list-item">
     @if(LoggedIn?.IsAdmin ?? false)
     {
@@ -25,16 +23,6 @@
     public ClassDBO? Class { get; set; }
     [CascadingParameter]
     public SiteUserDBO? LoggedIn { get; set; }
-
-    protected override void OnAfterRender(bool FirstRender)
-    {
-        base.OnAfterRender(FirstRender);
-
-        if (FirstRender)
-        {
-            Js.InvokeVoidAsync("RenderTooltips");
-        }
-    }
 }
 
 <style>

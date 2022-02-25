@@ -12,7 +12,7 @@
 <h3>Find fun new classes to add to your schedule</h3>
 
 @{
-    var ClassList = Classes.Class_List(IncludeDisabled: false);
+    var ClassList = Classes.Class_List(IncludeDisabled: false).Get()!;
 }
 
 @foreach (var Class in ClassList)

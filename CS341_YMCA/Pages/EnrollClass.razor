@@ -27,15 +27,8 @@
 
         if (FirstRender)
         {
-            Sql.ExecuteProcedure<ClassDBO>(
-                "Class_GetById", new
-                {
-                    Id = int.Parse(Id)
-                }, (Result) =>
-                {
-                    ActiveClass = Result;
-                    StateHasChanged();
-                });
+            ActiveClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
+            StateHasChanged();
         }
     }
 }
