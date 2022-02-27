@@ -63,6 +63,8 @@
         public string? ClassName { get; set; } = null;
         public bool? AllowEnrollment { get; set; } = null;
         public bool? Enabled { get; set; } = null;
+        public string? ShortDescription { get; set; } = null;
+        public string? LongDescription { get; set; } = null;
     }
 
     public class ClassSetResult
@@ -84,6 +86,8 @@
         public bool Enabled { get; set; } = true;
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
+        public string ShortDescription { get; set; } = "";
+        public string LongDescription { get; set; } = "";
     }
 
     #endregion

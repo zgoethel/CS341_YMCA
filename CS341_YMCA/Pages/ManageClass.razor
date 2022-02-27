@@ -23,8 +23,20 @@
     <EditForm Model=ActiveClass>
         <div class="row mt-4">
             <div class="col-5">
-                <label>Class name:</label>
+                <label>Class name:<i style="color: red">*</i></label>
                 <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.ClassName />
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-5">
+                <label>Short description:<i style="color: red">*</i></label>
+                <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.ShortDescription />
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-5">
+                <label>Detailed description:</label>
+                <InputTextArea rows=14 class="form-control mb-2" type="text" @bind-Value=ActiveClass.LongDescription />
             </div>
         </div>
         <div class="row">
@@ -70,9 +82,12 @@
 
     private void SaveForm()
     {
-        if (string.IsNullOrEmpty(ActiveClass.ClassName))
+        if (
+            string.IsNullOrEmpty(ActiveClass.ClassName)
+            || string.IsNullOrEmpty(ActiveClass.ShortDescription)
+        )
         {
-            ValidationMessage = "Please provide all reaquired fields.";
+            ValidationMessage = "Please provide all required fields.";
             return;
         }
 
@@ -80,14 +95,16 @@
             Id: ActiveClass.Id,
             ClassName: ActiveClass.ClassName,
             AllowEnrollment: ActiveClass.AllowEnrollment,
-            Enabled: ActiveClass.Enabled
+            Enabled: ActiveClass.Enabled,
+            ShortDescription: ActiveClass.ShortDescription,
+            LongDescription: ActiveClass.LongDescription
         );
 
         if (Result.Success)
             Nav.NavigateTo("ManageClasses");
         else
         {
-            ValidationMessage = Result.Error;
+            ValidationMessage = Result.Error ?? "An unknown error has occurred.";
             StateHasChanged();
         }
     }

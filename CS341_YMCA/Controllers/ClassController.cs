@@ -27,7 +27,9 @@ namespace CS341_YMCA.Controllers
             int? Id = null,
             string? ClassName = null,
             bool? AllowEnrollment = null,
-            bool? Enabled = null
+            bool? Enabled = null,
+            string? ShortDescription = null,
+            string? LongDescription = null
         )
         {
             EndpointResultToken<int> Result = new();
@@ -41,7 +43,9 @@ namespace CS341_YMCA.Controllers
                         Id = Id,
                         ClassName = ClassName,
                         AllowEnrollment = AllowEnrollment,
-                        Enabled = Enabled
+                        Enabled = Enabled,
+                        ShortDescription = ShortDescription,
+                        LongDescription = LongDescription
                     }, (_Result) =>
                     {
                         Result.Value = _Result.Id;
