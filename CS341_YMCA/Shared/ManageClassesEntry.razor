@@ -6,10 +6,10 @@
         <h5>
             @if(Class?.AllowEnrollment ?? false)
             {
-                <span class="badge bg-success _bg-success">Open</span>
+                <span class="badge bg-success bg-success-glow">Open</span>
             } else
             {
-                <span class="badge bg-danger _bg-danger">Closed</span>   
+                <span class="badge bg-danger bg-danger-glow">Closed</span>   
             }
         </h5>
     </td>
@@ -34,11 +34,11 @@
 }
 
 <style>
-    ._bg-success
+    .bg-success-glow
     {
         box-shadow: 0 0 0.2em 0.2em #badfba;
     }
-    ._bg-danger
+    .bg-danger-glow
     {
         box-shadow: 0 0 0.2em 0.2em #e2afc0;
     }
