@@ -11,10 +11,10 @@
 <hr />
 <h3>Create and modify classes available to Y patrons</h3>
 
-<a class="btn btn-primary" href="/ManageClasses/Create" style="float: right;"><span class="oi oi-plus" style="margin-top: 0.4em;"></span></a>
+<a class="btn btn-primary" href="ManageClasses/Create" style="float: right;"><span class="oi oi-plus" style="margin-top: 0.4em;"></span></a>
 
 @{
-    var ClassList = Classes.Class_List(IncludeDisabled: false).Get()!;
+    var ClassList = Classes.Class_List(IncludeDisabled: true).Get()!;
 }
 
 <table class="table table-striped mt-4">

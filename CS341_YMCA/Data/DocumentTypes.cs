@@ -50,6 +50,18 @@
         public bool IsAdmin { get; set; }
         public DateTime Created { get; set; }
         public DateTime Modified { get; set; }
+        public DateTime? MemberThru { get; set; }
+        public bool IsMember { get; set; }
+    }
+
+    public class SiteUserSetRequest
+    {
+        public int Id { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Email { get; set; }
+        public bool? IsAdmin { get; set; }
+        public DateTime? MemberThru { get; set; }
     }
 
     #endregion
@@ -59,12 +71,20 @@
 
     public class ClassSetRequest
     {
-        public int? Id { get; set; } = null;
-        public string? ClassName { get; set; } = null;
-        public bool? AllowEnrollment { get; set; } = null;
-        public bool? Enabled { get; set; } = null;
-        public string? ShortDescription { get; set; } = null;
-        public string? LongDescription { get; set; } = null;
+        public int? Id { get; set; }
+        public string? ClassName { get; set; }
+        public bool? AllowEnrollment { get; set; }
+        public bool? Enabled { get; set; }
+        public string? ShortDescription { get; set; }
+        public string? LongDescription { get; set; }
+        public string? PrereqIds { get; set; }
+        public DateTime? MemberEnrollmentStart { get; set; }
+        public int? MemberEnrollmentDays { get; set; }
+        public bool? AllowNonMembers { get; set; } = false;
+        public DateTime? NonMemberEnrollmentStart { get; set; }
+        public int? NonMemberEnrollmentDays { get; set; }
+        public float? MemberPrice { get; set; }
+        public float? NonMemberPrice { get; set; }
     }
 
     public class ClassSetResult
@@ -88,6 +108,14 @@
         public DateTime Updated { get; set; }
         public string ShortDescription { get; set; } = "";
         public string LongDescription { get; set; } = "";
+        public string PrereqIds { get; set; } = "";
+        public DateTime? MemberEnrollmentStart { get; set; }
+        public int? MemberEnrollmentDays { get; set; }
+        public bool AllowNonMembers { get; set; } = false;
+        public DateTime? NonMemberEnrollmentStart { get; set; }
+        public int? NonMemberEnrollmentDays { get; set; }
+        public float MemberPrice { get; set; } = 0.0f;
+        public float NonMemberPrice { get; set; } = 0.0f;
     }
 
     #endregion

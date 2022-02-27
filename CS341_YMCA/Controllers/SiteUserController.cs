@@ -222,5 +222,83 @@ namespace CS341_YMCA.Controllers
 
             return Result;
         }
+
+        /**
+         * Gets user data associated with an ID.
+         */
+        public EndpointResultToken<SiteUserDBO> SiteUser_GetById(
+            int Id
+        )
+        {
+            EndpointResultToken<SiteUserDBO> Result = new();
+
+            try
+            {
+                Sql.ExecuteProcedure<SiteUserDBO>(
+                    "SiteUser_GetById",
+                    new
+                    {
+                        Id
+                    }, (_Result) =>
+                    {
+                        Result.Value = _Result;
+                    });
+
+                if (Result.Value == null)
+                {
+                    Result.Success = false;
+                    Result.Error = "Record with given ID not found.";
+                }
+            } catch (SqlException Ex)
+            {
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+            }
+
+            return Result;
+        }
+
+        public EndpointResultToken<object> SiteUser_Set(
+            int Id,
+            string? FirstName = null,
+            string? LastName = null,
+            string? Email = null,
+            bool? IsAdmin = null,
+            DateTime? MemberThru = null
+        )
+        {
+            EndpointResultToken<object> Result = new();
+
+            try
+            {
+                Sql.ExecuteProcedure<object>(
+                    "SiteUser_Set",
+                    new SiteUserSetRequest()
+                    {
+                        Id = Id,
+                        FirstName = FirstName,
+                        LastName = LastName,
+                        Email = Email,
+                        IsAdmin = IsAdmin,
+                        MemberThru = MemberThru
+                    }, (_) => { });
+
+                Result.Success = true;
+            } catch (SqlException Ex)
+            {
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+            }
+
+            return Result;
+        }
     }
 }

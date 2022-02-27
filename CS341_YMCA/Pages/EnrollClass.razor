@@ -23,73 +23,78 @@
             <br />
 
             <!-- CONFIGURABLE IMAGE -->
-            <img src="images/stock_photo.jpg" alt="Class image is missing" />
+            <img style="display: block;max-width: 86%;" class="mb-4" src="images/stock_photo.jpg" alt="Class image is missing" />
     </div>
-    <div class="col-lg-5" style="border: 1px solid black;padding: 1em;">
-        <h2>Enrollment Information</h2>
+    <div class="col-lg-5">
+        <h3>Enrollment Information</h3>
 
-        <p>Interested in this class? Continue reading to enroll.</p>
+        <p class="mb-4">Interested in this class? Continue reading to enroll.</p>
         
-        <p>
-            Both members with paid memberships and public non-members
-            may enroll and participate in this class.
-        </p>
-        <!--
-            WHEN WE ADD THE FEATURE, ALSO HAVE THIS MESSAGE AVAILABLE:
-            ---
-            This class is open only to those holding valid Y memberships.
-        -->
-        
-        <!-- MODIFIABLE CLASS PRICES -->
-        <div class="row mt-4">
-            <div class="col-sm-6" style="text-align: center;">
-                <h1>$27<sup>60</sup></h1>
-                <p>For membership holders</p>
+        <div class="card mb-4">
+            <div class="card-header">
+                Membership and Fees
             </div>
-            <div class="col-sm-6" style="text-align: center;">
-                <h1>$49<sup>65</sup></h1>
-                <p>Without membership</p>
+            <div class="card-body">
+                <p>
+                    Both members with paid memberships and public non-members
+                    may enroll and participate in this class.
+                </p>
+                <!--
+                    WHEN WE ADD THE FEATURE, ALSO HAVE THIS MESSAGE AVAILABLE:
+                    ---
+                    This class is open only to those holding valid Y memberships.
+                -->
+        
+                <!-- MODIFIABLE CLASS PRICES -->
+                <div class="row mt-4">
+                    <div class="col-sm-6" style="text-align: center;">
+                        @if ((ActiveClass?.MemberPrice ?? 0.0) > 0.0)
+                        {
+                            <h1>$@((int?)ActiveClass?.MemberPrice)<sup>00</sup></h1>
+                        } else
+                        {
+                            <h1>No fee</h1>
+                        }
+                        <p>For membership holders</p>
+                    </div>
+                    <div class="col-sm-6" style="text-align: center;">
+                        @if ((ActiveClass?.NonMemberPrice ?? 0.0) > 0.0)
+                        {
+                            <h1>$@((int?)ActiveClass?.NonMemberPrice)<sup>00</sup></h1>
+                        } else
+                        {
+                            <h1>No fee</h1>
+                        }
+                        <p>Without membership</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <h3>Open seats</h3>
-        <!-- MODIFIABLE CLASS SECTIONS -->
-        <div class="row section-enroll-list-row">
-            <div class="col-sm-7 pt-2">
-                <p><strong>Section 1</strong><br />@@ Room 220</p>
-                <p>Starting December 19, 2022</p>
-                <ul>
-                    <li>Mondays <i>1:00 PM - 1:55 PM</i></li>
-                    <li>Wednesdays <i>1:00 PM - 1:55 PM</i></li>
-                </ul>
+        <div class="card mb-4">
+            <div class="card-header">
+                Open Seats
             </div>
-            <div class="col-sm-5">
-                <hr />
-                <span style="font-size: 1.6em;font-weight: bold;">3</span>
-                <span style="font-size: 1.4em;">&nbsp;open seats!</span>
-                <br />
-                <button class="btn btn-success mt-4">Claim yours</button>
-                <br />
-                <hr />
-            </div>
-        </div>
-        <div class="row section-enroll-list-row">
-            <div class="col-sm-7 pt-2">
-                <p><strong>Section 2</strong><br />@@ Room 220</p>
-                <p>Starting December 20, 2022</p>
-                <ul>
-                    <li>Tuesdays <i>1:00 PM - 1:55 PM</i></li>
-                    <li>Thursdays <i>1:00 PM - 1:55 PM</i></li>
-                </ul>
-            </div>
-            <div class="col-sm-5">
-                <hr />
-                <span style="font-size: 1.6em;font-weight: bold;">9</span>
-                <span style="font-size: 1.4em;">&nbsp;open seats!</span>
-                <br />
-                <button class="btn btn-success mt-4">Claim yours</button>
-                <br />
-                <hr />
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-7 pt-2">
+                        <p><strong>Holding sessions</strong><br />in Room 220</p>
+                        <p>Starting December 19, 2022</p>
+                        <ul>
+                            <li>Mondays <i>@@ 1:00 PM - 1:55 PM</i></li>
+                            <li>Wednesdays <i>@@ 1:00 PM - 1:55 PM</i></li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-5">
+                        <hr />
+                        <span style="font-size: 1.6em;font-weight: bold;">3</span>
+                        <span style="font-size: 1.4em;">&nbsp;open seats!</span>
+                        <br />
+                        <button class="btn btn-success mt-4">Claim yours</button>
+                        <br />
+                        <hr />
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -115,12 +120,3 @@
         }
     }
 }
-
-<style>
-    .section-enroll-list-row
-    {
-        box-shadow: 0 0 0.2em 0.2em grey;
-        margin: 0.5em;
-        margin-top: 2em;
-    }
-</style>
