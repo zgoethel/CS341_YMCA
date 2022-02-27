@@ -102,6 +102,13 @@
         public string ShortDescription { get; set; } = "";
         public string LongDescription { get; set; } = "";
         public string PrereqIds { get; set; } = "";
+        public DateTime? MemberEnrollmentStart { get; set; }
+        public int? MemberEnrollmentDays { get; set; }
+        public bool AllowNonMembers { get; set; } = false;
+        public DateTime? NonMemberEnrollmentStart { get; set; }
+        public int? NonMemberEnrollmentDays { get; set; }
+        public float MemberPrice { get; set; } = 0.0f;
+        public float NonMemberPrice { get; set; } = 0.0f;
     }
 
     #endregion
