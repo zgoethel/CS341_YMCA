@@ -30,7 +30,14 @@ namespace CS341_YMCA.Controllers
             bool? Enabled = null,
             string? ShortDescription = null,
             string? LongDescription = null,
-            string? PrereqIds = null
+            string? PrereqIds = null,
+            DateTime? MemberEnrollmentStart = null,
+            int? MemberEnrollmentDays = null,
+            DateTime? NonMemberEnrollmentStart = null,
+            int? NonMemberEnrollmentDays = null,
+            bool? AllowNonMembers = null,
+            float? MemberPrice = null,
+            float? NonMemberPrice = null
         )
         {
             EndpointResultToken<int> Result = new();
@@ -47,7 +54,14 @@ namespace CS341_YMCA.Controllers
                         Enabled = Enabled,
                         ShortDescription = ShortDescription,
                         LongDescription = LongDescription,
-                        PrereqIds = PrereqIds
+                        PrereqIds = PrereqIds,
+                        MemberEnrollmentStart = MemberEnrollmentStart,
+                        MemberEnrollmentDays = MemberEnrollmentDays,
+                        NonMemberEnrollmentStart = NonMemberEnrollmentStart,
+                        NonMemberEnrollmentDays = NonMemberEnrollmentDays,
+                        AllowNonMembers = AllowNonMembers,
+                        MemberPrice = MemberPrice,
+                        NonMemberPrice = NonMemberPrice
                     }, (_Result) =>
                     {
                         Result.Value = _Result.Id;

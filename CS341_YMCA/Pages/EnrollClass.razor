@@ -23,7 +23,7 @@
             <br />
 
             <!-- CONFIGURABLE IMAGE -->
-            <img style="display: block;max-width: 86%;" src="images/stock_photo.jpg" alt="Class image is missing" />
+            <img style="display: block;max-width: 86%;" class="mb-4" src="images/stock_photo.jpg" alt="Class image is missing" />
     </div>
     <div class="col-lg-5">
         <h3>Enrollment Information</h3>
@@ -48,11 +48,23 @@
                 <!-- MODIFIABLE CLASS PRICES -->
                 <div class="row mt-4">
                     <div class="col-sm-6" style="text-align: center;">
-                        <h1>$@((int?)ActiveClass?.MemberPrice)<sup>00</sup></h1>
+                        @if ((ActiveClass?.MemberPrice ?? 0.0) > 0.0)
+                        {
+                            <h1>$@((int?)ActiveClass?.MemberPrice)<sup>00</sup></h1>
+                        } else
+                        {
+                            <h1>No fee</h1>
+                        }
                         <p>For membership holders</p>
                     </div>
                     <div class="col-sm-6" style="text-align: center;">
-                        <h1>$@((int?)ActiveClass?.MemberPrice)<sup>00</sup></h1>
+                        @if ((ActiveClass?.NonMemberPrice ?? 0.0) > 0.0)
+                        {
+                            <h1>$@((int?)ActiveClass?.NonMemberPrice)<sup>00</sup></h1>
+                        } else
+                        {
+                            <h1>No fee</h1>
+                        }
                         <p>Without membership</p>
                     </div>
                 </div>

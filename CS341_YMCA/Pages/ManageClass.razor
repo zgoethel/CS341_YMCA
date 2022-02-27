@@ -186,7 +186,15 @@
             AllowEnrollment: ActiveClass.AllowEnrollment,
             Enabled: ActiveClass.Enabled,
             ShortDescription: ActiveClass.ShortDescription,
-            LongDescription: ActiveClass.LongDescription
+            LongDescription: ActiveClass.LongDescription,
+            PrereqIds: /* `null` for no change */ null,
+            MemberEnrollmentStart: ActiveClass.MemberEnrollmentStart,
+            MemberEnrollmentDays: ActiveClass.MemberEnrollmentDays,
+            NonMemberEnrollmentStart: ActiveClass.NonMemberEnrollmentStart,
+            NonMemberEnrollmentDays: ActiveClass.NonMemberEnrollmentDays,
+            AllowNonMembers: ActiveClass.AllowNonMembers,
+            MemberPrice: ActiveClass.MemberPrice,
+            NonMemberPrice: ActiveClass.NonMemberPrice
         );
 
         if (Result.Success)
