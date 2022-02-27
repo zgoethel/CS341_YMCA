@@ -21,35 +21,21 @@
     <h3>Manage details for '@ActiveClass.ClassName'</h3>
 
     <EditForm Model=ActiveClass>
-        <div class="row mt-4">
-            <div class="col-5">
-                <label>Class name:<i style="color: red">*</i></label>
-                <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.ClassName />
-            </div>
-        </div>
-        <div class="row mt-4">
-            <div class="col-5">
-                <label>Short description:<i style="color: red">*</i></label>
-                <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.ShortDescription />
-            </div>
-        </div>
-        <div class="row mt-4">
-            <div class="col-5">
-                <label>Detailed description:</label>
-                <InputTextArea rows=14 class="form-control mb-2" type="text" @bind-Value=ActiveClass.LongDescription />
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-5">
-                <InputCheckbox class="mb-2" @bind-Value=ActiveClass.AllowEnrollment />&nbsp;
-                <label>Allow Enrollment</label>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-5">
-                <InputCheckbox class="mb-2" @bind-Value=ActiveClass.Enabled />&nbsp;
-                <label>Enabled</label>
-            </div>
+        <div style="width: 44em;max-width: 100%;">
+            <label>Class name:<i style="color: red">*</i></label>
+            <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.ClassName />
+            
+            <label>Short description:<i style="color: red">*</i></label>
+            <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.ShortDescription />        
+        
+            <label>Detailed description:</label>
+            <InputTextArea rows=14 class="form-control mb-2" type="text" @bind-Value=ActiveClass.LongDescription />
+        
+            <InputCheckbox class="mb-2" @bind-Value=ActiveClass.AllowEnrollment />&nbsp;
+            <label>Allow Enrollment</label>
+
+            <InputCheckbox class="mb-2" @bind-Value=ActiveClass.Enabled />&nbsp;
+            <label>Enabled</label>
         </div>
 
         <button class="btn btn-primary mt-4" type="submit" @onclick=SaveForm>Submit</button>
