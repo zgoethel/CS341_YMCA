@@ -1,7 +1,7 @@
 ﻿@using CS341_YMCA.Data
 
-<div class="card class-list-item">
-    @if(LoggedIn?.IsAdmin ?? false)
+<div class="card class-list-item" style="vertical-align: top;">
+    @if (LoggedIn?.IsAdmin ?? false)
     {
         <div class="class-list-admin-actions">
             <p><strong>Admin actions</strong></p>
@@ -9,10 +9,16 @@
             <a href="ManageClasses/@Class?.Id"><i class="oi oi-pencil" style="float: right;" title="Edit this class"></i></a>
         </div>
     }
+    @if (Class?.AllowEnrollment ?? false)
+    {
+        <h4 style="float: left;position: absolute;"><span class="badge bg-success bg-success-glow mt-2 ms-2">Open for<br />enrollment!</span></h4>
+        <!--<h5 style="float: left;position: absolute;margin-top: 3em;"><span class="badge bg-warning bg-warning-glow ms-2">Members only</span></h5>
+        <h5 style="float: left;position: absolute;margin-top: 4.7em;"><span class="badge bg-success bg-success-glow ms-2">Open to public</span></h5>-->
+    }
     <img class="card-img-top" src="images/stripe_pattern.jpg" alt="Class image is missing">
     <div class="card-body">
         <h5 class="card-title">@Class?.ClassName</h5>
-        <p class="card-text">Description unavailable</p>
+        <p class="card-text">@Class?.ShortDescription</p>
         <a href="Enroll/@Class?.Id" class="btn btn-primary">Learn more</a>
     </div>
 </div>
@@ -54,5 +60,18 @@
         float: left;
         margin-bottom: 0;
         margin-top: -0.2em;
+    }
+
+    .bg-success-glow
+    {
+        box-shadow: 0 0 0.2em 0.2em #badfba;
+    }
+    .bg-danger-glow
+    {
+        box-shadow: 0 0 0.2em 0.2em #e2afc0;
+    }
+    .bg-warning-glow
+    {
+      box-shadow: 0 0 0.2em 0.2em #c4be8e;
     }
 </style>
