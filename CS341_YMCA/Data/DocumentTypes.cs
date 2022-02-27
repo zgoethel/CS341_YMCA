@@ -50,6 +50,18 @@
         public bool IsAdmin { get; set; }
         public DateTime Created { get; set; }
         public DateTime Modified { get; set; }
+        public DateTime? MemberThru { get; set; }
+        public bool IsMember { get; set; }
+    }
+
+    public class SiteUserSetRequest
+    {
+        public int Id { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Email { get; set; }
+        public bool? IsAdmin { get; set; }
+        public DateTime? MemberThru { get; set; }
     }
 
     #endregion
@@ -65,6 +77,7 @@
         public bool? Enabled { get; set; } = null;
         public string? ShortDescription { get; set; } = null;
         public string? LongDescription { get; set; } = null;
+        public string? PrereqIds { get; set; } = null;
     }
 
     public class ClassSetResult
@@ -88,6 +101,7 @@
         public DateTime Updated { get; set; }
         public string ShortDescription { get; set; } = "";
         public string LongDescription { get; set; } = "";
+        public string PrereqIds { get; set; } = "";
     }
 
     #endregion
