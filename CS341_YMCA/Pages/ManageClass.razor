@@ -5,8 +5,14 @@
 
 @inject ClassController Classes
 @inject Database Sql
+@inject NavigationManager Nav
 
 <PageTitle>Manage Class</PageTitle>
+
+@if (!string.IsNullOrEmpty(ValidationMessage))
+{
+    <div class="alert alert-warning">@ValidationMessage</div>
+}
 
 @if (LoggedIn?.IsAdmin ?? false)
 {
@@ -21,6 +27,20 @@
                 <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.ClassName />
             </div>
         </div>
+        <div class="row">
+            <div class="col-5">
+                <InputCheckbox class="mb-2" @bind-Value=ActiveClass.AllowEnrollment />&nbsp;
+                <label>Allow Enrollment</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-5">
+                <InputCheckbox class="mb-2" @bind-Value=ActiveClass.Enabled />&nbsp;
+                <label>Enabled</label>
+            </div>
+        </div>
+
+        <button class="btn btn-primary mt-4" type="submit" @onclick=SaveForm>Submit</button>
     </EditForm>
 } else
 {
@@ -34,6 +54,7 @@
     public string? Id { get; set; }
 
     private ClassDBO ActiveClass = new();
+    private string ValidationMessage = "";
 
     protected override void OnAfterRender(bool FirstRender)
     {
@@ -41,7 +62,32 @@
 
         if (FirstRender)
         {
-            ActiveClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
+            if (Id != "Create")
+                ActiveClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
+            StateHasChanged();
+        }
+    }
+
+    private void SaveForm()
+    {
+        if (string.IsNullOrEmpty(ActiveClass.ClassName))
+        {
+            ValidationMessage = "Please provide all reaquired fields.";
+            return;
+        }
+
+        var Result = Classes.Class_Set(
+            Id: ActiveClass.Id,
+            ClassName: ActiveClass.ClassName,
+            AllowEnrollment: ActiveClass.AllowEnrollment,
+            Enabled: ActiveClass.Enabled
+        );
+
+        if (Result.Success)
+            Nav.NavigateTo("ManageClasses");
+        else
+        {
+            ValidationMessage = Result.Error;
             StateHasChanged();
         }
     }

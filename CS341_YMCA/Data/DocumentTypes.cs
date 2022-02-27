@@ -78,10 +78,10 @@
 
     public class ClassDBO
     {
-        public int Id { get; set; }
-        public string ClassName { get; set; } = "";
-        public bool AllowEnrollment { get; set; }
-        public bool Enabled { get; set; }
+        public int? Id { get; set; }
+        public string ClassName { get; set; } = "New Class";
+        public bool AllowEnrollment { get; set; } = false;
+        public bool Enabled { get; set; } = true;
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
     }
