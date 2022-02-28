@@ -1,6 +1,7 @@
 ﻿using CS341_YMCA.Controllers;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace CS341_YMCA.Data
 {
@@ -21,7 +22,8 @@ namespace CS341_YMCA.Data
             this.Email = Email;
             this.PasswordHash = Password.CalculateSha512();
 
-            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+            var _State = GetAuthenticationStateAsync();
+            NotifyAuthenticationStateChanged(_State);
         }
 
         public void LogOut()

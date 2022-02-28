@@ -10,6 +10,9 @@
 @inject IHttpContextAccessor Con
 @inject SiteUserController SiteUsers
 
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage ProtectedStorage
+
 <PageTitle>YMCA Enrollment Portal</PageTitle>
 
 <AuthorizeView>
@@ -47,9 +50,28 @@
     protected SiteUserDBO? LoggedIn { get; set; }
     protected bool Authenticated => Auth!.Result.User.Identity!.IsAuthenticated;
 
-    protected override void OnAfterRender(bool FirstRender)
+    protected override async Task OnAfterRenderAsync(bool FirstRender)
     {
-        base.OnAfterRender(FirstRender);
+        await base.OnAfterRenderAsync(FirstRender);
+
+        if (FirstRender && !Authenticated)
+        {
+            try
+            {
+                var SessionKey = await ProtectedStorage.GetAsync<string?>("SessionKey");
+                if (SessionKey.Value != null)
+                {
+                    var SessionName = await ProtectedStorage.GetAsync<string>("SessionName");
+                    ((AuthStateProvider)AuthState).LogIn(SessionName.Value!, SessionKey.Value!);
+                }
+            } catch (Exception Ex)
+            {
+                Console.WriteLine("Something went wrong while reading session storage");
+                Console.WriteLine(Ex.ToString());
+            }
+
+            StateHasChanged();
+        }
 
         if (FirstRender && Authenticated)
         {

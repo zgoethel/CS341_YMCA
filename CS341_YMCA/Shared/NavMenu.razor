@@ -6,6 +6,9 @@
 @inject AuthenticationStateProvider AuthState
 @inject Database Sql
 
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage ProtectedStorage
+
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="@Nav.BaseUri.ToString()">
@@ -97,5 +100,8 @@
     {
         var _AuthState = AuthState as AuthStateProvider;
         _AuthState?.LogOut();
+
+        ProtectedStorage.DeleteAsync("SessionName");
+        ProtectedStorage.DeleteAsync("SessionKey");
     }
 }
