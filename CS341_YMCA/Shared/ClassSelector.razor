@@ -6,7 +6,7 @@
 <h3 style="white-space: break-spaces;">
     @foreach (var Class in Selected)
     {
-        <span class="badge bg-secondary ms-2 mt-2">
+        <span class="badge bg-secondary me-2 mt-2">
             @Class.ClassName&nbsp;
             <i class="oi oi-trash" @onclick="() => { OnRemoveClick(Class); }" style="cursor: pointer;"></i>
         </span>
