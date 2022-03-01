@@ -185,6 +185,44 @@ namespace CS341_YMCA.Controllers
         }
 
         /**
+         * Lists users according to provided filters.
+         */
+        public EndpointResultToken<List<SiteUserDBO>> SiteUser_List(
+            string? EmailFilter = null
+        )
+        {
+            var Result = new EndpointResultToken<List<SiteUserDBO>>
+            {
+                Value = new()
+            };
+
+            try
+            {
+                Sql.ExecuteProcedure<SiteUserDBO>(
+                    "SiteUser_List",
+                    new SiteUserListRequest()
+                    {
+                        EmailFilter = EmailFilter,
+                    }, (_Result) =>
+                    {
+                        Result.Value.Add(_Result);
+                    });
+            }
+            catch (SqlException Ex)
+            {
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            }
+            catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+            }
+
+            return Result;
+        }
+
+        /**
          * Gets user data associated with an email.
          */
         public EndpointResultToken<SiteUserDBO> SiteUser_GetByEmail(
