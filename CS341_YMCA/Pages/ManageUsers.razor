@@ -7,39 +7,48 @@
 
 <PageTitle>Member Accounts</PageTitle>
 
-<h1>Member Accounts</h1>
-<hr />
-<h3>Manage patron account, membership, and payment details</h3>
-
-@{
+@if (LoggedIn?.IsAdmin ?? false)
+{
+    <h1>Member Accounts</h1>
+    <hr />
+    <h3>Manage patron account, membership, and payment details</h3>
+    
     var UserList = Users.SiteUser_List().Get()!;
+    
+    <table class="table table-striped mt-4">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">First</th>
+                <th scope="col">Last</th>
+                <th scope="col">Email</th>
+                <th scope="col">Y Member</th>
+                <th scope="col">Admin</th>
+                <th scope="col">Created</th>
+                <th scope="col">Modified</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var User in UserList)
+            {
+                <ManageUsersEntry User=@User></ManageUsersEntry>
+            }
+        </tbody>
+    </table>
+    
+    <style>
+       td
+        {
+            vertical-align: middle;
+        }
+    </style>
+} else
+{
+    <div class="alert alert-danger">You are <strong>not</strong> an admin user and cannot access this page.</div>
 }
 
-<table class="table table-striped mt-4">
-    <thead>
-        <tr>
-            <th scope="col">ID</th>
-            <th scope="col">First</th>
-            <th scope="col">Last</th>
-            <th scope="col">Email</th>
-            <th scope="col">Y Member</th>
-            <th scope="col">Admin</th>
-            <th scope="col">Created</th>
-            <th scope="col">Modified</th>
-            <th scope="col"></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var User in UserList)
-        {
-            <ManageUsersEntry User=@User></ManageUsersEntry>
-        }
-    </tbody>
-</table>
-
-<style>
-    td
-    {
-        vertical-align: middle;
-    }
-</style>
+@code {
+    [CascadingParameter]
+    protected SiteUserDBO? LoggedIn { get; set; }
+}
