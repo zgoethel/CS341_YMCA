@@ -92,17 +92,14 @@
                     </div>
                     <br />
             
-                    <label>Additional fee for members:</label>
+                    <label>Class fee for members:</label>
                     <div class="row">
                         <div class="col-sm-7">
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">$</span>
                                 </div>
-                                <InputNumber step=1 min=0 class="form-control" @bind-Value=ActiveClass.MemberPrice />
-                                <div class="input-group-append">
-                                    <span class="input-group-text">.00</span>
-                                </div>
+                                <InputNumber step="any" min=0 class="form-control" @bind-Value=ActiveClass.MemberPrice />
                             </div>
                         </div>
                     </div>
@@ -138,17 +135,14 @@
                         </div>
                         <br />
                 
-                        <label>Additional fee for non-members:</label>
+                        <label>Class fee for non-members:</label>
                         <div class="row">
                             <div class="col-sm-7">
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">$</span>
                                     </div>
-                                    <InputNumber step=1 min=0 class="form-control" @bind-Value=ActiveClass.NonMemberPrice />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">.00</span>
-                                    </div>
+                                    <InputNumber step="any" min=0 class="form-control" @bind-Value=ActiveClass.NonMemberPrice />
                                 </div>
                             </div>
                         </div>
@@ -216,14 +210,11 @@
             return;
         }
         // Validation for pricing values
-        if (
-            (ActiveClass.MemberPrice > 0 && ActiveClass.MemberPrice != (int)ActiveClass.MemberPrice)
-            || (ActiveClass.NonMemberPrice > 0 && ActiveClass.NonMemberPrice != (int)ActiveClass.NonMemberPrice)
-            || ActiveClass.MemberPrice < 0
+        if (ActiveClass.MemberPrice < 0
             || ActiveClass.NonMemberPrice < 0
         )
         {
-            ValidationMessage = "Please use whole, positive dollar amounts.";
+            ValidationMessage = "Please use positive dollar amounts.";
             StateHasChanged();
             return;
         }

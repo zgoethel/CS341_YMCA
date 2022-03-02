@@ -65,7 +65,7 @@
                     <div class="col-sm-6" style="text-align: center;">
                         @if ((ActiveClass?.MemberPrice ?? 0.0) > 0.0)
                         {
-                            <h1>$@((int?)ActiveClass?.MemberPrice)<sup>00</sup></h1>
+                            <h1>$@((int?)ActiveClass?.MemberPrice)<sup>@((ActiveClass?.MemberPrice % 1)?.ToString(".00"))</sup></h1>
                         } else
                         {
                             <h1>No fee</h1>
@@ -77,7 +77,7 @@
                         <div class="col-sm-6" style="text-align: center;">
                             @if ((ActiveClass?.NonMemberPrice ?? 0.0) > 0.0)
                             {
-                                <h1>$@((int?)ActiveClass?.NonMemberPrice)<sup>00</sup></h1>
+                                <h1>$@((int?)ActiveClass?.NonMemberPrice)<sup>@((ActiveClass?.NonMemberPrice % 1)?.ToString(".00"))</sup></h1>
                             } else
                             {
                                 <h1>No fee</h1>
