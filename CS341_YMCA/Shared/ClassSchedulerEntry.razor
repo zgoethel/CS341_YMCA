@@ -61,6 +61,8 @@
 @code
 {
     [Parameter]
+    public ClassDBO? Parent { get; set; }
+    [Parameter]
     public ClassScheduleDBO? Session { get; set; }
     [Parameter]
     public bool ShowEditing { get; set; } = false;
@@ -113,7 +115,7 @@
     {
         if (Hour == 12) Hour -= 12;
 
-        var DateOnly = Session.FirstDate.Date;
+        var DateOnly = Session!.FirstDate.Date;
         DateOnly = DateOnly.AddHours(Hour);
         if (AmPm == "PM")
             DateOnly = DateOnly.AddHours(12);
@@ -122,7 +124,7 @@
 
         var Result = Classes.ClassSchedule_Set(
             Id: Session.Id,
-            ClassId: Session.ClassId,
+            ClassId: Parent?.Id,
             FirstDate: Session.FirstDate,
             Recurrence: Session.Recurrence,
             Occurrences: Session.Occurrences,

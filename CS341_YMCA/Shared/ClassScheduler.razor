@@ -3,9 +3,13 @@
 
 @inject ClassController Classes
 
-<button class="btn btn-primary" style="float: right;" @onclick=OnAddClick>
-    <i class="oi oi-plus"></i>
-</button>
+@if (ShowEditing)
+{
+    <button class="btn btn-primary" style="float: right;" @onclick=OnAddClick>
+        <i class="oi oi-plus"></i>
+    </button>
+}
+
 <table class="table table-striped">
     <thead>
         <tr>
@@ -22,7 +26,7 @@
     <tbody>
         @foreach (ClassScheduleDBO Session in Schedule)
         {
-            <ClassSchedulerEntry Session=@Session ShowEditing=@ShowEditing></ClassSchedulerEntry>
+            <ClassSchedulerEntry Parent=@Class Session=@Session ShowEditing=@ShowEditing></ClassSchedulerEntry>
         }
     </tbody>
 </table>
