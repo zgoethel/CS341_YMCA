@@ -37,7 +37,9 @@ namespace CS341_YMCA.Controllers
             int? NonMemberEnrollmentDays = null,
             bool? AllowNonMembers = null,
             float? MemberPrice = null,
-            float? NonMemberPrice = null
+            float? NonMemberPrice = null,
+            string? Location = null,
+            int? MaxSeats = null
         )
         {
             EndpointResultToken<int> Result = new();
@@ -61,7 +63,9 @@ namespace CS341_YMCA.Controllers
                         NonMemberEnrollmentDays = NonMemberEnrollmentDays,
                         AllowNonMembers = AllowNonMembers,
                         MemberPrice = MemberPrice,
-                        NonMemberPrice = NonMemberPrice
+                        NonMemberPrice = NonMemberPrice,
+                        Location = Location,
+                        MaxSeats = MaxSeats
                     }, (_Result) =>
                     {
                         Result.Value = _Result.Id;
@@ -144,6 +148,119 @@ namespace CS341_YMCA.Controllers
                     Result.Success = false;
                     Result.Error = "Record with given ID not found";
                 }
+            } catch (SqlException Ex)
+            {
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+            }
+
+            return Result;
+        }
+
+        /**
+         * Gets class data associated with IDs as CSV.
+         */
+        public EndpointResultToken<List<ClassDBO>> Class_GetByIds(
+            string Csv
+        )
+        {
+            EndpointResultToken<List<ClassDBO>> Result = new();
+            Result.Value = new();
+
+            try
+            {
+                Sql.ExecuteProcedure<ClassDBO>(
+                    "Class_GetByIds",
+                    new
+                    {
+                        Csv = Csv ?? ""
+                    }, (_Result) =>
+                    {
+                        Result.Value.Add(_Result);
+                    });
+            } catch (SqlException Ex)
+            {
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+            }
+
+            return Result;
+        }
+
+        /**
+         * Lists a class' schedule sessions according to class ID.
+         */
+        public EndpointResultToken<List<ClassScheduleDBO>> ClassSchedule_List(
+            int ClassId
+        )
+        {
+            var Result = new EndpointResultToken<List<ClassScheduleDBO>>
+            {
+                Value = new()
+            };
+
+            try
+            {
+                Sql.ExecuteProcedure<ClassScheduleDBO>(
+                    "ClassSchedule_List",
+                    new
+                    {
+                        ClassId
+                    }, (_Result) =>
+                    {
+                        Result.Value.Add(_Result);
+                    });
+            } catch (SqlException Ex)
+            {
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+            }
+
+            return Result;
+        }
+
+        /**
+         * Allows creation and udpating of class schedule data.
+         */
+        public EndpointResultToken<int> ClassSchedule_Set(
+            int? Id = null,
+            int? ClassId = null,
+            DateTime? FirstDate = null,
+            int? Recurrence = null,
+            int? Occurrences = null,
+            int? Duration = null
+        )
+        {
+            EndpointResultToken<int> Result = new();
+
+            try
+            {
+                Sql.ExecuteProcedure<ClassScheduleSetResult>(
+                    "ClassSchedule_Set",
+                    new ClassScheduleSetRequest()
+                    {
+                        Id = Id,
+                        ClassId = ClassId,
+                        FirstDate = FirstDate,
+                        Recurrence = Recurrence,
+                        Occurrences = Occurrences,
+                        Duration = Duration
+                    }, (_Result) =>
+                    {
+                        Result.Value = _Result.Id;
+                    });
             } catch (SqlException Ex)
             {
                 Result.Success = false;
