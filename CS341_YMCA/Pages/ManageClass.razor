@@ -59,12 +59,12 @@
             <h3>Class Prerequisites</h3>
             <ClassSelector Exclude=@ActiveClass.Id Csv=@(ActiveClass.PrereqIds ?? "") @ref=PrereqSelector />
 
-            <button class="btn btn-primary mt-4" type="submit" @onclick=SaveForm>Submit</button>
+            <button class="btn btn-primary mt-4" type="submit" @onclick="() => SaveForm(Redirect: true)">Submit</button>
             <br />
             <br />
 
             <h3>Class Scheduler</h3>
-            <ClassScheduler Class=@ActiveClass ShowEditing=true></ClassScheduler>
+            <ClassScheduler Manager=@this Class=@ActiveClass ShowEditing=true></ClassScheduler>
         </div>
         <div style="width: 26em;white-space: initial;" class="class-editor-col">
             <h3 class="mb-4">Pricing and Enrollment</h3>
@@ -183,7 +183,7 @@
     public string? Id { get; set; }
 
     private ClassDBO ActiveClass = new();
-    private string ValidationMessage = "";
+    public string ValidationMessage = "";
     private ClassSelector? PrereqSelector { get; set; }
 
     private string NonMemberStyle => ActiveClass.AllowNonMembers
@@ -203,7 +203,7 @@
         }
     }
 
-    private void SaveForm()
+    public void SaveForm(bool Redirect = true)
     {
         // Validation for required text fields
         if (
@@ -212,6 +212,7 @@
         )
         {
             ValidationMessage = "Please provide all required fields.";
+            StateHasChanged();
             return;
         }
         // Validation for pricing values
@@ -223,6 +224,7 @@
         )
         {
             ValidationMessage = "Please use whole, positive dollar amounts.";
+            StateHasChanged();
             return;
         }
         // Validation for seat limit value
@@ -232,6 +234,7 @@
         )
         {
             ValidationMessage = "Please use whole, positive number of max seats.";
+            StateHasChanged();
             return;
         }
 
@@ -254,6 +257,7 @@
             if (EnrollmentEnd > Sessions[0].FirstDate)
             {
                 ValidationMessage = "Classes cannot start before enrollment closes. Please change the enrollment window(s) or class schedule date(s).";
+                StateHasChanged();
                 return;
             }
         }
@@ -268,14 +272,16 @@
             )
             {
                 ValidationMessage = "You cannot \"Allow Enrollment\" without first setting an enrollment window.";
+                StateHasChanged();
                 return;
             } else if (
-                ActiveClass.MemberEnrollmentDays != null
-                && (ActiveClass.MemberEnrollmentDays != (int)ActiveClass.MemberEnrollmentDays
-                || ActiveClass.MemberEnrollmentDays < 0)
-            )
+            ActiveClass.MemberEnrollmentDays != null
+            && (ActiveClass.MemberEnrollmentDays != (int)ActiveClass.MemberEnrollmentDays
+            || ActiveClass.MemberEnrollmentDays < 0)
+          )
             {
                 ValidationMessage = "Specify enrollment window length as a number of whole days.";
+                StateHasChanged();
                 return;
             }
 
@@ -287,15 +293,17 @@
             )
             {
                 ValidationMessage = "Please either disable non-members, or specify their enrollment window.";
+                StateHasChanged();
                 return;
             } else if (
-                ActiveClass.AllowNonMembers
-                && ActiveClass.NonMemberEnrollmentDays != null
-                && (ActiveClass.NonMemberEnrollmentDays != (int)ActiveClass.NonMemberEnrollmentDays
-                || ActiveClass.NonMemberEnrollmentDays < 0)
-            )
+            ActiveClass.AllowNonMembers
+            && ActiveClass.NonMemberEnrollmentDays != null
+            && (ActiveClass.NonMemberEnrollmentDays != (int)ActiveClass.NonMemberEnrollmentDays
+            || ActiveClass.NonMemberEnrollmentDays < 0)
+          )
             {
                 ValidationMessage = "Specify enrollment window length as a number of whole days.";
+                StateHasChanged();
                 return;
             }
         }
@@ -319,9 +327,15 @@
             MaxSeats: ActiveClass.MaxSeats
         );
 
-        if (Result.Success)
+        if (Result.Success && Redirect)
             Nav.NavigateTo("ManageClasses");
-        else
+        else if (Result.Success)
+        {
+            ActiveClass.Id = Result.Get()!;
+
+            ValidationMessage = "";
+            StateHasChanged();
+        } else
         {
             ValidationMessage = Result.Error ?? "An unknown error has occurred.";
             StateHasChanged();

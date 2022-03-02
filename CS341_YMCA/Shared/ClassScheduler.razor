@@ -1,5 +1,6 @@
 ﻿@using CS341_YMCA.Data
 @using CS341_YMCA.Controllers
+@using CS341_YMCA.Pages
 
 @inject ClassController Classes
 
@@ -34,7 +35,7 @@
     <tbody>
         @foreach (ClassScheduleDBO Session in Schedule)
         {
-            <ClassSchedulerEntry Scheduler=@this Parent=@Class Session=@Session ShowEditing=@ShowEditing></ClassSchedulerEntry>
+            <ClassSchedulerEntry Manager=@Manager Scheduler=@this Parent=@Class Session=@Session ShowEditing=@ShowEditing></ClassSchedulerEntry>
         }
     </tbody>
 </table>
@@ -46,6 +47,8 @@
     public ClassDBO? Class { get; set; }
     [Parameter]
     public bool ShowEditing { get; set; } = false;
+    [Parameter]
+    public ManageClass? Manager { get; set; }
 
     private List<ClassScheduleDBO> Schedule { get; set; } = new();
     public string ValidationMessage { get; set; } = "";

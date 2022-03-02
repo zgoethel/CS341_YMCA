@@ -1,5 +1,6 @@
 ﻿@using CS341_YMCA.Data
 @using CS341_YMCA.Controllers
+@using CS341_YMCA.Pages
 
 @inject ClassController Classes
 
@@ -78,6 +79,8 @@
     public bool ShowEditing { get; set; } = false;
     [Parameter]
     public ClassScheduler Scheduler { get; set; } = new();
+    [Parameter]
+    public ManageClass? Manager { get; set; }
 
     private bool EditMode = false;
 
@@ -126,6 +129,14 @@
 
     private void OnSaveClicked()
     {
+        Manager?.SaveForm(Redirect: false);
+        if (!string.IsNullOrEmpty(Manager?.ValidationMessage))
+        {
+            Scheduler.ValidationMessage = "Please first attend to errors in the main class details.";
+            Scheduler._StateHasChanged();
+            return;
+        }
+
         // Validation for time values
         if (Hour < 1 || Hour > 12 || Hour != (int)Hour
             || Minute < 0 || Minute > 59 || Minute != (int)Minute
@@ -175,6 +186,8 @@
                 return;
             }
         }
+
+
 
         var Result = Classes.ClassSchedule_Set(
             Id: Session.Id,
