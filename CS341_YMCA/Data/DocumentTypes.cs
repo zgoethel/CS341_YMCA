@@ -90,6 +90,8 @@
         public int? NonMemberEnrollmentDays { get; set; }
         public float? MemberPrice { get; set; }
         public float? NonMemberPrice { get; set; }
+        public string? Location { get; set; }
+        public int? MaxSeats { get; set; }
     }
 
     public class ClassSetResult
@@ -105,7 +107,7 @@
 
     public class ClassDBO
     {
-        public int? Id { get; set; }
+        public int Id { get; set; }
         public string ClassName { get; set; } = "New Class";
         public bool AllowEnrollment { get; set; } = false;
         public bool Enabled { get; set; } = true;
@@ -121,6 +123,33 @@
         public int? NonMemberEnrollmentDays { get; set; }
         public float MemberPrice { get; set; } = 0.0f;
         public float NonMemberPrice { get; set; } = 0.0f;
+        public string? Location { get; set; }
+        public int? MaxSeats { get; set; }
+    }
+
+    public class ClassScheduleDBO
+    {
+        public int Id { get; set; }
+        public int ClassId { get; set; }
+        public DateTime FirstDate { get; set; } = DateTime.Now;
+        public int Recurrence { get; set; }
+        public int Duration { get; set; }
+        public int Occurrences { get; set; }
+    }
+
+    public class ClassScheduleSetRequest
+    {
+        public int? Id { get; set; }
+        public int? ClassId { get; set; }
+        public DateTime? FirstDate { get; set; }
+        public int? Recurrence { get; set; }
+        public int? Occurrences { get; set; }
+        public int? Duration { get; set; }
+    }
+
+    public class ClassScheduleSetResult
+    {
+        public int Id { get; set; }
     }
 
     #endregion
