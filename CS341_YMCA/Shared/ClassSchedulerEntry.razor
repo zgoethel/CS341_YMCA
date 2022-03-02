@@ -16,16 +16,12 @@
             </InputSelect>
         </td>
         <td><InputNumber @bind-Value=@Session.Duration class="form-control" min=0 style="max-width: 5em;" /> minutes</td>
-        @if (@Session.Recurrence == 0)
-        {
-            <td>Never</td>
-        } else if (@Session.Occurrences == 0)
-        {
-            <td>Every @Session.Recurrence days indefinitely</td>
-        } else
-        {
-            <td>Every @Session.Recurrence days, @Session.Occurrences times</td>
-        }
+        <td>
+            Every
+            <InputNumber @bind-Value=@Session.Recurrence class="form-control" min=0 step=1 />
+            days <i>(zero for one-time)</i>, repeating
+            <InputNumber @bind-Value=@Session.Occurrences class="form-control" min=0 step=1 />
+            times <i>(zero for indefinite)</i></td>
     } else
     {
         <td>@Session.FirstDate.ToLongDateString()</td>
@@ -133,6 +129,7 @@
 
         if (Result.Success)
         {
+            Session.Id = Result.Get()!;
             EditMode = false;
             StateHasChanged();
         }
