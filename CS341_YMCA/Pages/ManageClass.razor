@@ -266,10 +266,10 @@
                 StateHasChanged();
                 return;
             } else if (
-            ActiveClass.MemberEnrollmentDays != null
-            && (ActiveClass.MemberEnrollmentDays != (int)ActiveClass.MemberEnrollmentDays
-            || ActiveClass.MemberEnrollmentDays < 0)
-          )
+              ActiveClass.MemberEnrollmentDays != null
+              && (ActiveClass.MemberEnrollmentDays != (int)ActiveClass.MemberEnrollmentDays
+              || ActiveClass.MemberEnrollmentDays < 0)
+            )
             {
                 ValidationMessage = "Specify enrollment window length as a number of whole days.";
                 StateHasChanged();
@@ -287,11 +287,11 @@
                 StateHasChanged();
                 return;
             } else if (
-            ActiveClass.AllowNonMembers
-            && ActiveClass.NonMemberEnrollmentDays != null
-            && (ActiveClass.NonMemberEnrollmentDays != (int)ActiveClass.NonMemberEnrollmentDays
-            || ActiveClass.NonMemberEnrollmentDays < 0)
-          )
+                ActiveClass.AllowNonMembers
+                && ActiveClass.NonMemberEnrollmentDays != null
+                && (ActiveClass.NonMemberEnrollmentDays != (int)ActiveClass.NonMemberEnrollmentDays
+                || ActiveClass.NonMemberEnrollmentDays < 0)
+            )
             {
                 ValidationMessage = "Specify enrollment window length as a number of whole days.";
                 StateHasChanged();
@@ -323,6 +323,7 @@
         else if (Result.Success)
         {
             ActiveClass.Id = Result.Get()!;
+            ActiveClass.PrereqIds = PrereqSelector!.Csv;
 
             ValidationMessage = "";
             StateHasChanged();
