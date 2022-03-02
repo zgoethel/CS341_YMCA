@@ -102,23 +102,47 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-7 pt-2">
-                        <p><strong>Holding sessions</strong><br />in Room 220</p>
-                        <p>Starting December 19, 2022</p>
-                        <ul>
-                            <li>Mondays <i>@@ 1:00 PM - 1:55 PM</i></li>
-                            <li>Wednesdays <i>@@ 1:00 PM - 1:55 PM</i></li>
-                        </ul>
+                        <p><strong>Holding sessions</strong><br />@@ @(ActiveClass?.Location ?? "TBA")</p>
+                        @{
+                            if (ActiveClass != null)
+                            {
+                                var Sessions = Classes.ClassSchedule_List(ActiveClass.Id).Get()!;
+                                if (Sessions.Count == 0)
+                                {
+                                    <p>No schedule available</p>
+                                } else
+                                {
+                                    <p>Starting on @Sessions[0].FirstDate.ToLongDateString()</p>
+                                }
+                            }
+                        }
                     </div>
+                    @{
+                        var ThisUserCost = ActiveClass?.NonMemberPrice ?? 0.0f;
+                        if (LoggedIn?.IsMember ?? false)
+                            ThisUserCost = ActiveClass?.MemberPrice ?? 0.0f;
+                        var CanEnroll = (ActiveClass?.AllowNonMembers ?? false)
+                            || (LoggedIn?.IsMember ?? false);
+                    }
                     <div class="col-sm-5">
-                        <hr />
-                        <span style="font-size: 1.6em;font-weight: bold;">3</span>
-                        <span style="font-size: 1.4em;">&nbsp;open seats!</span>
+                        @if ((ActiveClass?.MaxSeats ?? 0) > 0)
+                        {
+                            <span style="font-size: 1.3em;font-weight: bold;">@ActiveClass?.MaxSeats</span>
+                            <span style="font-size: 1.2em;">&nbsp;open seats!</span>
                         <br />
-                        <button class="btn btn-success mt-4">Claim yours</button>
+                        }
+                        @if (CanEnroll)
+                        {   
+                            <p class="mt-2">Your price: <strong>$@string.Format("{0:0.00}", ThisUserCost)</strong></p>
+                            <button class="btn btn-success mt-1 mb-1">Enroll</button>
+                        } else
+                        {
+                            <p>A membership is required to enroll in this class.</p>
+                        }
                         <br />
-                        <hr />
                     </div>
                 </div>
+                <ClassScheduler Class=ActiveClass ShowEditing=false></ClassScheduler>
             </div>
         </div>
     </div>

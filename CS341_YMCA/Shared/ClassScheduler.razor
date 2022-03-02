@@ -1,0 +1,58 @@
+﻿@using CS341_YMCA.Data
+@using CS341_YMCA.Controllers
+
+@inject ClassController Classes
+
+<button class="btn btn-primary" style="float: right;" @onclick=OnAddClick>
+    <i class="oi oi-plus"></i>
+</button>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Time</th>
+            <th scope="col">Duration</th>
+            <th scope="col">Repeats</th>
+            @if (ShowEditing)
+            {
+                <th scope="col">Actions</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (ClassScheduleDBO Session in Schedule)
+        {
+            <ClassSchedulerEntry Session=@Session ShowEditing=@ShowEditing></ClassSchedulerEntry>
+        }
+    </tbody>
+</table>
+
+
+@code
+{
+    [Parameter]
+    public ClassDBO? Class { get; set; }
+    [Parameter]
+    public bool ShowEditing { get; set; } = false;
+
+    private List<ClassScheduleDBO> Schedule { get; set; } = new();
+
+    protected override void OnAfterRender(bool FirstRender)
+    {
+        base.OnAfterRender(FirstRender);
+
+        if (FirstRender)
+        {
+            Schedule = Classes.ClassSchedule_List(Class!.Id).Get()!;
+            StateHasChanged();
+        }
+    }
+
+    private void OnAddClick()
+    {
+        var Created = new ClassScheduleDBO();
+        Schedule.Add(Created);
+
+        StateHasChanged();
+    }
+}

@@ -51,8 +51,8 @@
             // Remove excluded value from class options
             if (Exclude.HasValue)
                 AllClasses.RemoveAll((It) => It.Id == Exclude);
-            Selected = AllClasses.FindAll((It) => SelectedIds.Contains(It.Id ?? 0));
-            NotSelected = AllClasses.FindAll((It) => !SelectedIds.Contains(It.Id ?? 0));
+            Selected = AllClasses.FindAll((It) => SelectedIds.Contains(It.Id));
+            NotSelected = AllClasses.FindAll((It) => !SelectedIds.Contains(It.Id));
 
             StateHasChanged();
         }
