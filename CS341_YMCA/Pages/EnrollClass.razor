@@ -13,17 +13,29 @@
     <hr />
 
     <div class="col-lg-7">
-            <h3>@ActiveClass?.ShortDescription</h3>
+        <h3>@ActiveClass?.ShortDescription</h3>
+        @if (!string.IsNullOrEmpty(ActiveClass?.PrereqIds))
+        {
+            <h4>Prerequisites: 
+                @{
+                    var PrereqClasses = Classes.Class_GetByIds(ActiveClass?.PrereqIds ?? "").Get()!;
+                }
+                @foreach (var Prereq in PrereqClasses)
+                {
+                    <span class="ms-2 badge bg-secondary">@Prereq.ClassName</span>
+                }
+            </h4>
+        }
 
-            @{
-                // Replaces newlines with HTML newlines
-                var DescriptionNewlines = (MarkupString)((ActiveClass?.LongDescription ?? "").Replace("\n", "<br />"));
-            }
-            <p class="mt-4 col-11">@DescriptionNewlines</p>
-            <br />
+        @{
+            // Replaces newlines with HTML newlines
+            var DescriptionNewlines = (MarkupString)((ActiveClass?.LongDescription ?? "").Replace("\n", "<br />"));
+        }
+        <p class="mt-4 col-11">@DescriptionNewlines</p>
+        <br />
 
-            <!-- CONFIGURABLE IMAGE -->
-            <img style="display: block;max-width: 86%;" class="mb-4" src="images/stock_photo.jpg" alt="Class image is missing" />
+        <!-- CONFIGURABLE IMAGE -->
+        <img style="display: block;max-width: 86%;" class="mb-4" src="images/stock_photo.jpg" alt="Class image is missing" />
     </div>
     <div class="col-lg-5">
         <h3>Enrollment Information</h3>
@@ -35,15 +47,18 @@
                 Membership and Fees
             </div>
             <div class="card-body">
-                <p>
-                    Both members with paid memberships and public non-members
-                    may enroll and participate in this class.
-                </p>
-                <!--
-                    WHEN WE ADD THE FEATURE, ALSO HAVE THIS MESSAGE AVAILABLE:
-                    ---
-                    This class is open only to those holding valid Y memberships.
-                -->
+                @if(ActiveClass?.AllowNonMembers ?? false)
+                {
+                    <p>
+                        Both members with paid memberships and public non-members
+                        may enroll and participate in this class.
+                    </p>
+                } else
+                {
+                    <p>
+                        This class is open only to those holding valid Y memberships.
+                    </p>
+                }
         
                 <!-- MODIFIABLE CLASS PRICES -->
                 <div class="row mt-4">
@@ -57,16 +72,25 @@
                         }
                         <p>For membership holders</p>
                     </div>
-                    <div class="col-sm-6" style="text-align: center;">
-                        @if ((ActiveClass?.NonMemberPrice ?? 0.0) > 0.0)
-                        {
-                            <h1>$@((int?)ActiveClass?.NonMemberPrice)<sup>00</sup></h1>
-                        } else
-                        {
-                            <h1>No fee</h1>
-                        }
-                        <p>Without membership</p>
-                    </div>
+                    @if (ActiveClass?.AllowNonMembers ?? false)
+                    {
+                        <div class="col-sm-6" style="text-align: center;">
+                            @if ((ActiveClass?.NonMemberPrice ?? 0.0) > 0.0)
+                            {
+                                <h1>$@((int?)ActiveClass?.NonMemberPrice)<sup>00</sup></h1>
+                            } else
+                            {
+                                <h1>No fee</h1>
+                            }
+                            <p>Without membership</p>
+                        </div>
+                    } else
+                    {
+                        <div class="col-sm-6" style="text-align: center;">
+                            <h1><i class="oi oi-lock-locked"></i></h1>
+                            <p>Without membership</p>
+                        </div>
+                    }
                 </div>
             </div>
         </div>

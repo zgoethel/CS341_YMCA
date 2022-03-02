@@ -1,0 +1,84 @@
+﻿@using CS341_YMCA.Data
+@using CS341_YMCA.Controllers
+
+@inject ClassController Classes
+
+<h3 style="white-space: break-spaces;">
+    @foreach (var Class in Selected)
+    {
+        <span class="badge bg-secondary me-2 mt-2">
+            @Class.ClassName&nbsp;
+            <i class="oi oi-trash" @onclick="() => { OnRemoveClick(Class); }" style="cursor: pointer;"></i>
+        </span>
+    }
+
+    <select @onchange=OnAddSelectorChange id="AddSelector" onclick="setTimeout(function() { document.getElementById('AddSelector').value = -1; }, 400);" class="form-control" style="width:5em;display: inline-block;padding-bottom: 0.2em;">
+        <option value=-1 selected="selected">Add +</option>
+        @foreach (var Option in NotSelected)
+        {
+            <option value=@Option.Id>@Option.ClassName</option>
+        }
+    </select>
+</h3>
+
+@code
+{
+    [Parameter]
+    public string Csv { get; set; } = "";
+    [Parameter]
+    public int? Exclude { get; set; }
+
+    protected List<ClassDBO> Selected = new();
+    private List<ClassDBO> NotSelected = new();
+
+    protected override void OnAfterRender(bool FirstRender)
+    {
+        base.OnAfterRender(FirstRender);
+
+        if (FirstRender)
+        {
+            // Create list of integers from CSV IDs
+            HashSet<int> SelectedIds = new();
+            if (!string.IsNullOrEmpty(Csv))
+            {
+                SelectedIds = Csv.Split(",")
+                    .Select((It) => int.Parse(It))
+                    .ToHashSet();
+            }
+
+            // Get lists of selected/unselected classes
+            var AllClasses = Classes.Class_List(IncludeDisabled: false).Get()!;
+            // Remove excluded value from class options
+            if (Exclude.HasValue)
+                AllClasses.RemoveAll((It) => It.Id == Exclude);
+            Selected = AllClasses.FindAll((It) => SelectedIds.Contains(It.Id ?? 0));
+            NotSelected = AllClasses.FindAll((It) => !SelectedIds.Contains(It.Id ?? 0));
+
+            StateHasChanged();
+        }
+    }
+
+    private void OnRemoveClick(ClassDBO Class)
+    {
+        Selected.Remove(Class);
+        NotSelected.Add(Class);
+        Csv = String.Join(',', Selected.Select((It) => It.Id.ToString()));
+
+        StateHasChanged();    
+    }
+
+    private void OnAddSelectorChange(ChangeEventArgs Event)
+    {
+        var AddSelector = int.Parse((Event.Value ?? "-1").ToString()!);
+        var Added = NotSelected.Find((It) => It.Id == AddSelector);
+
+        if (Added != null)
+        {
+            Selected.Add(Added);
+            NotSelected.Remove(Added);
+            Csv = String.Join(',', Selected.Select((It) => It.Id.ToString()));
+        }
+
+        StateHasChanged();
+    }
+}

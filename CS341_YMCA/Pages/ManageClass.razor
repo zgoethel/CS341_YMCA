@@ -19,8 +19,8 @@
     <h1>Class Editor</h1>
     <hr />
 
-    <EditForm Model=ActiveClass>
-        <div style="width: 38em;" class="class-editor-col me-4">
+    <EditForm Model=ActiveClass style="white-space: nowrap;">
+        <div style="width: 38em;white-space: initial;" class="class-editor-col me-4">
             <h3>Manage details for '@ActiveClass.ClassName'</h3>
 
             <label>Class name:<i style="color: red">*</i></label>
@@ -30,20 +30,22 @@
             <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.ShortDescription />        
         
             <label>Detailed description:</label>
-            <InputTextArea rows=14 class="form-control mb-2" type="text" @bind-Value=ActiveClass.LongDescription />
+            <InputTextArea rows=8 class="form-control mb-2" type="text" @bind-Value=ActiveClass.LongDescription />
         
             <InputCheckbox class="mb-2" @bind-Value=ActiveClass.AllowEnrollment />&nbsp;
             <label>Allow Enrollment <i>(within dates)</i></label>
 
             <InputCheckbox class="mb-2 ms-2" @bind-Value=ActiveClass.Enabled />&nbsp;
             <label>Enabled</label>
-
             <br />
             <br />
             
+            <h3>Class Prerequisites</h3>
+            <ClassSelector Exclude=@ActiveClass.Id Csv=@(ActiveClass.PrereqIds ?? "") @ref=PrereqSelector />
+            
             <button class="btn btn-primary mt-4" type="submit" @onclick=SaveForm>Submit</button>
         </div>
-        <div style="width: 20em;" class="class-editor-col">
+        <div style="width: 20em;white-space: initial;" class="class-editor-col">
             <h3 class="mb-4">Pricing and Enrollment</h3>
 
             <div class="card mb-4">
@@ -151,6 +153,7 @@
 
     private ClassDBO ActiveClass = new();
     private string ValidationMessage = "";
+    private ClassSelector? PrereqSelector { get; set; }
 
     private string NonMemberStyle => ActiveClass.AllowNonMembers
         ? "display: block;"
@@ -187,7 +190,7 @@
             Enabled: ActiveClass.Enabled,
             ShortDescription: ActiveClass.ShortDescription,
             LongDescription: ActiveClass.LongDescription,
-            PrereqIds: /* `null` for no change */ null,
+            PrereqIds: PrereqSelector?.Csv,
             MemberEnrollmentStart: ActiveClass.MemberEnrollmentStart,
             MemberEnrollmentDays: ActiveClass.MemberEnrollmentDays,
             NonMemberEnrollmentStart: ActiveClass.NonMemberEnrollmentStart,

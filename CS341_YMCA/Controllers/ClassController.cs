@@ -156,5 +156,39 @@ namespace CS341_YMCA.Controllers
 
             return Result;
         }
+
+        /**
+         * Gets class data associated with IDs as CSV.
+         */
+        public EndpointResultToken<List<ClassDBO>> Class_GetByIds(
+            string Csv
+        )
+        {
+            EndpointResultToken<List<ClassDBO>> Result = new();
+            Result.Value = new();
+
+            try
+            {
+                Sql.ExecuteProcedure<ClassDBO>(
+                    "Class_GetByIds",
+                    new
+                    {
+                        Csv = Csv ?? ""
+                    }, (_Result) =>
+                    {
+                        Result.Value.Add(_Result);
+                    });
+            } catch (SqlException Ex)
+            {
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+            }
+
+            return Result;
+        }
     }
 }

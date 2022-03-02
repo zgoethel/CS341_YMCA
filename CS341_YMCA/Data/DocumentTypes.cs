@@ -54,6 +54,11 @@
         public bool IsMember { get; set; }
     }
 
+    public class SiteUserListRequest
+    {
+        public string? EmailFilter { get; set; } = null;
+    }
+
     public class SiteUserSetRequest
     {
         public int Id { get; set; }

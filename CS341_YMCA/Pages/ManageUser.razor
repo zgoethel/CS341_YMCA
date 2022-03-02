@@ -1,0 +1,50 @@
+﻿@page "/ManageUsers/{Id}"
+
+@using CS341_YMCA.Data
+@using CS341_YMCA.Controllers
+
+@inject SiteUserController Users
+@inject Database Sql
+@inject NavigationManager Nav
+
+<PageTitle>Manage User Details</PageTitle>
+
+@if (!string.IsNullOrEmpty(ValidationMessage))
+{
+    <div class="alert alert-warning">@ValidationMessage</div>
+}
+
+@if (LoggedIn?.IsAdmin ?? false)
+{
+    <h1>User Account Editor</h1>
+    <hr />
+
+
+} else
+{
+    <div class="alert alert-danger">You are <strong>not</strong> an admin user and cannot access this page.</div>
+}
+
+@code {
+    [CascadingParameter]
+    protected SiteUserDBO? LoggedIn { get; set; }
+    [Parameter]
+    public string? Id { get; set; }
+
+    private SiteUserDBO ActiveUser = new();
+    private string ValidationMessage = "";
+    private ClassSelector? PrereqSelector { get; set; }
+
+    protected override void OnAfterRender(bool FirstRender)
+    {
+        base.OnAfterRender(FirstRender);
+
+        if (FirstRender)
+        {
+            if (Id != "Create")
+                ActiveUser = Users.SiteUser_GetById(int.Parse(Id!)).Get()!;
+
+            StateHasChanged();
+        }
+    }
+}

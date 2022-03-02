@@ -1,0 +1,39 @@
+﻿@using CS341_YMCA.Data
+
+<tr>
+    <td>@User?.Id</td>
+    <td>@User?.FirstName</td>
+    <td>@User?.LastName</td>
+    <td>@User?.Email</td>
+    <td>
+        @if(User?.IsMember ?? false)
+        {
+            <span class="oi oi-check text-success" style="vertical-align: middle;"></span>
+        } else
+        {
+            <span class="oi oi-x text-danger" style="vertical-align: middle;"></span>
+        }
+    </td>
+    <td>
+        @if(User?.IsAdmin ?? false)
+        {
+            <span class="oi oi-check text-success" style="vertical-align: middle;"></span>
+        } else
+        {
+            <span class="oi oi-x text-danger" style="vertical-align: middle;"></span>
+        }
+    </td>
+    <td>@User?.Created.ToShortDateString()<br />@User?.Created.ToShortTimeString()</td>
+    <td>@User?.Modified.ToShortDateString()<br />@User?.Modified.ToShortTimeString()</td>
+    <td>
+        <a href="ManageUsers/@User?.Id" class="btn btn-primary">Edit</a>
+    </td>
+</tr>
+
+@code
+{
+    [Parameter]
+    public SiteUserDBO? User { get; set; }
+    [CascadingParameter]
+    public SiteUserDBO? LoggedIn { get; set; }
+}
