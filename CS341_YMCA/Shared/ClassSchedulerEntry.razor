@@ -21,7 +21,8 @@
             <InputNumber @bind-Value=@Session.Recurrence class="form-control" min=0 step=1 />
             days <i>(zero for one-time)</i>, repeating
             <InputNumber @bind-Value=@Session.Occurrences class="form-control" min=0 step=1 />
-            times <i>(zero for indefinite)</i></td>
+            times <i>(zero for indefinite)</i>
+        </td>
     } else
     {
         <td>@Session.FirstDate.ToLongDateString()</td>
@@ -37,6 +38,19 @@
         {
             <td>Every @Session.Recurrence days, @Session.Occurrences times</td>
         }
+    }
+
+    @if (Session.Recurrence != 0 && Session.Occurrences != 0)
+    {
+        var DateEnd = Session.FirstDate;
+        for (int i = 0; i < Session.Occurrences; i++)
+        {
+            DateEnd = DateEnd.AddDays(Session.Recurrence);
+        }
+        <td><i>@DateEnd.ToShortDateString()</i></td>
+    } else
+    {
+        <td>&mdash;</td>
     }
 
     @if (ShowEditing)
@@ -57,11 +71,13 @@
 @code
 {
     [Parameter]
-    public ClassDBO? Parent { get; set; }
+    public ClassDBO Parent { get; set; } = new();
     [Parameter]
-    public ClassScheduleDBO? Session { get; set; }
+    public ClassScheduleDBO Session { get; set; } = new();
     [Parameter]
     public bool ShowEditing { get; set; } = false;
+    [Parameter]
+    public ClassScheduler Scheduler { get; set; } = new();
 
     private bool EditMode = false;
 
@@ -84,7 +100,8 @@
 
     private void OnDeleteClicked()
     {
-
+        Scheduler.ValidationMessage = "Delete not yet implemented.";
+        Scheduler._StateHasChanged();
     }
 
     public void OnEditClicked()
@@ -109,6 +126,25 @@
 
     private void OnSaveClicked()
     {
+        // Validation for time values
+        if (Hour < 1 || Hour > 12 || Hour != (int)Hour
+            || Minute < 0 || Minute > 59 || Minute != (int)Minute
+            || Session!.Duration < 0 || Session!.Duration != (int)Session!.Duration)
+        {
+            Scheduler.ValidationMessage = "Please specify times in valid whole amounts.";
+            Scheduler._StateHasChanged();
+            return;
+        }
+
+        // Validation for repetition values
+        if (Session!.Recurrence < 0 || Session!.Occurrences < 0
+            || Session!.Recurrence != (int)Session!.Recurrence)
+        {
+            Scheduler.ValidationMessage = "Repetition settings cannot be negative nor decimal.";
+            Scheduler._StateHasChanged();
+            return;
+        }
+
         if (Hour == 12) Hour -= 12;
 
         var DateOnly = Session!.FirstDate.Date;
@@ -117,6 +153,28 @@
             DateOnly = DateOnly.AddHours(12);
         DateOnly = DateOnly.AddMinutes(Minute);
         Session.FirstDate = DateOnly;
+
+        if (Parent?.MemberEnrollmentStart != null
+            && (Parent?.NonMemberEnrollmentStart != null
+            || !(Parent?.AllowNonMembers ?? false))
+        )
+        {
+            // Validate the first session is after enrollment period
+            var EnrollmentEnd = Parent!.MemberEnrollmentStart!.Value.AddDays(Parent!.MemberEnrollmentDays ?? 1);
+            if (Parent?.AllowNonMembers ?? false)
+            {
+                var _EnrollmentEnd = Parent!.NonMemberEnrollmentStart!.Value.AddDays(Parent!.NonMemberEnrollmentDays ?? 1);
+                if (_EnrollmentEnd > EnrollmentEnd)
+                    EnrollmentEnd = _EnrollmentEnd;
+            }
+
+            if (EnrollmentEnd > Session!.FirstDate)
+            {
+                Scheduler.ValidationMessage = "Classes cannot start before enrollment closes. Please change the enrollment window(s) or class schedule date(s).";
+                Scheduler._StateHasChanged();
+                return;
+            }
+        }
 
         var Result = Classes.ClassSchedule_Set(
             Id: Session.Id,
@@ -132,6 +190,9 @@
             Session.Id = Result.Get()!;
             EditMode = false;
             StateHasChanged();
+
+            Scheduler.ValidationMessage = "";
+            Scheduler._StateHasChanged();
         }
     }
 }

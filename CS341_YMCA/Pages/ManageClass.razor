@@ -205,6 +205,7 @@
 
     private void SaveForm()
     {
+        // Validation for required text fields
         if (
             string.IsNullOrEmpty(ActiveClass.ClassName)
             || string.IsNullOrEmpty(ActiveClass.ShortDescription)
@@ -212,6 +213,91 @@
         {
             ValidationMessage = "Please provide all required fields.";
             return;
+        }
+        // Validation for pricing values
+        if (
+            (ActiveClass.MemberPrice > 0 && ActiveClass.MemberPrice != (int)ActiveClass.MemberPrice)
+            || (ActiveClass.NonMemberPrice > 0 && ActiveClass.NonMemberPrice != (int)ActiveClass.NonMemberPrice)
+            || ActiveClass.MemberPrice < 0
+            || ActiveClass.NonMemberPrice < 0
+        )
+        {
+            ValidationMessage = "Please use whole, positive dollar amounts.";
+            return;
+        }
+        // Validation for seat limit value
+        if (
+            (ActiveClass.MaxSeats ?? 0) < 0
+            || (ActiveClass.MaxSeats ?? 0) != (int)(ActiveClass.MaxSeats ?? 0)
+        )
+        {
+            ValidationMessage = "Please use whole, positive number of max seats.";
+            return;
+        }
+
+        var Sessions = Classes.ClassSchedule_List(ActiveClass.Id).Get()!;
+        if (Sessions.Count > 0
+            && ActiveClass.MemberEnrollmentStart != null
+            && (ActiveClass.NonMemberEnrollmentStart != null
+            || !ActiveClass.AllowNonMembers)
+        )
+        {
+            // Validate the first session is after enrollment period
+            var EnrollmentEnd = ActiveClass.MemberEnrollmentStart!.Value.AddDays(ActiveClass.MemberEnrollmentDays ?? 1);
+            if (ActiveClass.AllowNonMembers)
+            {
+                var _EnrollmentEnd = ActiveClass.NonMemberEnrollmentStart!.Value.AddDays(ActiveClass.NonMemberEnrollmentDays ?? 1);
+                if (_EnrollmentEnd > EnrollmentEnd)
+                    EnrollmentEnd = _EnrollmentEnd;
+            }
+
+            if (EnrollmentEnd > Sessions[0].FirstDate)
+            {
+                ValidationMessage = "Classes cannot start before enrollment closes. Please change the enrollment window(s) or class schedule date(s).";
+                return;
+            }
+        }
+
+        // Validation for requiring enrollment dates
+        if (ActiveClass.AllowEnrollment)
+        {
+            // Ensure that enrollment is set up if opened
+            if (
+                ActiveClass.MemberEnrollmentStart == null
+                || (ActiveClass.MemberEnrollmentDays ?? 0) == 0
+            )
+            {
+                ValidationMessage = "You cannot \"Allow Enrollment\" without first setting an enrollment window.";
+                return;
+            } else if (
+                ActiveClass.MemberEnrollmentDays != null
+                && (ActiveClass.MemberEnrollmentDays != (int)ActiveClass.MemberEnrollmentDays
+                || ActiveClass.MemberEnrollmentDays < 0)
+            )
+            {
+                ValidationMessage = "Specify enrollment window length as a number of whole days.";
+                return;
+            }
+
+            // Ensure enrollment set up for non-members if applicable
+            if (
+                ActiveClass.AllowNonMembers
+                && (ActiveClass.MemberEnrollmentStart == null
+                || (ActiveClass.NonMemberEnrollmentDays ?? 0) == 0)
+            )
+            {
+                ValidationMessage = "Please either disable non-members, or specify their enrollment window.";
+                return;
+            } else if (
+                ActiveClass.AllowNonMembers
+                && ActiveClass.NonMemberEnrollmentDays != null
+                && (ActiveClass.NonMemberEnrollmentDays != (int)ActiveClass.NonMemberEnrollmentDays
+                || ActiveClass.NonMemberEnrollmentDays < 0)
+            )
+            {
+                ValidationMessage = "Specify enrollment window length as a number of whole days.";
+                return;
+            }
         }
 
         var Result = Classes.Class_Set(

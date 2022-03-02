@@ -3,6 +3,13 @@
 
 @inject ClassController Classes
 
+@if(!string.IsNullOrEmpty(ValidationMessage))
+{
+    <div class="alert alert-warning">
+        @ValidationMessage
+    </div>
+}
+
 @if (ShowEditing)
 {
     <button class="btn btn-primary" style="float: right;" @onclick=OnAddClick>
@@ -17,6 +24,7 @@
             <th scope="col">Time</th>
             <th scope="col">Duration</th>
             <th scope="col">Repeats</th>
+            <th scope="col"><i>(Last Day)</i></th>
             @if (ShowEditing)
             {
                 <th scope="col">Actions</th>
@@ -26,7 +34,7 @@
     <tbody>
         @foreach (ClassScheduleDBO Session in Schedule)
         {
-            <ClassSchedulerEntry Parent=@Class Session=@Session ShowEditing=@ShowEditing></ClassSchedulerEntry>
+            <ClassSchedulerEntry Scheduler=@this Parent=@Class Session=@Session ShowEditing=@ShowEditing></ClassSchedulerEntry>
         }
     </tbody>
 </table>
@@ -40,6 +48,7 @@
     public bool ShowEditing { get; set; } = false;
 
     private List<ClassScheduleDBO> Schedule { get; set; } = new();
+    public string ValidationMessage { get; set; } = "";
 
     protected override void OnAfterRender(bool FirstRender)
     {
@@ -58,5 +67,10 @@
         Schedule.Add(Created);
 
         StateHasChanged();
+    }
+
+    public void _StateHasChanged()
+    {
+        this.StateHasChanged();
     }
 }
