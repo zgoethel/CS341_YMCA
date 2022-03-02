@@ -14,8 +14,15 @@
         </h5>
     </td>
     <td>&mdash;</td>
-    <td>&mdash;</td>
-    <td>&mdash;</td>
+    @if (Class?.MaxSeats != null)
+    {
+        <td>@Class?.MaxSeats</td>
+        <td>@Class?.MaxSeats</td>
+    } else
+    {
+        <td>&infin;</td>
+        <td>&infin;</td>
+    }
     <td>@Class?.Created.ToShortDateString()<br />@Class?.Created.ToShortTimeString()</td>
     <td>@Class?.Updated.ToShortDateString()<br />@Class?.Updated.ToShortTimeString()</td>
     <td>
