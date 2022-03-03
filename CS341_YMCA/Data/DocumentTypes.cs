@@ -69,6 +69,11 @@
         public DateTime? MemberThru { get; set; }
     }
 
+    public class SiteUserDeleteRequest
+    {
+        public int Id { get; set; }
+    }
+
     #endregion
 
     // Region bound to request and result parameters for classes
@@ -148,6 +153,11 @@
     }
 
     public class ClassScheduleSetResult
+    {
+        public int Id { get; set; }
+    }
+
+    public class ClassDeleteRequest
     {
         public int Id { get; set; }
     }
