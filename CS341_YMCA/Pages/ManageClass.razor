@@ -60,6 +60,10 @@
             <ClassSelector Exclude=@ActiveClass.Id Csv=@(ActiveClass.PrereqIds ?? "") @ref=PrereqSelector />
 
             <button class="btn btn-primary mt-4" type="submit" @onclick="() => SaveForm(Redirect: true)">Submit</button>
+            @if (Id != "Create")
+            {
+                <button class="btn btn-danger mt-4" style="float:right;" @onclick="OpenDeleteDialog">Delete Class</button>
+            }
             <br />
             <br />
 
@@ -165,6 +169,26 @@
         </div>
         <br />
     </EditForm>
+    @if (DeleteDialogOpen) // temporary -- eventually this will be broken out into a generic dialog that can be used for anything
+    {
+        <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">You are about to delete the class <strong>@(ActiveClass.ClassName)</strong></h4>
+                        <button type="button" class="close" @onclick="@DeleteDialogCancel">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="font-weight-bold">This action cannot be undone. Are you sure you wish to continue?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="DeleteDialogCancel">Cancel</button>
+                        <button type="button" class="btn btn-danger" @onclick="DeleteDialogOK">Delete Class</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 } else
 {
     <div class="alert alert-danger">You are <strong>not</strong> an admin user and cannot access this page.</div>
@@ -179,6 +203,8 @@
     private ClassDBO ActiveClass = new();
     public string ValidationMessage = "";
     private ClassSelector? PrereqSelector { get; set; }
+
+    private bool DeleteDialogOpen { get; set; }
 
     private string NonMemberStyle => ActiveClass.AllowNonMembers
         ? "display: block;"
@@ -195,6 +221,44 @@
 
             StateHasChanged();
         }
+    }
+
+    private void OpenDeleteDialog()
+    {
+        DeleteDialogOpen = true;
+        StateHasChanged();
+    }
+
+    private void DeleteDialogCancel()
+    {
+        DeleteDialogClose(false);
+    }
+
+    private void DeleteDialogOK()
+    {
+        DeleteDialogClose(true);
+    }
+
+    private void DeleteDialogClose(bool accepted)
+    {
+        if (accepted)
+        {
+            var Result = Classes.Class_DeleteById(ActiveClass.Id);
+            
+            if (Result.Success)
+            {
+                Nav.NavigateTo("ManageClasses");
+            }
+            else
+            {
+                // Add some kind of error message here
+
+                StateHasChanged();
+            }
+        }
+
+        DeleteDialogOpen = false;
+        StateHasChanged();
     }
 
     public void SaveForm(bool Redirect = true)
