@@ -12,7 +12,7 @@
 
     @if (Class.MemberEnrollmentOpen && !Class.NonMemberEnrollmentOpen)
     {
-        <h4 style="float: left;position: absolute;"><span class="badge bg-info bg-success-glow mt-2 ms-2">Open early for<br />Y members!</span></h4>
+        <h4 style="float: left;position: absolute;"><span class="badge bg-info bg-info-glow mt-2 ms-2">Open early for<br />Y members!</span></h4>
     } else if (Class.MemberEnrollmentOpen || Class.NonMemberEnrollmentOpen)
     {
         <h4 style="float: left;position: absolute;"><span class="badge bg-success bg-success-glow mt-2 ms-2">Open for<br />enrollment!</span></h4>
@@ -81,5 +81,9 @@
     .bg-warning-glow
     {
       box-shadow: 0 0 0.2em 0.2em #c4be8e;
+    }
+    .bg-info-glow
+    {
+        box-shadow: 0 0 0.2em 0.2em #bad6df;
     }
 </style>
