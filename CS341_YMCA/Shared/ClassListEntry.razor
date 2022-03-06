@@ -16,6 +16,11 @@
     } else if (Class.MemberEnrollmentOpen || Class.NonMemberEnrollmentOpen)
     {
         <h4 style="float: left;position: absolute;"><span class="badge bg-success bg-success-glow mt-2 ms-2">Open for<br />enrollment!</span></h4>
+
+        @if (!(LoggedIn?.IsMember ?? false) && !Class.AllowNonMembers)
+        {
+            <h4 style="float: left;position: absolute;margin-top: 2.7em;"><span class="badge bg-danger bg-danger-glow mt-2 ms-2">Requires<br />membership</span></h4>
+        }
     }
 
     <img class="card-img-top" src="images/stripe_pattern.jpg" alt="Class image is missing">

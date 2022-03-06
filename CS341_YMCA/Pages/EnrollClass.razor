@@ -141,6 +141,31 @@
                             }
                             <br />
                         </div>
+                    } else if (
+                        (LoggedIn?.IsMember ?? false)
+                        && ActiveClass.MemberEnrollmentStart != null
+                        && DateTime.Now > ActiveClass.MemberEnrollmentStart?
+                            .AddDays(ActiveClass.MemberEnrollmentDays ?? 1)
+                    )
+                    {
+                        <p>Enrollment closed on</p>
+                        <h3>@(ActiveClass.MemberEnrollmentStart?
+                            .AddDays(ActiveClass.MemberEnrollmentDays ?? 1)
+                            .ToLongDateString())</h3>
+                    } else if (
+                        !(LoggedIn?.IsMember ?? false)
+                        && ActiveClass.NonMemberEnrollmentStart != null
+                        && DateTime.Now > ActiveClass.NonMemberEnrollmentStart?
+                            .AddDays(ActiveClass.NonMemberEnrollmentDays ?? 1)
+                    )
+                    {
+                        <p>Enrollment closed on</p>
+                        <h3>@(ActiveClass.NonMemberEnrollmentStart?
+                            .AddDays(ActiveClass.NonMemberEnrollmentDays ?? 1)
+                            .ToLongDateString())</h3>
+                    } else if (!ActiveClass.AllowEnrollment)
+                    {
+                        <p>Enrollment is disabled at this time.</p>
                     } else
                     {
                         <p>
