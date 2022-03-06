@@ -130,6 +130,8 @@
         public float NonMemberPrice { get; set; } = 0.0f;
         public string? Location { get; set; }
         public int? MaxSeats { get; set; }
+        public bool MemberEnrollmentOpen { get; set; }
+        public bool NonMemberEnrollmentOpen { get; set; }
     }
 
     public class ClassScheduleDBO

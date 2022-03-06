@@ -52,7 +52,7 @@
             <label>Allow Enrollment <i>(within dates)</i></label>
 
             <InputCheckbox class="mb-2 ms-2" @bind-Value=ActiveClass.Enabled />&nbsp;
-            <label>Enabled</label>
+            <label>Show Publicly</label>
             <br />
             <br />
             
@@ -175,8 +175,8 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">You are about to delete the class <strong>@(ActiveClass.ClassName)</strong></h4>
-                        <button type="button" class="close" @onclick="@DeleteDialogCancel">&times;</button>
+                        <h4 class="modal-title">You are about to delete the class <strong>'@(ActiveClass.ClassName)'</strong></h4>
+                        <button type="button" class="btn btn-close close" @onclick="@DeleteDialogCancel"></button>
                     </div>
                     <div class="modal-body">
                         <p class="font-weight-bold">This action cannot be undone. Are you sure you wish to continue?</p>

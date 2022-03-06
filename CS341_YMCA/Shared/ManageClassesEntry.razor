@@ -14,7 +14,7 @@
         </h5>
     </td>
     <td>&mdash;</td>
-    @if (Class?.MaxSeats != null)
+    @if ((Class?.MaxSeats ?? 0) != 0)
     {
         <td>@Class?.MaxSeats</td>
         <td>@Class?.MaxSeats</td>
