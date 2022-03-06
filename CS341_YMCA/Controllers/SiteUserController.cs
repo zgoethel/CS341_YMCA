@@ -338,5 +338,45 @@ namespace CS341_YMCA.Controllers
 
             return Result;
         }
+
+        /**
+         * Deletes the user with specified ID from the SiteUsers table.
+         */
+        public EndpointResultToken<object> SiteUser_DeleteById(
+            int Id
+        )
+        {
+            EndpointResultToken<object> Result = new();
+            Result.Value = new();
+
+            try
+            {
+                Sql.ExecuteProcedure<SiteUserDeleteRequest>(
+                    "SiteUser_DeleteById",
+                    new SiteUserDeleteRequest()
+                    {
+                        Id = Id
+                    }, (_Result) =>
+                    {
+                        Result.Value = _Result;
+                    });
+
+                if (Result.Value == null)
+                {
+                    Result.Success = false;
+                    Result.Error = "Record with given ID not found.";
+                }
+            } catch (SqlException Ex)
+            {
+                Result.Success = false;
+                Result.Error = Ex.Message;
+            } catch (Exception Ex)
+            {
+                Result.Success = false;
+                Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+            }
+
+            return Result;
+        }
     }
 }

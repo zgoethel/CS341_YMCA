@@ -6,19 +6,19 @@
 @inject ClassController Classes
 @inject Database Sql
 
-<PageTitle>@ActiveClass?.ClassName</PageTitle>
+<PageTitle>@ActiveClass.ClassName</PageTitle>
 
 <div class="row">
-    <h1>@ActiveClass?.ClassName</h1>
+    <h1>@ActiveClass.ClassName</h1>
     <hr />
 
     <div class="col-lg-7">
-        <h3>@ActiveClass?.ShortDescription</h3>
-        @if (!string.IsNullOrEmpty(ActiveClass?.PrereqIds))
+        <h3>@ActiveClass.ShortDescription</h3>
+        @if (!string.IsNullOrEmpty(ActiveClass.PrereqIds))
         {
             <h4>Prerequisites: 
                 @{
-                    var PrereqClasses = Classes.Class_GetByIds(ActiveClass?.PrereqIds ?? "").Get()!;
+                    var PrereqClasses = Classes.Class_GetByIds(ActiveClass.PrereqIds).Get()!;
                 }
                 @foreach (var Prereq in PrereqClasses)
                 {
@@ -29,7 +29,7 @@
 
         @{
             // Replaces newlines with HTML newlines
-            var DescriptionNewlines = (MarkupString)((ActiveClass?.LongDescription ?? "").Replace("\n", "<br />"));
+            var DescriptionNewlines = (MarkupString)(ActiveClass.LongDescription.Replace("\n", "<br />"));
         }
         <p class="mt-4 col-11">@DescriptionNewlines</p>
         <br />
@@ -47,7 +47,7 @@
                 Membership and Fees
             </div>
             <div class="card-body">
-                @if(ActiveClass?.AllowNonMembers ?? false)
+                @if(ActiveClass.AllowNonMembers)
                 {
                     <p>
                         Both members with paid memberships and public non-members
@@ -63,21 +63,21 @@
                 <!-- MODIFIABLE CLASS PRICES -->
                 <div class="row mt-4">
                     <div class="col-sm-6" style="text-align: center;">
-                        @if ((ActiveClass?.MemberPrice ?? 0.0) > 0.0)
+                        @if (ActiveClass.MemberPrice > 0.0)
                         {
-                            <h1>$@((int?)ActiveClass?.MemberPrice)<sup>00</sup></h1>
+                            <h1>$@((int?)ActiveClass.MemberPrice)<sup>@((ActiveClass.MemberPrice % 1).ToString(".00").Replace(".", ""))</sup></h1>
                         } else
                         {
                             <h1>No fee</h1>
                         }
                         <p>For membership holders</p>
                     </div>
-                    @if (ActiveClass?.AllowNonMembers ?? false)
+                    @if (ActiveClass.AllowNonMembers)
                     {
                         <div class="col-sm-6" style="text-align: center;">
-                            @if ((ActiveClass?.NonMemberPrice ?? 0.0) > 0.0)
+                            @if (ActiveClass.NonMemberPrice > 0.0)
                             {
-                                <h1>$@((int?)ActiveClass?.NonMemberPrice)<sup>00</sup></h1>
+                                <h1>$@((int?)ActiveClass.NonMemberPrice)<sup>@((ActiveClass.NonMemberPrice % 1).ToString(".00").Replace(".", ""))</sup></h1>
                             } else
                             {
                                 <h1>No fee</h1>
@@ -102,45 +102,91 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-7 pt-2">
-                        <p><strong>Holding sessions</strong><br />@@ @(ActiveClass?.Location ?? "TBA")</p>
+                        <p><strong>Holding sessions</strong><br />@@ @(ActiveClass.Location ?? "TBA")</p>
                         @{
-                            if (ActiveClass != null)
+                            var Sessions = Classes.ClassSchedule_List(ActiveClass.Id).Get()!;
+                            if (Sessions.Count == 0)
                             {
-                                var Sessions = Classes.ClassSchedule_List(ActiveClass.Id).Get()!;
-                                if (Sessions.Count == 0)
-                                {
-                                    <p>No schedule available</p>
-                                } else
-                                {
-                                    <p>Starting on @Sessions[0].FirstDate.ToLongDateString()</p>
-                                }
+                                <p>No schedule available</p>
+                            } else
+                            {
+                                <p>Starting on @Sessions[0].FirstDate.ToLongDateString()</p>
                             }
                         }
                     </div>
-                    @{
-                        var ThisUserCost = ActiveClass?.NonMemberPrice ?? 0.0f;
+                    @if (
+                        ((LoggedIn?.IsMember ?? false) && ActiveClass.MemberEnrollmentOpen)
+                        || ActiveClass.NonMemberEnrollmentOpen
+                    )
+                    {
+                        var ThisUserCost = ActiveClass.NonMemberPrice;
                         if (LoggedIn?.IsMember ?? false)
-                            ThisUserCost = ActiveClass?.MemberPrice ?? 0.0f;
-                        var CanEnroll = (ActiveClass?.AllowNonMembers ?? false)
-                            || (LoggedIn?.IsMember ?? false);
+                            ThisUserCost = ActiveClass.MemberPrice;
+                        var CanEnroll = ActiveClass.AllowNonMembers || (LoggedIn?.IsMember ?? false);
+
+                        <div class="col-sm-5">
+                            @if ((ActiveClass.MaxSeats ?? 0) > 0)
+                            {
+                                <span style="font-size: 1.3em;font-weight: bold;">@ActiveClass.MaxSeats</span>
+                                <span style="font-size: 1.2em;">&nbsp;open seats!</span>
+                            <br />
+                            }
+                            @if (CanEnroll)
+                            {   
+                                <p class="mt-2">Your price: <strong>$@string.Format("{0:0.00}", ThisUserCost)</strong></p>
+                                <button class="btn btn-success mt-1 mb-1">Enroll</button>
+                            } else
+                            {
+                                <p>A membership is required to enroll in this class.</p>
+                            }
+                            <br />
+                        </div>
+                    } else if (
+                        (LoggedIn?.IsMember ?? false)
+                        && ActiveClass.MemberEnrollmentStart != null
+                        && DateTime.Now > ActiveClass.MemberEnrollmentStart?
+                            .AddDays(ActiveClass.MemberEnrollmentDays ?? 1)
+                    )
+                    {
+                        <p>Enrollment closed on</p>
+                        <h3>@(ActiveClass.MemberEnrollmentStart?
+                            .AddDays(ActiveClass.MemberEnrollmentDays ?? 1)
+                            .ToLongDateString())</h3>
+                    } else if (
+                        !(LoggedIn?.IsMember ?? false)
+                        && ActiveClass.NonMemberEnrollmentStart != null
+                        && DateTime.Now > ActiveClass.NonMemberEnrollmentStart?
+                            .AddDays(ActiveClass.NonMemberEnrollmentDays ?? 1)
+                    )
+                    {
+                        <p>Enrollment closed on</p>
+                        <h3>@(ActiveClass.NonMemberEnrollmentStart?
+                            .AddDays(ActiveClass.NonMemberEnrollmentDays ?? 1)
+                            .ToLongDateString())</h3>
+                    } else if (!ActiveClass.AllowEnrollment)
+                    {
+                        <p>Enrollment is disabled at this time.</p>
+                    } else
+                    {
+                        <p>
+                            This class opens for
+                            @if(LoggedIn?.IsMember ?? false)
+                            {
+                                <span>members</span>
+                            } else
+                            {
+                                <span>non-members</span>
+                            }
+                            starting
+                            @if(LoggedIn?.IsMember ?? false)
+                            {
+                                <h3>@(ActiveClass.MemberEnrollmentStart?.ToLongDateString() ?? "TBA")</h3>
+                            } else
+                            {
+                                <h3>@(ActiveClass.NonMemberEnrollmentStart?.ToLongDateString() ?? "TBA")</h3>
+                            }
+                        </p>
                     }
-                    <div class="col-sm-5">
-                        @if ((ActiveClass?.MaxSeats ?? 0) > 0)
-                        {
-                            <span style="font-size: 1.3em;font-weight: bold;">@ActiveClass?.MaxSeats</span>
-                            <span style="font-size: 1.2em;">&nbsp;open seats!</span>
-                        <br />
-                        }
-                        @if (CanEnroll)
-                        {   
-                            <p class="mt-2">Your price: <strong>$@string.Format("{0:0.00}", ThisUserCost)</strong></p>
-                            <button class="btn btn-success mt-1 mb-1">Enroll</button>
-                        } else
-                        {
-                            <p>A membership is required to enroll in this class.</p>
-                        }
-                        <br />
-                    </div>
                 </div>
                 <ClassScheduler Class=ActiveClass ShowEditing=false></ClassScheduler>
             </div>
@@ -155,7 +201,7 @@
     [Parameter]
     public string? Id { get; set; }
 
-    protected ClassDBO? ActiveClass { get; set; }
+    protected ClassDBO ActiveClass { get; set; } = new();
 
     protected override void OnAfterRender(bool FirstRender)
     {

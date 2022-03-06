@@ -3,9 +3,10 @@
 @using CS341_YMCA.Data
 @using CS341_YMCA.Controllers
 
-@inject SiteUserController Users
+@inject SiteUserController SiteUsers
 @inject Database Sql
 @inject NavigationManager Nav
+
 
 <PageTitle>Manage User Details</PageTitle>
 
@@ -18,8 +19,30 @@
 {
     <h1>User Account Editor</h1>
     <hr />
+    <h3>Managing details for <strong>@(ActiveUser.FirstName) @(ActiveUser.LastName)</strong> (@(ActiveUser.Email))</h3>
 
+    <button class="btn btn-danger mt-4" @onclick="OpenDeleteDialog">Delete User</button>
 
+    @if (DeleteDialogOpen) // temporary -- eventually this will be broken out into a generic dialog that can be used for anything
+    {
+        <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">You are about to delete the account <strong>'@(ActiveUser.Email)'</strong></h4>
+                        <button type="button" class="btn btn-close close" @onclick="@DeleteDialogCancel"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="font-weight-bold">This action cannot be undone. Are you sure you wish to continue?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="DeleteDialogCancel">Cancel</button>
+                        <button type="button" class="btn btn-danger" @onclick="DeleteDialogOK">Delete User</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 } else
 {
     <div class="alert alert-danger">You are <strong>not</strong> an admin user and cannot access this page.</div>
@@ -35,6 +58,8 @@
     private string ValidationMessage = "";
     private ClassSelector? PrereqSelector { get; set; }
 
+    private bool DeleteDialogOpen { get; set; }
+
     protected override void OnAfterRender(bool FirstRender)
     {
         base.OnAfterRender(FirstRender);
@@ -42,9 +67,47 @@
         if (FirstRender)
         {
             if (Id != "Create")
-                ActiveUser = Users.SiteUser_GetById(int.Parse(Id!)).Get()!;
+                ActiveUser = SiteUsers.SiteUser_GetById(int.Parse(Id!)).Get()!;
 
             StateHasChanged();
         }
+    }
+
+    private void OpenDeleteDialog()
+    {
+        DeleteDialogOpen = true;
+        StateHasChanged();
+    }
+
+    private void DeleteDialogCancel()
+    {
+        DeleteDialogClose(false);
+    }
+
+    private void DeleteDialogOK()
+    {
+        DeleteDialogClose(true);
+    }
+
+    private void DeleteDialogClose(bool accepted)
+    {
+        if (accepted)
+        {
+            var Result = SiteUsers.SiteUser_DeleteById(ActiveUser.Id);
+            
+            if (Result.Success)
+            {
+                Nav.NavigateTo("ManageUsers");
+            }
+            else
+            {
+                // Add some kind of error message here
+
+                StateHasChanged();
+            }
+        }
+
+        DeleteDialogOpen = false;
+        StateHasChanged();
     }
 }

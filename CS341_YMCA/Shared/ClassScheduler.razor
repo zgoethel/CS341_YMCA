@@ -1,11 +1,23 @@
 ﻿@using CS341_YMCA.Data
 @using CS341_YMCA.Controllers
+@using CS341_YMCA.Pages
 
 @inject ClassController Classes
 
-<button class="btn btn-primary" style="float: right;" @onclick=OnAddClick>
-    <i class="oi oi-plus"></i>
-</button>
+@if(!string.IsNullOrEmpty(ValidationMessage))
+{
+    <div class="alert alert-warning">
+        @ValidationMessage
+    </div>
+}
+
+@if (ShowEditing)
+{
+    <button class="btn btn-primary" style="float: right;" @onclick=OnAddClick>
+        <i class="oi oi-plus"></i>
+    </button>
+}
+
 <table class="table table-striped">
     <thead>
         <tr>
@@ -13,6 +25,7 @@
             <th scope="col">Time</th>
             <th scope="col">Duration</th>
             <th scope="col">Repeats</th>
+            <th scope="col"><i>(Last Day)</i></th>
             @if (ShowEditing)
             {
                 <th scope="col">Actions</th>
@@ -22,7 +35,7 @@
     <tbody>
         @foreach (ClassScheduleDBO Session in Schedule)
         {
-            <ClassSchedulerEntry Session=@Session ShowEditing=@ShowEditing></ClassSchedulerEntry>
+            <ClassSchedulerEntry Manager=@Manager Scheduler=@this Parent=@Class Session=@Session ShowEditing=@ShowEditing></ClassSchedulerEntry>
         }
     </tbody>
 </table>
@@ -34,8 +47,11 @@
     public ClassDBO? Class { get; set; }
     [Parameter]
     public bool ShowEditing { get; set; } = false;
+    [Parameter]
+    public ManageClass? Manager { get; set; }
 
     private List<ClassScheduleDBO> Schedule { get; set; } = new();
+    public string ValidationMessage { get; set; } = "";
 
     protected override void OnAfterRender(bool FirstRender)
     {
@@ -54,5 +70,10 @@
         Schedule.Add(Created);
 
         StateHasChanged();
+    }
+
+    public void _StateHasChanged()
+    {
+        this.StateHasChanged();
     }
 }
