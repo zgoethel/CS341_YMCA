@@ -52,19 +52,23 @@
             <label>Allow Enrollment <i>(within dates)</i></label>
 
             <InputCheckbox class="mb-2 ms-2" @bind-Value=ActiveClass.Enabled />&nbsp;
-            <label>Enabled</label>
+            <label>Show Publicly</label>
             <br />
             <br />
             
             <h3>Class Prerequisites</h3>
             <ClassSelector Exclude=@ActiveClass.Id Csv=@(ActiveClass.PrereqIds ?? "") @ref=PrereqSelector />
 
-            <button class="btn btn-primary mt-4" type="submit" @onclick=SaveForm>Submit</button>
+            <button class="btn btn-primary mt-4" type="submit" @onclick="() => SaveForm(Redirect: true)">Submit</button>
+            @if (Id != "Create")
+            {
+                <button class="btn btn-danger mt-4" style="float:right;" @onclick="OpenDeleteDialog">Delete Class</button>
+            }
             <br />
             <br />
 
             <h3>Class Scheduler</h3>
-            <ClassScheduler Class=@ActiveClass ShowEditing=true></ClassScheduler>
+            <ClassScheduler Manager=@this Class=@ActiveClass ShowEditing=true></ClassScheduler>
         </div>
         <div style="width: 26em;white-space: initial;" class="class-editor-col">
             <h3 class="mb-4">Pricing and Enrollment</h3>
@@ -92,17 +96,14 @@
                     </div>
                     <br />
             
-                    <label>Additional fee for members:</label>
+                    <label>Class fee for members:</label>
                     <div class="row">
                         <div class="col-sm-7">
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">$</span>
                                 </div>
-                                <InputNumber step=1 min=0 class="form-control" @bind-Value=ActiveClass.MemberPrice />
-                                <div class="input-group-append">
-                                    <span class="input-group-text">.00</span>
-                                </div>
+                                <InputNumber step="any" min=0 class="form-control" @bind-Value=ActiveClass.MemberPrice />
                             </div>
                         </div>
                     </div>
@@ -138,17 +139,14 @@
                         </div>
                         <br />
                 
-                        <label>Additional fee for non-members:</label>
+                        <label>Class fee for non-members:</label>
                         <div class="row">
                             <div class="col-sm-7">
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">$</span>
                                     </div>
-                                    <InputNumber step=1 min=0 class="form-control" @bind-Value=ActiveClass.NonMemberPrice />
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">.00</span>
-                                    </div>
+                                    <InputNumber step="any" min=0 class="form-control" @bind-Value=ActiveClass.NonMemberPrice />
                                 </div>
                             </div>
                         </div>
@@ -171,6 +169,26 @@
         </div>
         <br />
     </EditForm>
+    @if (DeleteDialogOpen) // temporary -- eventually this will be broken out into a generic dialog that can be used for anything
+    {
+        <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">You are about to delete the class <strong>'@(ActiveClass.ClassName)'</strong></h4>
+                        <button type="button" class="btn btn-close close" @onclick="@DeleteDialogCancel"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="font-weight-bold">This action cannot be undone. Are you sure you wish to continue?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="DeleteDialogCancel">Cancel</button>
+                        <button type="button" class="btn btn-danger" @onclick="DeleteDialogOK">Delete Class</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 } else
 {
     <div class="alert alert-danger">You are <strong>not</strong> an admin user and cannot access this page.</div>
@@ -183,8 +201,10 @@
     public string? Id { get; set; }
 
     private ClassDBO ActiveClass = new();
-    private string ValidationMessage = "";
+    public string ValidationMessage = "";
     private ClassSelector? PrereqSelector { get; set; }
+
+    private bool DeleteDialogOpen { get; set; }
 
     private string NonMemberStyle => ActiveClass.AllowNonMembers
         ? "display: block;"
@@ -203,15 +223,144 @@
         }
     }
 
-    private void SaveForm()
+    private void OpenDeleteDialog()
     {
+        DeleteDialogOpen = true;
+        StateHasChanged();
+    }
+
+    private void DeleteDialogCancel()
+    {
+        DeleteDialogClose(false);
+    }
+
+    private void DeleteDialogOK()
+    {
+        DeleteDialogClose(true);
+    }
+
+    private void DeleteDialogClose(bool accepted)
+    {
+        if (accepted)
+        {
+            var Result = Classes.Class_DeleteById(ActiveClass.Id);
+            
+            if (Result.Success)
+            {
+                Nav.NavigateTo("ManageClasses");
+            }
+            else
+            {
+                // Add some kind of error message here
+
+                StateHasChanged();
+            }
+        }
+
+        DeleteDialogOpen = false;
+        StateHasChanged();
+    }
+
+    public void SaveForm(bool Redirect = true)
+    {
+        // Validation for required text fields
         if (
             string.IsNullOrEmpty(ActiveClass.ClassName)
             || string.IsNullOrEmpty(ActiveClass.ShortDescription)
         )
         {
             ValidationMessage = "Please provide all required fields.";
+            StateHasChanged();
             return;
+        }
+        // Validation for pricing values
+        if (ActiveClass.MemberPrice < 0
+            || ActiveClass.NonMemberPrice < 0
+        )
+        {
+            ValidationMessage = "Please use positive dollar amounts.";
+            StateHasChanged();
+            return;
+        }
+        // Validation for seat limit value
+        if (
+            (ActiveClass.MaxSeats ?? 0) < 0
+            || (ActiveClass.MaxSeats ?? 0) != (int)(ActiveClass.MaxSeats ?? 0)
+        )
+        {
+            ValidationMessage = "Please use whole, positive number of max seats.";
+            StateHasChanged();
+            return;
+        }
+
+        var Sessions = Classes.ClassSchedule_List(ActiveClass.Id).Get()!;
+        if (Sessions.Count > 0
+            && ActiveClass.MemberEnrollmentStart != null
+            && (ActiveClass.NonMemberEnrollmentStart != null
+            || !ActiveClass.AllowNonMembers)
+        )
+        {
+            // Validate the first session is after enrollment period
+            var EnrollmentEnd = ActiveClass.MemberEnrollmentStart!.Value.AddDays(ActiveClass.MemberEnrollmentDays ?? 1);
+            if (ActiveClass.AllowNonMembers)
+            {
+                var _EnrollmentEnd = ActiveClass.NonMemberEnrollmentStart!.Value.AddDays(ActiveClass.NonMemberEnrollmentDays ?? 1);
+                if (_EnrollmentEnd > EnrollmentEnd)
+                    EnrollmentEnd = _EnrollmentEnd;
+            }
+
+            if (EnrollmentEnd > Sessions[0].FirstDate)
+            {
+                ValidationMessage = "Classes cannot start before enrollment closes. Please change the enrollment window(s) or class schedule date(s).";
+                StateHasChanged();
+                return;
+            }
+        }
+
+        // Validation for requiring enrollment dates
+        if (ActiveClass.AllowEnrollment)
+        {
+            // Ensure that enrollment is set up if opened
+            if (
+                ActiveClass.MemberEnrollmentStart == null
+                || (ActiveClass.MemberEnrollmentDays ?? 0) == 0
+            )
+            {
+                ValidationMessage = "You cannot \"Allow Enrollment\" without first setting an enrollment window.";
+                StateHasChanged();
+                return;
+            } else if (
+              ActiveClass.MemberEnrollmentDays != null
+              && (ActiveClass.MemberEnrollmentDays != (int)ActiveClass.MemberEnrollmentDays
+              || ActiveClass.MemberEnrollmentDays < 0)
+            )
+            {
+                ValidationMessage = "Specify enrollment window length as a number of whole days.";
+                StateHasChanged();
+                return;
+            }
+
+            // Ensure enrollment set up for non-members if applicable
+            if (
+                ActiveClass.AllowNonMembers
+                && (ActiveClass.MemberEnrollmentStart == null
+                || (ActiveClass.NonMemberEnrollmentDays ?? 0) == 0)
+            )
+            {
+                ValidationMessage = "Please either disable non-members, or specify their enrollment window.";
+                StateHasChanged();
+                return;
+            } else if (
+                ActiveClass.AllowNonMembers
+                && ActiveClass.NonMemberEnrollmentDays != null
+                && (ActiveClass.NonMemberEnrollmentDays != (int)ActiveClass.NonMemberEnrollmentDays
+                || ActiveClass.NonMemberEnrollmentDays < 0)
+            )
+            {
+                ValidationMessage = "Specify enrollment window length as a number of whole days.";
+                StateHasChanged();
+                return;
+            }
         }
 
         var Result = Classes.Class_Set(
@@ -233,9 +382,16 @@
             MaxSeats: ActiveClass.MaxSeats
         );
 
-        if (Result.Success)
+        if (Result.Success && Redirect)
             Nav.NavigateTo("ManageClasses");
-        else
+        else if (Result.Success)
+        {
+            ActiveClass.Id = Result.Get()!;
+            ActiveClass.PrereqIds = PrereqSelector!.Csv;
+
+            ValidationMessage = "";
+            StateHasChanged();
+        } else
         {
             ValidationMessage = Result.Error ?? "An unknown error has occurred.";
             StateHasChanged();

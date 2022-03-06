@@ -69,6 +69,11 @@
         public DateTime? MemberThru { get; set; }
     }
 
+    public class SiteUserDeleteRequest
+    {
+        public int Id { get; set; }
+    }
+
     #endregion
 
     // Region bound to request and result parameters for classes
@@ -125,11 +130,13 @@
         public float NonMemberPrice { get; set; } = 0.0f;
         public string? Location { get; set; }
         public int? MaxSeats { get; set; }
+        public bool MemberEnrollmentOpen { get; set; }
+        public bool NonMemberEnrollmentOpen { get; set; }
     }
 
     public class ClassScheduleDBO
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
         public int ClassId { get; set; }
         public DateTime FirstDate { get; set; } = DateTime.Now;
         public int Recurrence { get; set; }
@@ -148,6 +155,11 @@
     }
 
     public class ClassScheduleSetResult
+    {
+        public int Id { get; set; }
+    }
+
+    public class ClassDeleteRequest
     {
         public int Id { get; set; }
     }
