@@ -1,10 +1,13 @@
 ﻿@using CS341_YMCA.Data
 
 <tr>
-    <td>@Class?.ClassName</td>
+    <td>@Class.ClassName</td>
     <td>
         <h5>
-            @if(Class?.AllowEnrollment ?? false)
+            @if (Class.MemberEnrollmentOpen && !Class.NonMemberEnrollmentOpen)
+            {
+                <span class="badge bg-info bg-info-glow">Members</span>
+            } else if (Class.MemberEnrollmentOpen || Class.NonMemberEnrollmentOpen)
             {
                 <span class="badge bg-success bg-success-glow">Open</span>
             } else
@@ -14,27 +17,27 @@
         </h5>
     </td>
     <td>&mdash;</td>
-    @if ((Class?.MaxSeats ?? 0) != 0)
+    @if ((Class.MaxSeats ?? 0) != 0)
     {
-        <td>@Class?.MaxSeats</td>
-        <td>@Class?.MaxSeats</td>
+        <td>@Class.MaxSeats</td>
+        <td>@Class.MaxSeats</td>
     } else
     {
         <td>&infin;</td>
         <td>&infin;</td>
     }
-    <td>@Class?.Created.ToShortDateString()<br />@Class?.Created.ToShortTimeString()</td>
-    <td>@Class?.Updated.ToShortDateString()<br />@Class?.Updated.ToShortTimeString()</td>
+    <td>@Class.Created.ToShortDateString()<br />@Class.Created.ToShortTimeString()</td>
+    <td>@Class.Updated.ToShortDateString()<br />@Class.Updated.ToShortTimeString()</td>
     <td>
-        <a href="ManageClasses/@Class?.Id" class="btn btn-primary">Editor</a>
-        <a href="Enroll/@Class?.Id" class="btn btn-secondary">Enrollment page</a>
+        <a href="ManageClasses/@Class.Id" class="btn btn-primary">Editor</a>
+        <a href="Enroll/@Class.Id" class="btn btn-secondary">Enrollment page</a>
     </td>
 </tr>
 
 @code
 {
     [Parameter]
-    public ClassDBO? Class { get; set; }
+    public ClassDBO Class { get; set; } = new();
     [CascadingParameter]
     public SiteUserDBO? LoggedIn { get; set; }
 }
@@ -47,5 +50,9 @@
     .bg-danger-glow
     {
         box-shadow: 0 0 0.2em 0.2em #e2afc0;
+    }
+    .bg-info-glow
+    {
+        box-shadow: 0 0 0.2em 0.2em #bad6df;
     }
 </style>
