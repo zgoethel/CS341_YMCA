@@ -198,13 +198,13 @@
 
 @code {
     [CascadingParameter]
-    protected SiteUserDBO? LoggedIn { get; set; }
+    protected SiteUserDBO LoggedIn { get; set; } = new();
     [Parameter]
     public string? Id { get; set; }
 
     private ClassDBO ActiveClass = new();
     public string ValidationMessage = "";
-    private ClassSelector? PrereqSelector { get; set; }
+    private ClassSelector PrereqSelector { get; set; } = new();
 
     private bool DeleteDialogOpen { get; set; }
 
@@ -212,17 +212,10 @@
         ? "display: block;"
         : "display: none;";
 
-    protected override void OnAfterRender(bool FirstRender)
+    protected override void OnInitialized()
     {
-        base.OnAfterRender(FirstRender);
-
-        if (FirstRender)
-        {
-            if (Id != "Create")
-                ActiveClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
-
-            StateHasChanged();
-        }
+        if (Id != "Create")
+            ActiveClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
     }
 
     private void OpenDeleteDialog()

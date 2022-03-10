@@ -7,7 +7,7 @@
 
 <PageTitle>Member Accounts</PageTitle>
 
-@if (LoggedIn?.IsAdmin ?? false)
+@if (LoggedIn.IsAdmin)
 {
     <h1>Member Accounts</h1>
     <hr />
@@ -50,5 +50,5 @@
 
 @code {
     [CascadingParameter]
-    protected SiteUserDBO? LoggedIn { get; set; }
+    protected SiteUserDBO LoggedIn { get; set; } = new();
 }

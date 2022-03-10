@@ -50,27 +50,19 @@
 
 @code {
     [CascadingParameter]
-    protected SiteUserDBO? LoggedIn { get; set; }
+    protected SiteUserDBO LoggedIn { get; set; } = new();
     [Parameter]
     public string? Id { get; set; }
 
     private SiteUserDBO ActiveUser = new();
     private string ValidationMessage = "";
-    private ClassSelector? PrereqSelector { get; set; }
 
     private bool DeleteDialogOpen { get; set; }
 
-    protected override void OnAfterRender(bool FirstRender)
+    protected override void OnInitialized()
     {
-        base.OnAfterRender(FirstRender);
-
-        if (FirstRender)
-        {
-            if (Id != "Create")
-                ActiveUser = SiteUsers.SiteUser_GetById(int.Parse(Id!)).Get()!;
-
-            StateHasChanged();
-        }
+        if (Id != "Create")
+            ActiveUser = SiteUsers.SiteUser_GetById(int.Parse(Id!)).Get()!;
     }
 
     private void OpenDeleteDialog()

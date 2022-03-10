@@ -42,7 +42,7 @@
     public class SiteUserDBO
     {
         public int Id { get; set; }
-        public string FirstName { get; set; } = "";
+        public string FirstName { get; set; } = "Guest";
         public string? LastName { get; set; }
         public string Email { get; set; } = "";
         public bool HasPassword { get; set; }
