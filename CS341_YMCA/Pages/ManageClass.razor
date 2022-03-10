@@ -41,8 +41,6 @@
                 </div>
             </div>
             
-            
-            
             <label>Short description:<i style="color: red">*</i></label>
             <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.ShortDescription />        
         
@@ -69,6 +67,7 @@
             <br />
 
             <h3>Class Scheduler</h3>
+            <hr />
             <ClassScheduler Manager=@this Class=@ActiveClass ShowEditing=true></ClassScheduler>
         </div>
         <div class="col-lg-4">
