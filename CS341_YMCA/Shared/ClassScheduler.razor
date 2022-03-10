@@ -11,57 +11,69 @@
     </div>
 }
 
-@if (ShowEditing)
+@*if (ShowEditing)
 {
     <button class="btn btn-primary" style="float: right;" @onclick=OnAddClick>
         <i class="oi oi-plus"></i>
     </button>
+}*@
+
+<h4 class="ms-4 me-4 text-info"
+    style="float: right;cursor: pointer;"
+    @onclick="() => { WeekStart = WeekStart.AddDays(7); }">
+<span class="badge bg-info" style="display: inline;">MORE</span>
+<i class="ms-2 oi oi-chevron-right" /></h4>
+
+<h4 class="mt-1 me-4">
+<i class="oi oi-chevron-left"
+    style="cursor: pointer;"
+    @onclick="() => { WeekStart = WeekStart.AddDays(-7); }"
+/>
+    Week of @WeekStart.ToLongDateString().Replace("Sunday, ", "")
+</h4>
+
+@{
+    string[] _Days = { "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" };
 }
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th scope="col">Date</th>
-            <th scope="col">Time</th>
-            <th scope="col">Duration</th>
-            <th scope="col">Repeats</th>
-            <th scope="col"><i>(Last Day)</i></th>
-            @if (ShowEditing)
-            {
-                <th scope="col">Actions</th>
-            }
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (ClassScheduleDBO Session in Schedule)
-        {
-            <ClassSchedulerEntry Manager=@Manager Scheduler=@this Parent=@Class Session=@Session ShowEditing=@ShowEditing></ClassSchedulerEntry>
-        }
-    </tbody>
-</table>
+<div class="_col-no-margin mt-1">
+    @for (int j = 0; j < 7; j++)
+    {
+        <div style="width: 14%;" class="col">
+            <h3>@_Days[j]</h3>
+            <ClassScheduleDay
+                Class=@Class
+                Schedule=@Schedule
+                Date=@WeekStart.AddDays(j)
+            />
+        </div>
+    }
+</div>
 
 
 @code
 {
     [Parameter]
-    public ClassDBO? Class { get; set; }
+    public ClassDBO Class { get; set; } = new();
     [Parameter]
     public bool ShowEditing { get; set; } = false;
     [Parameter]
-    public ManageClass? Manager { get; set; }
+    public ManageClass Manager { get; set; } = new();
 
-    private List<ClassScheduleDBO> Schedule { get; set; } = new();
-    public string ValidationMessage { get; set; } = "";
+    private List<ClassScheduleDBO> Schedule = new();
+    private string ValidationMessage = "";
+    private DateTime WeekStart = DateTime.Today;
 
-    protected override void OnAfterRender(bool FirstRender)
+    protected override void OnInitialized()
     {
-        base.OnAfterRender(FirstRender);
+        base.OnInitialized();
 
-        if (FirstRender)
-        {
-            Schedule = Classes.ClassSchedule_List(Class!.Id).Get()!;
-            StateHasChanged();
-        }
+        Schedule = Classes.ClassSchedule_List(Class!.Id).Get()!;
+
+        var _WeekStart = Schedule.FirstOrDefault()?.FirstDate ?? DateTime.Today;
+        WeekStart = WeekStart.AddDays(-(int)WeekStart.DayOfWeek);
+
+        StateHasChanged();
     }
 
     private void OnAddClick()
@@ -71,9 +83,16 @@
 
         StateHasChanged();
     }
-
-    public void _StateHasChanged()
-    {
-        this.StateHasChanged();
-    }
 }
+
+<style>
+    div._col-no-margin .col
+    {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding: 0.2em;
+        min-width: 6.5em;
+        max-width: 14%;
+        display: inline-block;
+    }
+</style>

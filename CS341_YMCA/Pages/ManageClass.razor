@@ -18,9 +18,10 @@
 {
     <h1>Class Editor</h1>
     <hr />
-
-    <EditForm Model=ActiveClass style="white-space: nowrap;">
-        <div style="width: 42em;white-space: initial;" class="class-editor-col me-4">
+    
+    <EditForm Model=ActiveClass>
+    <div class="row">
+        <div class="col-lg-8">
             <h3>Manage details for '@ActiveClass.ClassName'</h3>
 
             <div class="row">
@@ -39,8 +40,6 @@
                     <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.Location />
                 </div>
             </div>
-            
-            
             
             <label>Short description:<i style="color: red">*</i></label>
             <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.ShortDescription />        
@@ -68,9 +67,10 @@
             <br />
 
             <h3>Class Scheduler</h3>
+            <hr />
             <ClassScheduler Manager=@this Class=@ActiveClass ShowEditing=true></ClassScheduler>
         </div>
-        <div style="width: 26em;white-space: initial;" class="class-editor-col">
+        <div class="col-lg-4">
             <h3 class="mb-4">Pricing and Enrollment</h3>
 
             <div class="card mb-4">
@@ -168,7 +168,9 @@
             </div>
         </div>
         <br />
+    </div>
     </EditForm>
+
     @if (DeleteDialogOpen) // temporary -- eventually this will be broken out into a generic dialog that can be used for anything
     {
         <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
@@ -196,13 +198,13 @@
 
 @code {
     [CascadingParameter]
-    protected SiteUserDBO? LoggedIn { get; set; }
+    protected SiteUserDBO LoggedIn { get; set; } = new();
     [Parameter]
     public string? Id { get; set; }
 
     private ClassDBO ActiveClass = new();
     public string ValidationMessage = "";
-    private ClassSelector? PrereqSelector { get; set; }
+    private ClassSelector PrereqSelector { get; set; } = new();
 
     private bool DeleteDialogOpen { get; set; }
 
@@ -210,17 +212,10 @@
         ? "display: block;"
         : "display: none;";
 
-    protected override void OnAfterRender(bool FirstRender)
+    protected override void OnInitialized()
     {
-        base.OnAfterRender(FirstRender);
-
-        if (FirstRender)
-        {
-            if (Id != "Create")
-                ActiveClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
-
-            StateHasChanged();
-        }
+        if (Id != "Create")
+            ActiveClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
     }
 
     private void OpenDeleteDialog()
@@ -398,12 +393,3 @@
         }
     }
 }
-
-<style>
-    div.class-editor-col
-    {
-        max-width: 100%;
-        display: inline-block;
-        vertical-align: top;
-    }
-</style>

@@ -37,7 +37,7 @@
                 <span class="oi oi-pencil" aria-hidden="true"></span> Edit Schedule
             </NavLink>
         </div>
-        @if(LoggedIn?.IsAdmin ?? false)
+        @if(LoggedIn.IsAdmin)
         {
             <div class="nav-item px-3">
                 <style>
@@ -60,33 +60,38 @@
     </nav>
     <div id="greeting">
         <p>
-            Hi, <strong>@((LoggedIn?.FirstName + " " + LoggedIn?.LastName).Trim())</strong>!
+            Hi, <strong>@((LoggedIn.FirstName + " " + LoggedIn.LastName).Trim())</strong>!
             <br/>
 
-            @if(LoggedIn?.IsMember ?? false)
+            @if (LoggedIn.IsMember)
             {
                 <span class="badge bg-success">Member</span>
             } else
             {
                 <span class="badge bg-info">Non-member</span>
             }
-            @if(LoggedIn?.IsAdmin ?? false)
+            @if (LoggedIn.IsAdmin)
             {
                 <span class="ms-2 badge bg-danger">Admin</span>
             }
         </p>
 
-        <button @onclick=LogOutClick class="btn btn-primary">Log out</button>
-        <a class="btn btn-secondary" href="Settings"><span class="oi oi-wrench" style="vertical-align: middle;"></span></a>
+        @if (LoggedIn.Id == 0)
+        {
+            <a href="SiteUser/LoginFlow" class="btn btn-primary">Log in</a>
+        } else
+        {
+            <button @onclick=LogOutClick class="btn btn-primary">Log out</button>
+            <a class="btn btn-secondary" href="Settings"><span class="oi oi-wrench" style="vertical-align: middle;"></span></a>
+        }
     </div>
 </div>
 
 @code {
     [CascadingParameter]
     protected Task<AuthenticationState>? Auth { get; set; }
-
     [CascadingParameter]
-    protected SiteUserDBO? LoggedIn { get; set; }
+    protected SiteUserDBO LoggedIn { get; set; } = new();
 
     private bool CollapseNavmenu = true;
     private string? NavMenuCssClass => CollapseNavmenu ? "collapse" : null;
@@ -103,5 +108,7 @@
 
         var _AuthState = AuthState as AuthStateProvider;
         _AuthState?.LogOut();
+
+        StateHasChanged();
     }
 }

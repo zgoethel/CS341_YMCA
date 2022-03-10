@@ -1,0 +1,50 @@
+﻿@using CS341_YMCA.Data
+@using CS341_YMCA.Controllers
+@using CS341_YMCA.Pages
+
+@inject ClassController Classes
+
+<div class="schedule-day-block mb-1">
+<p style="margin-bottom: 0.2em;"><strong><i>@Date.Month/@Date.Day</i></strong></p>
+<hr style="margin: 0;" />
+
+@if (EditMode && ShowEditing)
+{
+        
+} else
+{
+        
+}
+</div>
+
+@code
+{
+    [Parameter]
+    public ClassDBO Class { get; set; } = new();
+    [Parameter]
+    public List<ClassScheduleDBO> Schedule { get; set; } = new();
+    [Parameter]
+    public bool ShowEditing { get; set; } = false;
+    [Parameter]
+    public DateTime Date { get; set; } = DateTime.Today;
+
+    public bool EditMode = false;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+    }
+}
+
+<style>
+    div.schedule-day-block
+    {
+        padding: 0.5em;
+        border: 1px solid grey;
+        border-radius: 0.6em;
+        box-shadow: 0 0 0.3em 0.3em #c2c2c2;
+        border-left: 0.4em solid green;
+        height: 8em;
+    }
+</style>
