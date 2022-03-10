@@ -18,28 +18,25 @@
     </button>
 }*@
 
-<div style="height: 3.2em;">
-    <h3 class="mt-1 me-4"
-        style="float: left;cursor: pointer;">
-    <i class="oi oi-chevron-left"
-        @onclick="() => { WeekStart = WeekStart.AddDays(-7); }"
-    /></h3>
+<h4 class="ms-4 me-4 text-info"
+    style="float: right;cursor: pointer;"
+    @onclick="() => { WeekStart = WeekStart.AddDays(7); }">
+<span class="badge bg-info" style="display: inline;">MORE</span>
+<i class="ms-2 oi oi-chevron-right" /></h4>
 
-    <h3 class="mt-1 ms-4 me-4 text-info"
-        style="float: right;cursor: pointer;"
-        @onclick="() => { WeekStart = WeekStart.AddDays(7); }">
-        MORE
-    <i class="ms-2 oi oi-chevron-right" /></h3>
-    <h3 class="mt-1" style="float: left;">
-        Week of @WeekStart.ToLongDateString().Replace("Sunday, ", "")
-    </h3>
-</div>
+<h4 class="mt-1 me-4">
+<i class="oi oi-chevron-left"
+    style="cursor: pointer;"
+    @onclick="() => { WeekStart = WeekStart.AddDays(-7); }"
+/>
+    Week of @WeekStart.ToLongDateString().Replace("Sunday, ", "")
+</h4>
 
 @{
     string[] _Days = { "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" };
 }
 
-<div class="row _col-no-margin mt-1">
+<div class="_col-no-margin mt-1">
     @for (int j = 0; j < 7; j++)
     {
         <div style="width: 14%;" class="col">
@@ -96,5 +93,6 @@
         padding: 0.2em;
         min-width: 6.5em;
         max-width: 14%;
+        display: inline-block;
     }
 </style>
