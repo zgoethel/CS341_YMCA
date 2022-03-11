@@ -11,13 +11,6 @@
     </div>
 }
 
-@*if (ShowEditing)
-{
-    <button class="btn btn-primary" style="float: right;" @onclick=OnAddClick>
-        <i class="oi oi-plus"></i>
-    </button>
-}*@
-
 @if (HasMoreRight)
 {
     
@@ -62,6 +55,7 @@
                 Class=@Class
                 Schedule=@Schedule
                 Date=@WeekStart.AddDays(j)
+                ShowEditing=ShowEditing
             />
         </div>
     }

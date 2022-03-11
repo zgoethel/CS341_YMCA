@@ -4,37 +4,90 @@
 
 @inject ClassController Classes
 
+@if (AddEditOpen)
+{
+    <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Edit Schedule for <strong>'@Date.ToShortDateString()'</strong></h4>
+                    <button type="button" class="btn btn-close close" @onclick="() =>
+                        {
+                            AddEditOpen = false;
+                            StateHasChanged();
+                        }"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="font-weight-bold"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() =>
+                        {
+                            AddEditOpen = false;
+                            StateHasChanged();
+                        }">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="() =>
+                        {
+                            AddEditOpen = false;
+                            StateHasChanged();
+                        }">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 <div class="schedule-day-block mb-1">
+
+@if (ShowEditing && RelevantSchedule != null)
+{
+    <i class="oi oi-pencil"
+        style="float: right;cursor: pointer;"
+        @onclick = "() =>
+        {
+            AddEditOpen = true;
+            StateHasChanged();
+        }"
+    />
+}
+
 <p style="margin-bottom: 0.2em;"><strong><i>@Date.Month/@Date.Day</i></strong></p>
 <hr style="margin: 0;" />
 
-@foreach (var Schedule in RelevantSchedule)
+@if (RelevantSchedule == null)
 {
-    <div class="row">
-    @if (EditMode && ShowEditing)
+    @if (ShowEditing)
     {
+        <button class="btn btn-primary mt-2"
+            @onclick = "() =>
+            {
+                AddEditOpen = true;
+                StateHasChanged();
+            }">
+        <i class="oi oi-plus" /></button>
+    }
+} else
+{
+    <p>
+        @RelevantSchedule.FirstDate.ToShortTimeString()&nbsp;-
+        @RelevantSchedule.FirstDate.AddMinutes(RelevantSchedule.Duration).ToShortTimeString()
+    </p>
 
+    <p>
+    @if (RelevantSchedule.Recurrence <= 0)
+    {
+        <i class="oi oi-loop-square" /><i>Never</i>
+    } else if (RelevantSchedule.Occurrences <= 0)
+    {
+        <i class="oi oi-loop-square" /><i>Forever</i>
     } else
     {
-        <p>
-            @Schedule.FirstDate.ToShortTimeString()&nbsp;-
-            @Schedule.FirstDate.AddMinutes(Schedule.Duration).ToShortTimeString()
-        </p>
-
-        <p>
-        @if (Schedule.Recurrence <= 0)
-        {
-            <i class="oi oi-loop-square" /><i>Never</i>
-        } else if (Schedule.Occurrences <= 0)
-        {
-            <i class="oi oi-loop-square" /><i>Forever</i>
-        } else
-        {
-            <i class="oi oi-loop-square" /><i>Until @(Schedule.FirstDate.AddDays(Schedule.Recurrence * Schedule.Occurrences).ToShortDateString())</i>
-        }
-        </p>
+        <i class="oi oi-loop-square" /><i>
+            Until
+            @(RelevantSchedule.FirstDate.Date.AddDays(RelevantSchedule.Recurrence * RelevantSchedule.Occurrences).ToShortDateString())
+        </i>
     }
-    </div>
+    </p>
 }
 
 </div>
@@ -48,9 +101,7 @@
     [Parameter]
     public bool ShowEditing { get; set; } = false;
 
-    // Internal field value for `Date`
     private DateTime _Date { get; set; } = DateTime.Today;
-    // Fancy sauce property with getters and setters
     [Parameter]
     public DateTime Date
     {
@@ -58,21 +109,20 @@
         set
         {
             _Date = value.Date;
-
             // Reload schedule data for new day
-            RelevantSchedule = Schedule.FindAll((It) =>
+            RelevantSchedule = Schedule.Find((It) =>
             {
-                // Select if this is the first day
-                var JustDay = It.FirstDate.Date;
+            // Select if this is the first day
+            var JustDay = It.FirstDate.Date;
                 if (JustDay == _Date)
                     return true;
-                // Don't select if class is over
-                if (
+            // Don't select if class is over
+            if (
                     It.Recurrence <= 0
                     || _Date < JustDay
                 ) return false;
-                // Select if today falls on an even recurrence
-                var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
+            // Select if today falls on an even recurrence
+            var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
                 var DiffDays = _Date.Subtract(JustDay).Days;
                 if (
                     (_Date <= EndDate || It.Occurrences <= 0)
@@ -86,8 +136,8 @@
         }
     }
 
-    public bool EditMode = false;
-    private List<ClassScheduleDBO> RelevantSchedule = new();
+    private ClassScheduleDBO? RelevantSchedule;
+    private bool AddEditOpen = false;
 
     protected override void OnInitialized()
     {
