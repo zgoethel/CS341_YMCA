@@ -8,13 +8,35 @@
 <p style="margin-bottom: 0.2em;"><strong><i>@Date.Month/@Date.Day</i></strong></p>
 <hr style="margin: 0;" />
 
-@if (EditMode && ShowEditing)
+@foreach (var Schedule in RelevantSchedule)
 {
-        
-} else
-{
-        
+    <div class="row">
+    @if (EditMode && ShowEditing)
+    {
+
+    } else
+    {
+        <p>
+            @Schedule.FirstDate.ToShortTimeString()&nbsp;-
+            @Schedule.FirstDate.AddMinutes(Schedule.Duration).ToShortTimeString()
+        </p>
+
+        <p>
+        @if (Schedule.Recurrence <= 0)
+        {
+            <i class="oi oi-loop-square" /><i>Never</i>
+        } else if (Schedule.Occurrences <= 0)
+        {
+            <i class="oi oi-loop-square" /><i>Forever</i>
+        } else
+        {
+            <i class="oi oi-loop-square" /><i>Until @(Schedule.FirstDate.AddDays(Schedule.Recurrence * Schedule.Occurrences).ToShortDateString())</i>
+        }
+        </p>
+    }
+    </div>
 }
+
 </div>
 
 @code
@@ -25,15 +47,50 @@
     public List<ClassScheduleDBO> Schedule { get; set; } = new();
     [Parameter]
     public bool ShowEditing { get; set; } = false;
+
+    private DateTime _Date { get; set; } = DateTime.Today;
     [Parameter]
-    public DateTime Date { get; set; } = DateTime.Today;
+    public DateTime Date
+    {
+        get => _Date;
+        set
+        {
+            _Date = value.Date;
+            RelevantSchedule = Schedule
+                .FindAll((It) =>
+                {
+                    var JustDay = It.FirstDate.Date;
+                    if (JustDay == _Date)
+                        return true;
+
+                    if (
+                        It.Recurrence <= 0
+                        || _Date < It.FirstDate
+                    ) return false;
+
+                    var EndDate = It.FirstDate.AddDays(It.Recurrence * It.Occurrences);
+                    var DiffDays = _Date.Subtract(It.FirstDate).Days + 1;
+                    if (
+                        (_Date <= EndDate || It.Occurrences <= 0)
+                        && DiffDays % It.Recurrence == 0
+                    ) return true;
+
+                    return false;
+                });
+
+            StateHasChanged();
+        }
+    }
 
     public bool EditMode = false;
+    private List<ClassScheduleDBO> RelevantSchedule = new();
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
+        // Force trigger of change
+        Date = _Date;
     }
 }
 
@@ -45,6 +102,6 @@
         border-radius: 0.6em;
         box-shadow: 0 0 0.3em 0.3em #c2c2c2;
         border-left: 0.4em solid green;
-        height: 8em;
+        height: 9.8em;
     }
 </style>
