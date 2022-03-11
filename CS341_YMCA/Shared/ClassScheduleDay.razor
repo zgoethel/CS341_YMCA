@@ -48,7 +48,9 @@
     [Parameter]
     public bool ShowEditing { get; set; } = false;
 
+    // Internal field value for `Date`
     private DateTime _Date { get; set; } = DateTime.Today;
+    // Fancy sauce property with getters and setters
     [Parameter]
     public DateTime Date
     {
@@ -56,27 +58,29 @@
         set
         {
             _Date = value.Date;
-            RelevantSchedule = Schedule
-                .FindAll((It) =>
-                {
-                    var JustDay = It.FirstDate.Date;
-                    if (JustDay == _Date)
-                        return true;
 
-                    if (
-                        It.Recurrence <= 0
-                        || _Date < It.FirstDate
-                    ) return false;
+            // Reload schedule data for new day
+            RelevantSchedule = Schedule.FindAll((It) =>
+            {
+                // Select if this is the first day
+                var JustDay = It.FirstDate.Date;
+                if (JustDay == _Date)
+                    return true;
+                // Don't select if class is over
+                if (
+                    It.Recurrence <= 0
+                    || _Date < JustDay
+                ) return false;
+                // Select if today falls on an even recurrence
+                var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
+                var DiffDays = _Date.Subtract(JustDay).Days;
+                if (
+                    (_Date <= EndDate || It.Occurrences <= 0)
+                    && DiffDays % It.Recurrence == 0
+                ) return true;
 
-                    var EndDate = It.FirstDate.AddDays(It.Recurrence * It.Occurrences);
-                    var DiffDays = _Date.Subtract(It.FirstDate).Days + 1;
-                    if (
-                        (_Date <= EndDate || It.Occurrences <= 0)
-                        && DiffDays % It.Recurrence == 0
-                    ) return true;
-
-                    return false;
-                });
+                return false;
+            });
 
             StateHasChanged();
         }
