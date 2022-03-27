@@ -1,6 +1,4 @@
-﻿@using CS341_YMCA.Controllers
-@using CS341_YMCA.Data
-@using Microsoft.AspNetCore.WebUtilities
+﻿@using Microsoft.AspNetCore.WebUtilities
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components
 @using System.ComponentModel.DataAnnotations
@@ -8,12 +6,15 @@
 @using System.Security.Cryptography
 @using System.Text
 
+@using CS341_YMCA.Helpers
+@using CS341_YMCA.Services
+
 @page "/SiteUser/LoginFlow"
 @layout SimplifiedLayout
 
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthState
-@inject SiteUserController SiteUsers
+@inject SiteUserRepository SiteUsers
 
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject ProtectedLocalStorage ProtectedStorage
@@ -35,19 +36,21 @@
     </p>
         
     <EditForm Model=FormBind>
-        <label>Email:</label>
-        <InputText class="form-control mb-2"
-            type="text"
-            @bind-Value=FormBind.Email />
 
-        <label>Password:</label>
-        <InputText class="form-control"
-            type="password" 
-            @bind-Value=FormBind.Password />
+    <label>Email:</label>
+    <InputText class="form-control mb-2"
+        type="text"
+        @bind-Value=FormBind.Email />
 
-        <a href="SiteUser/RequestPasswordResetFlow" style="margin-top: 2em;color: black;float: right;">Forgot password?</a>
-        <button class="btn btn-primary mt-4" type="submit" @onclick=SubmitLogin>Log In</button>&nbsp;
-        <a class="btn btn-secondary mt-4" type="button" href="SiteUser/RegisterFlow">Register</a>
+    <label>Password:</label>
+    <InputText class="form-control"
+        type="password" 
+        @bind-Value=FormBind.Password />
+
+    <a href="SiteUser/RequestPasswordResetFlow" style="margin-top: 2em;color: black;float: right;">Forgot password?</a>
+    <button class="btn btn-primary mt-4 me-2" type="submit" @onclick=SubmitLogin>Log In</button>
+    <a class="btn btn-secondary mt-4" type="button" href="SiteUser/RegisterFlow">Register</a>
+    
     </EditForm>
 } else
 {

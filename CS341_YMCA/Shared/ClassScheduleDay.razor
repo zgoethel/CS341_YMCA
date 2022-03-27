@@ -1,39 +1,39 @@
-﻿@using CS341_YMCA.Data
-@using CS341_YMCA.Controllers
+﻿@using CS341_YMCA.Helpers
+@using CS341_YMCA.Services
 @using CS341_YMCA.Pages
 
-@inject ClassController Classes
+@inject ClassRepository Classes
 
 @if (AddEditOpen)
 {
     <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Edit Schedule for <strong>'@Date.ToShortDateString()'</strong></h4>
-                    <button type="button" class="btn btn-close close" @onclick="() =>
-                        {
-                            AddEditOpen = false;
-                            StateHasChanged();
-                        }"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="font-weight-bold"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="() =>
-                        {
-                            AddEditOpen = false;
-                            StateHasChanged();
-                        }">Cancel</button>
-                    <button type="button" class="btn btn-primary" @onclick="() =>
-                        {
-                            AddEditOpen = false;
-                            StateHasChanged();
-                        }">Submit</button>
-                </div>
-            </div>
-        </div>
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+        <h4 class="modal-title">Edit Schedule for <strong>'@Date.ToShortDateString()'</strong></h4>
+        <button type="button" class="btn btn-close close" @onclick="() =>
+            {
+                AddEditOpen = false;
+                StateHasChanged();
+            }"></button>
+    </div>
+    <div class="modal-body">
+        <p class="font-weight-bold"></p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" @onclick="() =>
+            {
+                AddEditOpen = false;
+                StateHasChanged();
+            }">Cancel</button>
+        <button type="button" class="btn btn-primary" @onclick="() =>
+            {
+                AddEditOpen = false;
+                StateHasChanged();
+            }">Submit</button>
+    </div>
+    </div>
+    </div>
     </div>
 }
 
@@ -101,6 +101,9 @@
     [Parameter]
     public bool ShowEditing { get; set; } = false;
 
+    private ClassScheduleDBO? RelevantSchedule;
+    private bool AddEditOpen = false;
+
     private DateTime _Date { get; set; } = DateTime.Today;
     [Parameter]
     public DateTime Date
@@ -112,17 +115,17 @@
             // Reload schedule data for new day
             RelevantSchedule = Schedule.Find((It) =>
             {
-            // Select if this is the first day
-            var JustDay = It.FirstDate.Date;
+                // Select if this is the first day
+                var JustDay = It.FirstDate.Date;
                 if (JustDay == _Date)
                     return true;
-            // Don't select if class is over
-            if (
+                // Don't select if class is over
+                if (
                     It.Recurrence <= 0
                     || _Date < JustDay
                 ) return false;
-            // Select if today falls on an even recurrence
-            var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
+                // Select if today falls on an even recurrence
+                var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
                 var DiffDays = _Date.Subtract(JustDay).Days;
                 if (
                     (_Date <= EndDate || It.Occurrences <= 0)
@@ -134,17 +137,6 @@
 
             StateHasChanged();
         }
-    }
-
-    private ClassScheduleDBO? RelevantSchedule;
-    private bool AddEditOpen = false;
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-
-        // Force trigger of change
-        Date = _Date;
     }
 }
 

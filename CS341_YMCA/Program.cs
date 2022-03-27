@@ -1,6 +1,7 @@
-using CS341_YMCA.Data;
-using CS341_YMCA.Controllers;
 using Microsoft.AspNetCore.Components.Authorization;
+
+using CS341_YMCA.Helpers;
+using CS341_YMCA.Services;
 
 var Builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +13,8 @@ Builder.Services.AddAuthorizationCore();
 
 Builder.Services.AddTransient<Database>();
 Builder.Services.AddTransient<EmailSender>();
-Builder.Services.AddTransient<SiteUserController>();
-Builder.Services.AddTransient<ClassController>();
+Builder.Services.AddTransient<SiteUserRepository>();
+Builder.Services.AddTransient<ClassRepository>();
 
 Builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 

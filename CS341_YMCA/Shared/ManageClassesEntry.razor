@@ -1,37 +1,37 @@
-﻿@using CS341_YMCA.Data
+﻿@using CS341_YMCA.Helpers
 
 <tr>
-    <td style="white-space: nowrap;">@Class.ClassName</td>
-    <td>
-        <h5>
-            @if (Class.MemberEnrollmentOpen && !Class.NonMemberEnrollmentOpen)
-            {
-                <span class="badge bg-info bg-info-glow">Members</span>
-            } else if (Class.MemberEnrollmentOpen || Class.NonMemberEnrollmentOpen)
-            {
-                <span class="badge bg-success bg-success-glow">Open</span>
-            } else
-            {
-                <span class="badge bg-danger bg-danger-glow">Closed</span>   
-            }
-        </h5>
-    </td>
-    <td>&mdash;</td>
-    @if ((Class.MaxSeats ?? 0) != 0)
-    {
-        <td>@Class.MaxSeats</td>
-        <td>@Class.MaxSeats</td>
-    } else
-    {
-        <td>&infin;</td>
-        <td>&infin;</td>
-    }
-    <td>@Class.Created.ToShortDateString()<br />@Class.Created.ToShortTimeString()</td>
-    <td>@Class.Updated.ToShortDateString()<br />@Class.Updated.ToShortTimeString()</td>
-    <td style="white-space: nowrap;">
-        <a href="ManageClasses/@Class.Id" class="btn btn-primary">Editor</a>
-        <a href="Enroll/@Class.Id" class="btn btn-secondary">Enrollment page</a>
-    </td>
+<td style="white-space: nowrap;">@Class.ClassName</td>
+<td>
+    <h5>
+        @if (Class.MemberEnrollmentOpen && !Class.NonMemberEnrollmentOpen)
+        {
+            <span class="badge bg-info bg-info-glow">Members</span>
+        } else if (Class.MemberEnrollmentOpen || Class.NonMemberEnrollmentOpen)
+        {
+            <span class="badge bg-success bg-success-glow">Open</span>
+        } else
+        {
+            <span class="badge bg-danger bg-danger-glow">Closed</span>   
+        }
+    </h5>
+</td>
+<td>&mdash;</td>
+@if ((Class.MaxSeats ?? 0) != 0)
+{
+    <td>@Class.MaxSeats</td>
+    <td>@Class.MaxSeats</td>
+} else
+{
+    <td>&infin;</td>
+    <td>&infin;</td>
+}
+<td>@Class.Created.ToShortDateString()<br />@Class.Created.ToShortTimeString()</td>
+<td>@Class.Updated.ToShortDateString()<br />@Class.Updated.ToShortTimeString()</td>
+<td style="white-space: nowrap;">
+    <a href="ManageClasses/@Class.Id" class="btn btn-primary">Editor</a>
+    <a href="Enroll/@Class.Id" class="btn btn-secondary">Enrollment page</a>
+</td>
 </tr>
 
 @code
