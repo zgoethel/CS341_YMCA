@@ -3,6 +3,7 @@
 @using CS341_YMCA.Pages
 
 @inject ClassRepository Classes
+@inject IJSRuntime Js
 
 @if (AddEditOpen)
 {
@@ -18,7 +19,80 @@
             }"></button>
     </div>
     <div class="modal-body">
-        <p class="font-weight-bold"></p>
+    <EditForm Model=RelevantSchedule>
+
+    <div class="row">
+    <div class="col-sm-5">
+        <label>First occurrence date:</label>
+        <InputDate class="form-control" @bind-Value=RelevantSchedule.FirstDate />
+    </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-sm-5"><label>Start time</label></div>
+        <div class="col-sm-3"><label>Duration</label></div>
+    </div>
+    <div class="row">
+    <div class="col-sm-5">
+        <InputText class="timepicker form-control" @bind-Value=JustTime />
+    </div>
+    <div class="col-sm-3">
+        <InputNumber class="form-control me-2" @bind-Value=RelevantSchedule.Duration min=1 step=1 />
+        <span><i>(minutes)</i></span>
+    </div>
+    </div>
+
+    <InputCheckbox class="me-2 mt-4" @bind-Value=ClassRepeats />
+    <span>Session repeats</span>
+
+    @if (ClassRepeats)
+    {
+        <h5 class="mt-4">Recurrence Settings</h5>
+        <div>
+            <span>Repeats every</span>
+            <InputNumber class="form-control ms-2 me-2 mt-2"
+                @bind-Value=RelevantSchedule.Recurrence
+                style="display: inline-block;max-width: 5em;"
+                min=1
+                step=1 />
+            <span>days</span>
+        </div>
+        <div>
+            <span>and occurs</span>
+            <InputSelect class="form-control form-select ms-2 me-2 mt-2"
+                    style="display: inline-block;max-width: 14em;"
+                    @bind-Value=OccursIndefinitely>
+
+                <option value=true>indefinitely</option>
+                <option value=false>for a fixed time</option>
+            </InputSelect>
+
+            @if (!OccursIndefinitely)
+            {
+                <div class="mt-4">
+                    <span>Repeat</span>
+                    <InputNumber class="form-control ms-2 me-2"
+                        @bind-Value=RelevantSchedule.Occurrences
+                        style="display: inline-block;max-width: 5em;"
+                        min=1
+                        step=1 />
+                    <span>time(s)</span>
+                    <br />
+                    <i style="display: block;" class="mt-2">
+                        (Last day would be <strong>
+                        @(RelevantSchedule.FirstDate.Date
+                            .AddDays(RelevantSchedule.Recurrence * RelevantSchedule.Occurrences)
+                            .ToLongDateString())
+                        </strong>)
+                    </i>
+                </div>
+            }
+        </div>
+    }
+
+    @code { const string _PM = "PM"; }
+
+    </EditForm>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" @onclick="() =>
@@ -28,7 +102,25 @@
             }">Cancel</button>
         <button type="button" class="btn btn-primary" @onclick="() =>
             {
+                var Split = JustTime.Split(' ', ':');
+                Split[2] = Split[2].ToUpper();
+
+                if (Split[0] == 12.ToString())
+                    Split[0] = 0.ToString();
+                if (Split[2] == _PM)
+                    Split[0] = (int.Parse(Split[0]) + 12).ToString();
+
+                RelevantSchedule.FirstDate = RelevantSchedule.FirstDate.Date;
+                RelevantSchedule.FirstDate = RelevantSchedule.FirstDate
+                    .AddHours(int.Parse(Split[0]))
+                    .AddMinutes(int.Parse(Split[1]));
+
+                if (_RelevantSchedule.Id is not null)
+                    Schedule.Remove(_RelevantSchedule);
+                Schedule.Add(RelevantSchedule);
+
                 AddEditOpen = false;
+                UpdateCallback();
                 StateHasChanged();
             }">Submit</button>
     </div>
@@ -39,7 +131,7 @@
 
 <div class="schedule-day-block mb-1">
 
-@if (ShowEditing && RelevantSchedule != null)
+@if (ShowEditing && _RelevantSchedule.Id != null)
 {
     <i class="oi oi-pencil"
         style="float: right;cursor: pointer;"
@@ -54,7 +146,7 @@
 <p style="margin-bottom: 0.2em;"><strong><i>@Date.Month/@Date.Day</i></strong></p>
 <hr style="margin: 0;" />
 
-@if (RelevantSchedule == null)
+@if (_RelevantSchedule.Id == null)
 {
     @if (ShowEditing)
     {
@@ -69,22 +161,22 @@
 } else
 {
     <p>
-        @RelevantSchedule.FirstDate.ToShortTimeString()&nbsp;-
-        @RelevantSchedule.FirstDate.AddMinutes(RelevantSchedule.Duration).ToShortTimeString()
+        @_RelevantSchedule.FirstDate.ToShortTimeString()&nbsp;-
+        @_RelevantSchedule.FirstDate.AddMinutes(_RelevantSchedule.Duration).ToShortTimeString()
     </p>
 
     <p>
-    @if (RelevantSchedule.Recurrence <= 0)
+    @if (_RelevantSchedule.Recurrence <= 0)
     {
         <i class="oi oi-loop-square" /><i>Never</i>
-    } else if (RelevantSchedule.Occurrences <= 0)
+    } else if (_RelevantSchedule.Occurrences <= 0)
     {
         <i class="oi oi-loop-square" /><i>Forever</i>
     } else
     {
         <i class="oi oi-loop-square" /><i>
             Until
-            @(RelevantSchedule.FirstDate.Date.AddDays(RelevantSchedule.Recurrence * RelevantSchedule.Occurrences).ToShortDateString())
+            @(_RelevantSchedule.FirstDate.Date.AddDays(_RelevantSchedule.Recurrence * _RelevantSchedule.Occurrences).ToShortDateString())
         </i>
     }
     </p>
@@ -100,9 +192,17 @@
     public List<ClassScheduleDBO> Schedule { get; set; } = new();
     [Parameter]
     public bool ShowEditing { get; set; } = false;
+    [Parameter]
+    public Action UpdateCallback { get; set; } = () => { };
 
-    private ClassScheduleDBO? RelevantSchedule;
+    // Parent editor copy (original)
+    private ClassScheduleDBO _RelevantSchedule = new();
+    // Modal editor copy (in flight)
+    private ClassScheduleDBO RelevantSchedule = new();
     private bool AddEditOpen = false;
+    private bool ClassRepeats = false;
+    private bool OccursIndefinitely = true;
+    private string JustTime = "";
 
     private DateTime _Date { get; set; } = DateTime.Today;
     [Parameter]
@@ -113,19 +213,19 @@
         {
             _Date = value.Date;
             // Reload schedule data for new day
-            RelevantSchedule = Schedule.Find((It) =>
+            _RelevantSchedule = Schedule.Find((It) =>
             {
-                // Select if this is the first day
-                var JustDay = It.FirstDate.Date;
+            // Select if this is the first day
+            var JustDay = It.FirstDate.Date;
                 if (JustDay == _Date)
                     return true;
-                // Don't select if class is over
-                if (
+            // Don't select if class is over
+            if (
                     It.Recurrence <= 0
                     || _Date < JustDay
                 ) return false;
-                // Select if today falls on an even recurrence
-                var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
+            // Select if today falls on an even recurrence
+            var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
                 var DiffDays = _Date.Subtract(JustDay).Days;
                 if (
                     (_Date <= EndDate || It.Occurrences <= 0)
@@ -133,10 +233,37 @@
                 ) return true;
 
                 return false;
-            });
+            }) ?? new()
+            {
+                Id = null,
+                ClassId = Class.Id,
+                FirstDate = value.Date,
+                Recurrence = 0,
+                Duration = 30,
+                Occurrences = 0
+            };
 
+            // Make a copy so editing only sticks when pressing "Submit"
+            RelevantSchedule = new()
+            {
+                Id = _RelevantSchedule.Id,
+                ClassId = _RelevantSchedule.ClassId,
+                FirstDate = _RelevantSchedule.FirstDate,
+                Recurrence = _RelevantSchedule.Recurrence,
+                Duration = _RelevantSchedule.Duration,
+                Occurrences = _RelevantSchedule.Occurrences
+            };
+
+            JustTime = RelevantSchedule.FirstDate.ToShortTimeString();
             StateHasChanged();
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool FirstRender)
+    {
+        base.OnAfterRender(FirstRender);
+
+        await Js.InvokeVoidAsync("InitializeTimePickers");
     }
 }
 
@@ -149,5 +276,13 @@
         box-shadow: 0 0 0.3em 0.3em #c2c2c2;
         border-left: 0.4em solid green;
         height: 9.8em;
+    }
+    .oi-chevron-top
+    {
+        padding-left: 2em;
+    }
+    .bootstrap-datetimepicker-widget table td span
+    {
+        display: inline;
     }
 </style>

@@ -55,6 +55,10 @@
                 Schedule=@Schedule
                 Date=@WeekStart.AddDays(j)
                 ShowEditing=ShowEditing
+                UpdateCallback="() =>
+                {
+                    StateHasChanged();
+                }"
             />
         </div>
     }
