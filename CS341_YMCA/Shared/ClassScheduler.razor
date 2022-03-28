@@ -1,8 +1,8 @@
-﻿@using CS341_YMCA.Data
-@using CS341_YMCA.Controllers
+﻿@using CS341_YMCA.Helpers
+@using CS341_YMCA.Services
 @using CS341_YMCA.Pages
 
-@inject ClassController Classes
+@inject ClassRepository Classes
 
 @if(!string.IsNullOrEmpty(ValidationMessage))
 {
@@ -11,18 +11,27 @@
     </div>
 }
 
-@*if (ShowEditing)
+@if (HasMoreRight)
 {
-    <button class="btn btn-primary" style="float: right;" @onclick=OnAddClick>
-        <i class="oi oi-plus"></i>
-    </button>
-}*@
-
-<h4 class="ms-4 me-4 text-info"
-    style="float: right;cursor: pointer;"
-    @onclick="() => { WeekStart = WeekStart.AddDays(7); }">
-<span class="badge bg-info" style="display: inline;">MORE</span>
-<i class="ms-2 oi oi-chevron-right" /></h4>
+    <h4 class="ms-4 me-4 text-info"
+        style="float: right;cursor: pointer;"
+        @onclick="() =>
+        {
+            WeekStart = WeekStart.AddDays(7);
+            HasMoreRight = false;
+            StateHasChanged();
+        }">
+    <span class="badge bg-info" style="display: inline;">MORE</span>
+    <i class="ms-2 oi oi-chevron-right" /></h4>
+} else
+{
+    <h4 class="ms-4 me-4"
+        style="float: right;cursor: pointer;">
+    <i class="oi oi-chevron-right"
+        style="cursor: pointer;"
+        @onclick="() => { WeekStart = WeekStart.AddDays(7); }"
+    /></h4>
+}
 
 <h4 class="mt-1 me-4">
 <i class="oi oi-chevron-left"
@@ -45,6 +54,11 @@
                 Class=@Class
                 Schedule=@Schedule
                 Date=@WeekStart.AddDays(j)
+                ShowEditing=ShowEditing
+                UpdateCallback="() =>
+                {
+                    StateHasChanged();
+                }"
             />
         </div>
     }
@@ -63,6 +77,7 @@
     private List<ClassScheduleDBO> Schedule = new();
     private string ValidationMessage = "";
     private DateTime WeekStart = DateTime.Today;
+    private bool HasMoreRight = false;
 
     protected override void OnInitialized()
     {
@@ -71,9 +86,13 @@
         Schedule = Classes.ClassSchedule_List(Class!.Id).Get()!;
 
         var _WeekStart = Schedule.FirstOrDefault()?.FirstDate ?? DateTime.Today;
-        WeekStart = WeekStart.AddDays(-(int)WeekStart.DayOfWeek);
+        var Offset = -(int)_WeekStart.DayOfWeek;
+        WeekStart = _WeekStart.AddDays(Offset);
 
-        StateHasChanged();
+        HasMoreRight = Schedule.Find((It) =>
+            {
+                return It.FirstDate.AddDays(It.Recurrence * It.Occurrences) >= WeekStart.AddDays(7);
+            }) != null;
     }
 
     private void OnAddClick()
@@ -94,5 +113,6 @@
         min-width: 6.5em;
         max-width: 14%;
         display: inline-block;
+        vertical-align: top;
     }
 </style>

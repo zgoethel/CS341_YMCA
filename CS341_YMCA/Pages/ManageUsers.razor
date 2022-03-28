@@ -1,48 +1,50 @@
-﻿@using CS341_YMCA.Data
-@using CS341_YMCA.Controllers
+﻿@using CS341_YMCA.Helpers
+@using CS341_YMCA.Services
 
 @page "/ManageUsers"
 
-@inject SiteUserController Users
+@inject SiteUserRepository Users
 
 <PageTitle>Member Accounts</PageTitle>
 
 @if (LoggedIn.IsAdmin)
 {
-    <h1>Member Accounts</h1>
-    <hr />
-    <h3>Manage patron account, membership, and payment details</h3>
+
+<h1>Member Accounts</h1>
+<hr />
+<h3>Manage patron account, membership, and payment details</h3>
     
-    var UserList = Users.SiteUser_List().Get()!;
+var UserList = Users.SiteUser_List().Get()!;
     
-    <table class="table table-striped mt-4">
-        <thead>
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">First</th>
-                <th scope="col">Last</th>
-                <th scope="col">Email</th>
-                <th scope="col">Y Member</th>
-                <th scope="col">Admin</th>
-                <th scope="col">Created</th>
-                <th scope="col">Modified</th>
-                <th scope="col"></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var User in UserList)
-            {
-                <ManageUsersEntry User=@User></ManageUsersEntry>
-            }
-        </tbody>
-    </table>
+<table class="table table-striped mt-4">
+<thead>
+<tr>
+    <th scope="col">ID</th>
+    <th scope="col">First</th>
+    <th scope="col">Last</th>
+    <th scope="col">Email</th>
+    <th scope="col">Y Member</th>
+    <th scope="col">Admin</th>
+    <th scope="col">Created</th>
+    <th scope="col">Modified</th>
+    <th scope="col"></th>
+</tr>
+</thead>
+<tbody>
+    @foreach (var User in UserList)
+    {
+        <ManageUsersEntry User=@User></ManageUsersEntry>
+    }
+</tbody>
+</table>
     
-    <style>
-       td
-        {
-            vertical-align: middle;
-        }
-    </style>
+<style>
+    td
+    {
+        vertical-align: middle;
+    }
+</style>
+
 } else
 {
     <div class="alert alert-danger">You are <strong>not</strong> an admin user and cannot access this page.</div>

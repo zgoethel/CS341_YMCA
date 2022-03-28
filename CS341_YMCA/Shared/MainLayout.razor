@@ -1,5 +1,5 @@
-﻿@using CS341_YMCA.Data
-@using CS341_YMCA.Controllers
+﻿@using CS341_YMCA.Helpers
+@using CS341_YMCA.Services
 
 @inherits LayoutComponentBase
 
@@ -8,7 +8,7 @@
 @inject Database Sql
 @inject AuthenticationStateProvider AuthState
 @inject IHttpContextAccessor Con
-@inject SiteUserController SiteUsers
+@inject SiteUserRepository SiteUsers
 
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject ProtectedLocalStorage ProtectedStorage

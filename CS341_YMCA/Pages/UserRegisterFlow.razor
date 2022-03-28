@@ -1,6 +1,4 @@
-﻿@using CS341_YMCA.Controllers
-@using CS341_YMCA.Data
-@using CS341_YMCA.Pages
+﻿@using CS341_YMCA.Pages
 @using Microsoft.AspNetCore.WebUtilities
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components
@@ -9,10 +7,13 @@
 @using System.Security.Cryptography
 @using System.Text
 
+@using CS341_YMCA.Helpers
+@using CS341_YMCA.Services
+
 @page "/SiteUser/RegisterFlow"
 @layout SimplifiedLayout
 
-@inject SiteUserController SiteUsers
+@inject SiteUserRepository SiteUsers
 @inject NavigationManager Nav
 
 <PageTitle>Member Registration</PageTitle>
@@ -37,23 +38,25 @@
     </p>
 
     <EditForm Model=FormBind>
-        <label>First Name:</label>
-        <InputText class="form-control mb-2"
-            type="text"
-            @bind-Value=FormBind.FirstName />
 
-        <label>Last Name:</label>
-        <InputText class="form-control mb-2"
-            type="text" 
-            @bind-Value=FormBind.LastName />
+    <label>First Name:</label>
+    <InputText class="form-control mb-2"
+        type="text"
+        @bind-Value=FormBind.FirstName />
 
-        <label>Email:</label>
-        <InputText class="form-control"
-            type="text" 
-            @bind-Value=FormBind.Email />
+    <label>Last Name:</label>
+    <InputText class="form-control mb-2"
+        type="text" 
+        @bind-Value=FormBind.LastName />
 
-        <button class="btn btn-primary mt-4" type="submit" @onclick=SubmitRegistration>Create Account</button>&nbsp;
-        <a class="btn btn-secondary mt-4" type="button" href="SiteUser/LoginFlow">Sign In</a>
+    <label>Email:</label>
+    <InputText class="form-control"
+        type="text" 
+        @bind-Value=FormBind.Email />
+
+    <button class="btn btn-primary mt-4 me-2" type="submit" @onclick=SubmitRegistration>Create Account</button>
+    <a class="btn btn-secondary mt-4" type="button" href="SiteUser/LoginFlow">Sign In</a>
+    
     </EditForm>
 } else
 {
