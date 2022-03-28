@@ -63,8 +63,8 @@
                     style="display: inline-block;max-width: 14em;"
                     @bind-Value=OccursIndefinitely>
 
-                <option value=true>indefinitely</option>
-                <option value=false>for a fixed time</option>
+                <option value=true>indefinitely.</option>
+                <option value=false>for a fixed time.</option>
             </InputSelect>
 
             @if (!OccursIndefinitely)
@@ -76,7 +76,7 @@
                         style="display: inline-block;max-width: 5em;"
                         min=1
                         step=1 />
-                    <span>time(s)</span>
+                    <span>time(s).</span>
                     <br />
                     <i style="display: block;" class="mt-2">
                         (Last day would be <strong>
@@ -110,14 +110,25 @@
                 if (Split[2] == _PM)
                     Split[0] = (int.Parse(Split[0]) + 12).ToString();
 
-                RelevantSchedule.FirstDate = RelevantSchedule.FirstDate.Date;
                 RelevantSchedule.FirstDate = RelevantSchedule.FirstDate
+                    .Date
                     .AddHours(int.Parse(Split[0]))
                     .AddMinutes(int.Parse(Split[1]));
+                if (ClassRepeats)
+                {
+                    if (OccursIndefinitely)
+                        RelevantSchedule.Occurrences = 0;
+                } else
+                {
+                    RelevantSchedule.Recurrence = 0;
+                    RelevantSchedule.Occurrences = 0;
+                }
 
                 if (_RelevantSchedule.Id is not null)
                     Schedule.Remove(_RelevantSchedule);
                 Schedule.Add(RelevantSchedule);
+                _RelevantSchedule = RelevantSchedule;
+                _RelevantSchedule.Id = 0;
 
                 AddEditOpen = false;
                 UpdateCallback();
@@ -199,8 +210,8 @@
     private ClassScheduleDBO _RelevantSchedule = new();
     // Modal editor copy (in flight)
     private ClassScheduleDBO RelevantSchedule = new();
-    private bool AddEditOpen = false;
-    private bool ClassRepeats = false;
+    private bool AddEditOpen { get; set; }
+    private bool ClassRepeats { get; set; }
     private bool OccursIndefinitely = true;
     private string JustTime = "";
 
@@ -215,17 +226,17 @@
             // Reload schedule data for new day
             _RelevantSchedule = Schedule.Find((It) =>
             {
-            // Select if this is the first day
-            var JustDay = It.FirstDate.Date;
+                // Select if this is the first day
+                var JustDay = It.FirstDate.Date;
                 if (JustDay == _Date)
                     return true;
-            // Don't select if class is over
-            if (
+                // Don't select if class is over
+                if (
                     It.Recurrence <= 0
                     || _Date < JustDay
                 ) return false;
-            // Select if today falls on an even recurrence
-            var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
+                // Select if today falls on an even recurrence
+                var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
                 var DiffDays = _Date.Subtract(JustDay).Days;
                 if (
                     (_Date <= EndDate || It.Occurrences <= 0)
@@ -237,11 +248,14 @@
             {
                 Id = null,
                 ClassId = Class.Id,
-                FirstDate = value.Date,
+                FirstDate = value.Date.AddHours(12),
                 Recurrence = 0,
                 Duration = 30,
                 Occurrences = 0
             };
+            
+            ClassRepeats = _RelevantSchedule.Recurrence != 0;
+            OccursIndefinitely = _RelevantSchedule.Occurrences == 0;
 
             // Make a copy so editing only sticks when pressing "Submit"
             RelevantSchedule = new()
@@ -249,9 +263,13 @@
                 Id = _RelevantSchedule.Id,
                 ClassId = _RelevantSchedule.ClassId,
                 FirstDate = _RelevantSchedule.FirstDate,
-                Recurrence = _RelevantSchedule.Recurrence,
+                Recurrence = (_RelevantSchedule.Recurrence == 0)
+                    ? 7
+                    : _RelevantSchedule.Recurrence,
                 Duration = _RelevantSchedule.Duration,
-                Occurrences = _RelevantSchedule.Occurrences
+                Occurrences = (_RelevantSchedule.Occurrences == 0)
+                    ? 1
+                    : _RelevantSchedule.Occurrences
             };
 
             JustTime = RelevantSchedule.FirstDate.ToShortTimeString();
