@@ -74,7 +74,7 @@
     [Parameter]
     public ManageClass Manager { get; set; } = new();
 
-    private List<ClassScheduleDBO> Schedule = new();
+    public List<ClassScheduleDBO> Schedule = new();
     private string ValidationMessage = "";
     private DateTime WeekStart = DateTime.Today;
     private bool HasMoreRight = false;
@@ -93,6 +93,23 @@
             {
                 return It.FirstDate.AddDays(It.Recurrence * It.Occurrences) >= WeekStart.AddDays(7);
             }) != null;
+    }
+
+    public void Save()
+    {
+        foreach (var Session in Schedule)
+        {
+            var Result = Classes.ClassSchedule_Set(
+                Id: Session.Id,
+                ClassId: Class.Id,
+                FirstDate: Session.FirstDate,
+                Recurrence: Session.Recurrence,
+                Occurrences: Session.Occurrences,
+                Duration: Session.Duration
+            );
+
+            Session.Id = Result.Get()!;
+        }
     }
 
     private void OnAddClick()

@@ -52,6 +52,7 @@ public class SiteUserDBO
     public DateTime Modified { get; set; }
     public DateTime? MemberThru { get; set; }
     public bool IsMember { get; set; }
+    public string FulfilledCsv { get; set; } = "";
 }
 
 public class SiteUserListRequest
@@ -67,6 +68,7 @@ public class SiteUserSetRequest
     public string? Email { get; set; }
     public bool? IsAdmin { get; set; }
     public DateTime? MemberThru { get; set; }
+    public string? FullfilledCsv { get; set; }
 }
 
 public class SiteUserDeleteRequest
@@ -87,7 +89,6 @@ public class ClassSetRequest
     public bool? Enabled { get; set; }
     public string? ShortDescription { get; set; }
     public string? LongDescription { get; set; }
-    public string? PrereqIds { get; set; }
     public DateTime? MemberEnrollmentStart { get; set; }
     public int? MemberEnrollmentDays { get; set; }
     public bool? AllowNonMembers { get; set; } = false;
@@ -97,6 +98,8 @@ public class ClassSetRequest
     public float? NonMemberPrice { get; set; }
     public string? Location { get; set; }
     public int? MaxSeats { get; set; }
+    public string? FulfillCsv { get; set; }
+    public string? RequireCsv { get; set; }
 }
 
 public class ClassSetResult
@@ -120,7 +123,6 @@ public class ClassDBO
     public DateTime Updated { get; set; }
     public string ShortDescription { get; set; } = "";
     public string LongDescription { get; set; } = "";
-    public string PrereqIds { get; set; } = "";
     public DateTime? MemberEnrollmentStart { get; set; }
     public int? MemberEnrollmentDays { get; set; }
     public bool AllowNonMembers { get; set; } = false;
@@ -132,6 +134,8 @@ public class ClassDBO
     public int? MaxSeats { get; set; }
     public bool MemberEnrollmentOpen { get; set; }
     public bool NonMemberEnrollmentOpen { get; set; }
+    public string FulfillCsv { get; set; } = "";
+    public string RequireCsv { get; set; } = "";
 }
 
 public class ClassScheduleDBO
@@ -162,6 +166,11 @@ public class ClassScheduleSetResult
 public class ClassDeleteRequest
 {
     public int Id { get; set; }
+}
+
+public class ClassListReqResult
+{
+    public string Value { get; set; } = "";
 }
 
 #endregion

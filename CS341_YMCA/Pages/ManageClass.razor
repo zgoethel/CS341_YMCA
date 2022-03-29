@@ -58,8 +58,22 @@
 <br />
 <br />
             
-<h3>Class Prerequisites</h3>
-<ClassSelector Exclude=@ActiveClass.Id Csv=@(ActiveClass.PrereqIds ?? "") @ref=PrereqSelector />
+<div class="row">
+<div class="col-lg-6">
+    <h3>Class Fulfills</h3>
+    <CsvSelector Exclude=@(new())
+        Csv=@ActiveClass.FulfillCsv
+        @ref=FulfillSelector
+        Items=@(Classes.Class_ListReqs().Get()!) />
+</div>
+<div class="col-lg-6">
+    <h3>Class Requires</h3>
+    <CsvSelector Exclude=@(new())
+        Csv=@ActiveClass.RequireCsv
+        @ref=RequireSelector
+        Items=@(Classes.Class_ListReqs().Get()!) />
+</div>
+</div>
 
 <button class="btn btn-primary mt-4" type="submit" @onclick="() => SaveForm(Redirect: true)">Submit</button>
 @if (Id != "Create")
@@ -71,7 +85,7 @@
 
 <h3>Class Scheduler</h3>
 <hr />
-<ClassScheduler Manager=@this Class=@ActiveClass ShowEditing=true></ClassScheduler>
+<ClassScheduler @ref=Scheduler Manager=@this Class=@ActiveClass ShowEditing=true></ClassScheduler>
 
 @* PAGE LEFT COLUMN ENDS HERE *@
 </div>
@@ -210,7 +224,9 @@
 
     private ClassDBO ActiveClass = new();
     public string ValidationMessage = "";
-    private ClassSelector PrereqSelector { get; set; } = new();
+    private CsvSelector FulfillSelector { get; set; } = new();
+    private CsvSelector RequireSelector { get; set; } = new();
+    private ClassScheduler? Scheduler { get; set; }
 
     private bool DeleteDialogOpen { get; set; }
 
@@ -290,7 +306,7 @@
             return;
         }
 
-        var Sessions = Classes.ClassSchedule_List(ActiveClass.Id).Get()!;
+        var Sessions = Scheduler.Schedule;//Classes.ClassSchedule_List(ActiveClass.Id).Get()!;
         if (Sessions.Count > 0
             && ActiveClass.MemberEnrollmentStart != null
             && (ActiveClass.NonMemberEnrollmentStart != null
@@ -360,6 +376,13 @@
             }
         }
 
+        if (FulfillSelector.Selected.Intersect(RequireSelector.Selected).Count() > 0)
+        {
+            ValidationMessage = "Each requirement code may only be used once, in either requirements of fullfillments.";
+            StateHasChanged();
+            return;
+        }
+
         var Result = Classes.Class_Set(
             Id: ActiveClass.Id,
             ClassName: ActiveClass.ClassName,
@@ -367,7 +390,6 @@
             Enabled: ActiveClass.Enabled,
             ShortDescription: ActiveClass.ShortDescription,
             LongDescription: ActiveClass.LongDescription,
-            PrereqIds: PrereqSelector?.Csv,
             MemberEnrollmentStart: ActiveClass.MemberEnrollmentStart,
             MemberEnrollmentDays: ActiveClass.MemberEnrollmentDays,
             NonMemberEnrollmentStart: ActiveClass.NonMemberEnrollmentStart,
@@ -376,15 +398,19 @@
             MemberPrice: ActiveClass.MemberPrice,
             NonMemberPrice: ActiveClass.NonMemberPrice,
             Location: ActiveClass.Location,
-            MaxSeats: ActiveClass.MaxSeats
+            MaxSeats: ActiveClass.MaxSeats,
+            FulfillCsv: FulfillSelector.Csv,
+            RequireCsv: RequireSelector.Csv
         );
 
+        if (Result.Success) Scheduler.Save();
         if (Result.Success && Redirect)
+        {
             Nav.NavigateTo("ManageClasses");
-        else if (Result.Success)
+        } else if (Result.Success)
         {
             ActiveClass.Id = Result.Get()!;
-            ActiveClass.PrereqIds = PrereqSelector!.Csv;
+            //ActiveClass.PrereqIds = PrereqSelector!.Csv;
 
             ValidationMessage = "";
             StateHasChanged();
