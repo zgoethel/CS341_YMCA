@@ -62,15 +62,15 @@
 <div class="col-lg-6">
     <h3>Class Fulfills</h3>
     <CsvSelector Exclude=@(new())
-        Csv=@ActiveClass.RequireCsv
-        @ref=PrereqSelector
+        Csv=@ActiveClass.FulfillCsv
+        @ref=FulfillSelector
         Items=@(Classes.Class_ListReqs().Get()!) />
 </div>
 <div class="col-lg-6">
     <h3>Class Requires</h3>
     <CsvSelector Exclude=@(new())
         Csv=@ActiveClass.RequireCsv
-        @ref=PrereqSelector
+        @ref=RequireSelector
         Items=@(Classes.Class_ListReqs().Get()!) />
 </div>
 </div>
@@ -224,7 +224,8 @@
 
     private ClassDBO ActiveClass = new();
     public string ValidationMessage = "";
-    private CsvSelector PrereqSelector { get; set; } = new();
+    private CsvSelector FulfillSelector { get; set; } = new();
+    private CsvSelector RequireSelector { get; set; } = new();
 
     private bool DeleteDialogOpen { get; set; }
 
@@ -374,6 +375,13 @@
             }
         }
 
+        if (FulfillSelector.Selected.Intersect(RequireSelector.Selected).Count() > 0)
+        {
+            ValidationMessage = "Each requirement code may only be used once, in either requirements of fullfillments.";
+            StateHasChanged();
+            return;
+        }
+
         var Result = Classes.Class_Set(
             Id: ActiveClass.Id,
             ClassName: ActiveClass.ClassName,
@@ -390,8 +398,8 @@
             NonMemberPrice: ActiveClass.NonMemberPrice,
             Location: ActiveClass.Location,
             MaxSeats: ActiveClass.MaxSeats,
-            FulfillCsv: ActiveClass.FulfillCsv,
-            RequireCsv: ActiveClass.RequireCsv
+            FulfillCsv: FulfillSelector.Csv,
+            RequireCsv: RequireSelector.Csv
         );
 
         if (Result.Success && Redirect)

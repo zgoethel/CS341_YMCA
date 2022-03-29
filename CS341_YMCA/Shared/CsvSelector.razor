@@ -19,7 +19,7 @@
         class="form-control"
         style="width:5em;display: inline-block;padding-bottom: 0.2em;">
         
-        <option value="-1">Add +</option>
+        <option value="-1" hidden>Add +</option>
         <option value="-2">Create new code</option>
         @foreach (var Option in NotSelected)
         {
@@ -58,7 +58,7 @@
             StateHasChanged();
         }">Cancel</button>
     @code {
-        const string _Reg = "[A-Za-z0-9]+";
+        const string _Reg = "^[A-Za-z0-9]+$";
         const string _ErrMsg = "Please enter an alphanumeric class code.";
         const string _Ep = "";
     }
@@ -86,6 +86,7 @@
 
             ValidationMessage = _Ep;
             _Bind.Value = _Ep;
+            Csv = String.Join(',', Selected);
             
             AddCsvOpen = false;
             StateHasChanged();
@@ -113,7 +114,7 @@
     [Parameter]
     public List<string> Items { get; set; } = new();
 
-    protected List<string> Selected = new();
+    public List<string> Selected = new();
     private List<string> NotSelected = new();
     private bool AddCsvOpen = false;
     private string ValidationMessage = "";
