@@ -16,19 +16,27 @@
 @* PAGE LEFT COLUMN BEGINS HERE *@
 
 <h3>@ActiveClass.ShortDescription</h3>
-@*if (!string.IsNullOrEmpty(ActiveClass.PrereqIds))
+<br />
+@if (!string.IsNullOrEmpty(ActiveClass.FulfillCsv))
 {
-    <h4>
-        Prerequisites: 
-        @{
-            var PrereqClasses = Classes.Class_GetByIds(ActiveClass.PrereqIds).Get()!;
-        }
-        @foreach (var Prereq in PrereqClasses)
+    <h4 style="display: inline;" class="me-4">
+        Fulfills: 
+        @foreach (var Item in ActiveClass.FulfillCsv.Split(","))
         {
-            <span class="ms-2 badge bg-secondary">@Prereq.ClassName</span>
+            <span class="ms-2 badge bg-info">@Item</span>
         }
     </h4>
-}*@
+}
+@if (!string.IsNullOrEmpty(ActiveClass.RequireCsv))
+{
+    <h4 style="display: inline;">
+        Prerequisites: 
+        @foreach (var Item in ActiveClass.RequireCsv.Split(","))
+        {
+            <span class="ms-2 badge bg-secondary">@Item</span>
+        }
+    </h4>
+}
 
 @{
     // Replaces newlines with HTML newlines
