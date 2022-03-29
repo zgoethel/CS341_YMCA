@@ -85,7 +85,7 @@
 
 <h3>Class Scheduler</h3>
 <hr />
-<ClassScheduler Manager=@this Class=@ActiveClass ShowEditing=true></ClassScheduler>
+<ClassScheduler @ref=Scheduler Manager=@this Class=@ActiveClass ShowEditing=true></ClassScheduler>
 
 @* PAGE LEFT COLUMN ENDS HERE *@
 </div>
@@ -226,6 +226,7 @@
     public string ValidationMessage = "";
     private CsvSelector FulfillSelector { get; set; } = new();
     private CsvSelector RequireSelector { get; set; } = new();
+    private ClassScheduler? Scheduler { get; set; }
 
     private bool DeleteDialogOpen { get; set; }
 
@@ -381,6 +382,8 @@
             StateHasChanged();
             return;
         }
+
+        Scheduler.Save();
 
         var Result = Classes.Class_Set(
             Id: ActiveClass.Id,

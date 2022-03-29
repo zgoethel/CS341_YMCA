@@ -12,7 +12,7 @@
         </span>
     }
 
-    @code { Guid _Gen = Guid.NewGuid(); }
+    @{ Guid _Gen = Guid.NewGuid(); }
     <InputSelect @bind-Value=DropDown
         id=@(_Gen.ToString())
         onclick=@("setTimeout(function() { $('#" + _Gen.ToString() + "').val(-1); }, 200);")
@@ -146,6 +146,7 @@
 
     private void OnAddSelectorChange(string Item)
     {
+        if (Item == "-1") return;
         if (Item == "-2")
         {
             AddCsvOpen = true;

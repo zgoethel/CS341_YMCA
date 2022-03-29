@@ -95,6 +95,23 @@
             }) != null;
     }
 
+    public void Save()
+    {
+        foreach (var Session in Schedule)
+        {
+            var Result = Classes.ClassSchedule_Set(
+                Id: Session.Id,
+                ClassId: Class.Id,
+                FirstDate: Session.FirstDate,
+                Recurrence: Session.Recurrence,
+                Occurrences: Session.Occurrences,
+                Duration: Session.Duration
+            );
+
+            Session.Id = Result.Get()!;
+        }
+    }
+
     private void OnAddClick()
     {
         var Created = new ClassScheduleDBO();
