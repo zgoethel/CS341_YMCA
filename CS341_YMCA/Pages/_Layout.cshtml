@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Components.Web
+
 @namespace CS341_YMCA.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
@@ -12,6 +13,13 @@
     <link href="css/site.css" rel="stylesheet" />
     <link href="CS341_YMCA.styles.css" rel="stylesheet" />
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script> 
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js"> </script>
 </head>
 <body>
     @RenderBody()
@@ -28,5 +36,26 @@
     </div>
 
     <script src="_framework/blazor.server.js"></script>
+
+    <script>
+        var InitializeTimePickers = function()
+        {
+            $('.timepicker').datetimepicker(
+            {
+                format: 'hh:mm a'
+            });
+            $('.timepicker').click(function()
+            {
+                $("*[data-action='incrementHours']").addClass("oi");
+                $("*[data-action='incrementHours']").addClass("oi-chevron-top");
+                $("*[data-action='decrementHours']").addClass("oi");
+                $("*[data-action='decrementHours']").addClass("oi-chevron-bottom");
+                $("*[data-action='incrementMinutes']").addClass("oi");
+                $("*[data-action='incrementMinutes']").addClass("oi-chevron-top");
+                $("*[data-action='decrementMinutes']").addClass("oi");
+                $("*[data-action='decrementMinutes']").addClass("oi-chevron-bottom");
+            });
+        };
+    </script>
 </body>
 </html>

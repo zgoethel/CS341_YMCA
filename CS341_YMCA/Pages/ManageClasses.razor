@@ -1,11 +1,14 @@
-﻿@using CS341_YMCA.Data
-@using CS341_YMCA.Controllers
+﻿@using CS341_YMCA.Helpers
+@using CS341_YMCA.Services
 
 @page "/ManageClasses"
 
-@inject ClassController Classes
+@inject ClassRepository Classes
 
 <PageTitle>Manage Classes</PageTitle>
+
+@if (LoggedIn.IsAdmin)
+{
 
 <h1>Manage Classes</h1>
 <hr />
@@ -13,38 +16,38 @@
 
 <a class="btn btn-primary" href="ManageClasses/Create" style="float: right;"><span class="oi oi-plus" style="margin-top: 0.4em;"></span></a>
 
-@{
-    var ClassList = Classes.Class_List(IncludeDisabled: true).Get()!;
-}
-
+var ClassList = Classes.Class_List(IncludeDisabled: true).Get()!;
+    
+<div class="overflow-auto">
 <table class="table table-striped mt-4">
-    <thead>
-        <tr>
-            <th scope="col"></th>
-            <th scope="col"></th>
-            <th scope="col" class="col-group" colspan=3>Seats</th>
-            <th scope="col"></th>
-            <th scope="col"></th>
-            <th scope="col"></th>
-        </tr>
-        <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Enrollment</th>
-            <th scope="col" style="border-left: 2px solid #621414;">Taken</th>
-            <th scope="col">Avail.</th>
-            <th scope="col" style="border-right: 2px solid #621414;">Total</th>
-            <th scope="col">Created</th>
-            <th scope="col">Modified</th>
-            <th scope="col">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var Class in ClassList)
-        {
-            <ManageClassesEntry Class=@Class></ManageClassesEntry>
-        }
-    </tbody>
+<thead>
+<tr>
+    <th scope="col"></th>
+    <th scope="col"></th>
+    <th scope="col" class="col-group" colspan=3>Seats</th>
+    <th scope="col"></th>
+    <th scope="col"></th>
+    <th scope="col"></th>
+</tr>
+<tr>
+    <th scope="col">Name</th>
+    <th scope="col">Enrollment</th>
+    <th scope="col" style="border-left: 2px solid #621414;">Taken</th>
+    <th scope="col">Avail.</th>
+    <th scope="col" style="border-right: 2px solid #621414;">Total</th>
+    <th scope="col">Created</th>
+    <th scope="col">Modified</th>
+    <th scope="col">Actions</th>
+</tr>
+</thead>
+<tbody>
+    @foreach (var Class in ClassList)
+    {
+        <ManageClassesEntry Class=@Class></ManageClassesEntry>
+    }
+</tbody>
 </table>
+</div>
 
 <style>
     th.col-group
@@ -59,3 +62,14 @@
         vertical-align: middle;
     }
 </style>
+
+} else
+{
+    <div class="alert alert-danger">You are <strong>not</strong> an admin user and cannot access this page.</div>
+}
+
+@code
+{
+    [CascadingParameter]
+    private SiteUserDBO LoggedIn { get; set; } = new();
+}

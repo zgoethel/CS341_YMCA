@@ -1,14 +1,15 @@
 ﻿@page "/"
 
-@using CS341_YMCA.Data
+@using CS341_YMCA.Helpers
+@using CS341_YMCA.Services
 
 <PageTitle>Home</PageTitle>
 
-<h1>Howdy, <strong>@LoggedIn?.FirstName</strong>!</h1>
+<h1>Howdy, <strong>@LoggedIn.FirstName</strong>!</h1>
 <hr />
 <h3>We're glad you stopped by.</h3>
 
 @code {
     [CascadingParameter]
-    protected SiteUserDBO? LoggedIn { get; set; }
+    protected SiteUserDBO LoggedIn { get; set; } = new();
 }

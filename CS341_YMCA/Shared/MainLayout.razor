@@ -1,5 +1,5 @@
-﻿@using CS341_YMCA.Data
-@using CS341_YMCA.Controllers
+﻿@using CS341_YMCA.Helpers
+@using CS341_YMCA.Services
 
 @inherits LayoutComponentBase
 
@@ -8,15 +8,15 @@
 @inject Database Sql
 @inject AuthenticationStateProvider AuthState
 @inject IHttpContextAccessor Con
-@inject SiteUserController SiteUsers
+@inject SiteUserRepository SiteUsers
 
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject ProtectedLocalStorage ProtectedStorage
 
 <PageTitle>YMCA Enrollment Portal</PageTitle>
 
-<AuthorizeView>
-<Authorized>
+@*<AuthorizeView>
+<Authorized>*@
     <style>
         body
         {
@@ -37,17 +37,17 @@
             </main>
         </CascadingValue>
     </div>
-</Authorized>
+@*</Authorized>
 <NotAuthorized>
 
 </NotAuthorized>
-</AuthorizeView>
+</AuthorizeView>*@
 
 @code {
     [CascadingParameter]
     protected Task<AuthenticationState>? Auth { get; set; }
 
-    protected SiteUserDBO? LoggedIn { get; set; }
+    protected SiteUserDBO LoggedIn { get; set; } = new();
     protected bool Authenticated => Auth!.Result.User.Identity!.IsAuthenticated;
 
     protected override async Task OnAfterRenderAsync(bool FirstRender)
@@ -75,12 +75,14 @@
 
         if (FirstRender && Authenticated)
         {
-            LoggedIn = SiteUsers.SiteUser_GetByEmail(Auth!.Result.User.Identity!.Name!).Value;
+            LoggedIn = SiteUsers.SiteUser_GetByEmail(Auth!.Result.User.Identity!.Name!).Get()!;
             StateHasChanged();
         } else if (!Authenticated)
         {
-            var Path = Links.GetPathByAction(Con.HttpContext!, "LoginFlow", "SiteUser");
-            Nav.NavigateTo(Path!);
+            //var Path = Links.GetPathByAction(Con.HttpContext!, "LoginFlow", "SiteUser");
+            //Nav.NavigateTo(Path!);
+            LoggedIn = new();
+            StateHasChanged();
         }
     }
 }
