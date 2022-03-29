@@ -1,0 +1,162 @@
+﻿@using System.Text.RegularExpressions
+
+@using CS341_YMCA.Helpers
+@using CS341_YMCA.Services
+
+<h3 style="white-space: break-spaces;">
+    @foreach (var Item in Selected)
+    {
+        <span class="badge bg-secondary me-2 mt-2">
+            @Item&nbsp;
+            <i class="oi oi-trash" @onclick="() => { OnRemoveClick(Item); }" style="cursor: pointer;"></i>
+        </span>
+    }
+
+    @code { Guid _Gen = Guid.NewGuid(); }
+    <InputSelect @bind-Value=DropDown
+        id=@(_Gen.ToString())
+        onclick=@("setTimeout(function() { $('#" + _Gen.ToString() + "').val(-1); }, 200);")
+        class="form-control"
+        style="width:5em;display: inline-block;padding-bottom: 0.2em;">
+        
+        <option value="-1">Add +</option>
+        <option value="-2">Create new code</option>
+        @foreach (var Option in NotSelected)
+        {
+            <option value=@Option>@Option</option>
+        }
+    </InputSelect>
+</h3>
+
+@if (AddCsvOpen)
+{
+    <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+        <h4 class="modal-title">Add a new requirement code</h4>
+        <button type="button" class="btn btn-close close" @onclick="() =>
+            {
+                AddCsvOpen = false;
+                StateHasChanged();
+            }"></button>
+    </div>
+    <EditForm Model=_Bind>
+    <div class="modal-body">
+        
+    @if (!string.IsNullOrEmpty(ValidationMessage))
+    {
+        <div class="alert alert-danger">@ValidationMessage</div>
+    }
+    <InputText class="form-control" @bind-Value=_Bind.Value />
+    <span><i>(Use alphanumeric characters)</i></span>
+    </div>
+    <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" @onclick="() =>
+        {
+            AddCsvOpen = false;
+            StateHasChanged();
+        }">Cancel</button>
+    @code {
+        const string _Reg = "[A-Za-z0-9]+";
+        const string _ErrMsg = "Please enter an alphanumeric class code.";
+        const string _Ep = "";
+    }
+    <button type="button" class="btn btn-primary" @onclick="() =>
+        {
+            if (!Regex.IsMatch(_Bind.Value, _Reg))
+            {
+                ValidationMessage = _ErrMsg;
+                StateHasChanged();
+                return;
+            }
+
+            var _Upper = _Bind.Value.ToUpper();
+
+            if (Selected.Contains(_Upper))
+            {
+                AddCsvOpen = false;
+                StateHasChanged();
+                return;
+            }
+
+            Selected.Add(_Upper);
+            if (!Items.Contains(_Upper)) Items.Add(_Upper);
+            if (NotSelected.Contains(_Upper)) NotSelected.Remove(_Upper);
+
+            ValidationMessage = _Ep;
+            _Bind.Value = _Ep;
+            
+            AddCsvOpen = false;
+            StateHasChanged();
+        }">Submit</button>
+
+    </div>
+    </EditForm>
+    </div>
+    </div>
+    </div>
+}
+
+@code
+{
+    private class BindModel
+    {
+        public string Value { get; set; } = "";
+    }
+    private BindModel _Bind = new();
+
+    [Parameter]
+    public string Csv { get; set; } = "";
+    [Parameter]
+    public List<string> Exclude { get; set; } = new();
+    [Parameter]
+    public List<string> Items { get; set; } = new();
+
+    protected List<string> Selected = new();
+    private List<string> NotSelected = new();
+    private bool AddCsvOpen = false;
+    private string ValidationMessage = "";
+
+    private string DropDown
+    {
+        get => "-1";
+        set
+        {
+            OnAddSelectorChange(value);
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        var _Selected = Csv.Split(",").ToHashSet();
+        Selected = Items.FindAll((It) => _Selected.Contains(It) && !Exclude.Contains(It));
+        NotSelected = Items.FindAll((It) => !_Selected.Contains(It) && !Exclude.Contains(It));
+    }
+
+    private void OnRemoveClick(string Item)
+    {
+        Selected.Remove(Item);
+        NotSelected.Add(Item);
+        Csv = String.Join(',', Selected);
+
+        StateHasChanged();
+    }
+
+    private void OnAddSelectorChange(string Item)
+    {
+        if (Item == "-2")
+        {
+            AddCsvOpen = true;
+            StateHasChanged();
+
+            return;
+        }
+
+        Selected.Add(Item);
+        NotSelected.Remove(Item);
+        Csv = String.Join(',', Selected);
+
+        StateHasChanged();
+    }
+}

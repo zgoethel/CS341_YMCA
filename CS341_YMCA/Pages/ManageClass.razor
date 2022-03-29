@@ -58,8 +58,22 @@
 <br />
 <br />
             
-<h3>Class Prerequisites</h3>
-<ClassSelector Exclude=@ActiveClass.Id Csv=@(ActiveClass.PrereqIds ?? "") @ref=PrereqSelector />
+<div class="row">
+<div class="col-lg-6">
+    <h3>Class Fulfills</h3>
+    <CsvSelector Exclude=@(new())
+        Csv=@ActiveClass.RequireCsv
+        @ref=PrereqSelector
+        Items=@(Classes.Class_ListReqs().Get()!) />
+</div>
+<div class="col-lg-6">
+    <h3>Class Requires</h3>
+    <CsvSelector Exclude=@(new())
+        Csv=@ActiveClass.RequireCsv
+        @ref=PrereqSelector
+        Items=@(Classes.Class_ListReqs().Get()!) />
+</div>
+</div>
 
 <button class="btn btn-primary mt-4" type="submit" @onclick="() => SaveForm(Redirect: true)">Submit</button>
 @if (Id != "Create")
@@ -210,7 +224,7 @@
 
     private ClassDBO ActiveClass = new();
     public string ValidationMessage = "";
-    private ClassSelector PrereqSelector { get; set; } = new();
+    private CsvSelector PrereqSelector { get; set; } = new();
 
     private bool DeleteDialogOpen { get; set; }
 
@@ -367,7 +381,6 @@
             Enabled: ActiveClass.Enabled,
             ShortDescription: ActiveClass.ShortDescription,
             LongDescription: ActiveClass.LongDescription,
-            PrereqIds: PrereqSelector?.Csv,
             MemberEnrollmentStart: ActiveClass.MemberEnrollmentStart,
             MemberEnrollmentDays: ActiveClass.MemberEnrollmentDays,
             NonMemberEnrollmentStart: ActiveClass.NonMemberEnrollmentStart,
@@ -376,7 +389,9 @@
             MemberPrice: ActiveClass.MemberPrice,
             NonMemberPrice: ActiveClass.NonMemberPrice,
             Location: ActiveClass.Location,
-            MaxSeats: ActiveClass.MaxSeats
+            MaxSeats: ActiveClass.MaxSeats,
+            FulfillCsv: ActiveClass.FulfillCsv,
+            RequireCsv: ActiveClass.RequireCsv
         );
 
         if (Result.Success && Redirect)
@@ -384,7 +399,7 @@
         else if (Result.Success)
         {
             ActiveClass.Id = Result.Get()!;
-            ActiveClass.PrereqIds = PrereqSelector!.Csv;
+            //ActiveClass.PrereqIds = PrereqSelector!.Csv;
 
             ValidationMessage = "";
             StateHasChanged();

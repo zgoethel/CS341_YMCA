@@ -29,7 +29,6 @@ public class ClassRepository
         bool? Enabled = null,
         string? ShortDescription = null,
         string? LongDescription = null,
-        string? PrereqIds = null,
         DateTime? MemberEnrollmentStart = null,
         int? MemberEnrollmentDays = null,
         DateTime? NonMemberEnrollmentStart = null,
@@ -38,7 +37,9 @@ public class ClassRepository
         float? MemberPrice = null,
         float? NonMemberPrice = null,
         string? Location = null,
-        int? MaxSeats = null
+        int? MaxSeats = null,
+        string? FulfillCsv = null,
+        string? RequireCsv = null
     )
     {
         ResultToken<int> Result = new();
@@ -55,7 +56,6 @@ public class ClassRepository
                     Enabled = Enabled,
                     ShortDescription = ShortDescription,
                     LongDescription = LongDescription,
-                    PrereqIds = PrereqIds,
                     MemberEnrollmentStart = MemberEnrollmentStart,
                     MemberEnrollmentDays = MemberEnrollmentDays,
                     NonMemberEnrollmentStart = NonMemberEnrollmentStart,
@@ -64,7 +64,9 @@ public class ClassRepository
                     MemberPrice = MemberPrice,
                     NonMemberPrice = NonMemberPrice,
                     Location = Location,
-                    MaxSeats = MaxSeats
+                    MaxSeats = MaxSeats,
+                    FulfillCsv = FulfillCsv,
+                    RequireCsv = RequireCsv
                 }, (_Result) =>
                 {
                     Result.Value = _Result.Id;
@@ -299,6 +301,36 @@ public class ClassRepository
                 Result.Success = false;
                 Result.Error = "Record with given ID not found.";
             }
+        } catch (SqlException Ex)
+        {
+            Result.Success = false;
+            Result.Error = Ex.Message;
+        } catch (Exception Ex)
+        {
+            Result.Success = false;
+            Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+        }
+
+        return Result;
+    }
+
+    /**
+     * Gets list of all distinct existing prereq codes on classes.
+     */
+    public ResultToken<List<string>> Class_ListReqs()
+    {
+        ResultToken<List<string>> Result = new();
+        Result.Value = new();
+
+        try
+        {
+            Sql.ExecuteProcedure<ClassListReqResult>(
+                "Class_ListReqs",
+                new {  },
+                (_Result) =>
+                {
+                    Result.Value.Add(_Result.Value);
+                });
         } catch (SqlException Ex)
         {
             Result.Success = false;

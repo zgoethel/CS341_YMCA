@@ -16,7 +16,7 @@
 @* PAGE LEFT COLUMN BEGINS HERE *@
 
 <h3>@ActiveClass.ShortDescription</h3>
-@if (!string.IsNullOrEmpty(ActiveClass.PrereqIds))
+@*if (!string.IsNullOrEmpty(ActiveClass.PrereqIds))
 {
     <h4>
         Prerequisites: 
@@ -28,7 +28,7 @@
             <span class="ms-2 badge bg-secondary">@Prereq.ClassName</span>
         }
     </h4>
-}
+}*@
 
 @{
     // Replaces newlines with HTML newlines
