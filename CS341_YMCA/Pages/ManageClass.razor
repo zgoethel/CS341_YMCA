@@ -306,7 +306,7 @@
             return;
         }
 
-        var Sessions = Classes.ClassSchedule_List(ActiveClass.Id).Get()!;
+        var Sessions = Scheduler.Schedule;//Classes.ClassSchedule_List(ActiveClass.Id).Get()!;
         if (Sessions.Count > 0
             && ActiveClass.MemberEnrollmentStart != null
             && (ActiveClass.NonMemberEnrollmentStart != null
@@ -383,8 +383,6 @@
             return;
         }
 
-        Scheduler.Save();
-
         var Result = Classes.Class_Set(
             Id: ActiveClass.Id,
             ClassName: ActiveClass.ClassName,
@@ -405,9 +403,11 @@
             RequireCsv: RequireSelector.Csv
         );
 
+        if (Result.Success) Scheduler.Save();
         if (Result.Success && Redirect)
+        {
             Nav.NavigateTo("ManageClasses");
-        else if (Result.Success)
+        } else if (Result.Success)
         {
             ActiveClass.Id = Result.Get()!;
             //ActiveClass.PrereqIds = PrereqSelector!.Csv;

@@ -128,7 +128,7 @@
                     Schedule.Remove(_RelevantSchedule);
                 Schedule.Add(RelevantSchedule);
                 _RelevantSchedule = RelevantSchedule;
-                _RelevantSchedule.Id = 0;
+                _RelevantSchedule.Id = _RelevantSchedule.Id ?? 0;
 
                 AddEditOpen = false;
                 UpdateCallback();
