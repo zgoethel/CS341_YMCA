@@ -34,7 +34,7 @@
     </div>
     <div class="row">
     <div class="col-sm-5">
-        <InputText class="timepicker form-control" @bind-Value=JustTime />
+        <input type="text" class="timepicker form-control" value=@JustTime id="class-sched-timepicker" />
     </div>
     <div class="col-sm-3">
         <InputNumber class="form-control me-2" @bind-Value=RelevantSchedule.Duration min=1 step=1 />
@@ -90,7 +90,11 @@
         </div>
     }
 
-    @code { const string _PM = "PM"; }
+    @code {
+        const string _PM = "PM";
+        const string _a = "GetInputVal";
+        const string _b = "class-sched-timepicker";
+    }
 
     </EditForm>
     </div>
@@ -100,8 +104,9 @@
                 AddEditOpen = false;
                 StateHasChanged();
             }">Cancel</button>
-        <button type="button" class="btn btn-primary" @onclick="() =>
+        <button type="button" class="btn btn-primary" @onclick="async () =>
             {
+                var JustTime = await Js.InvokeAsync<string>(_a, _b);
                 var Split = JustTime.Split(' ', ':');
                 Split[2] = Split[2].ToUpper();
 
