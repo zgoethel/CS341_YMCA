@@ -6,6 +6,7 @@
 @inject ClassRepository Classes
 @inject Database Sql
 @inject NavigationManager Nav
+@inject SiteUserRepository SiteUsers
 
 <PageTitle>Manage Class</PageTitle>
 
@@ -186,7 +187,20 @@
     <label>Seat limit <i>(zero for no limit)</i>:</label>
     <InputNumber class="form-control" style="max-width: 6em;" @bind-Value=ActiveClass.MaxSeats min=0 step=1></InputNumber>
 
-    <div class="alert alert-secondary mt-3">Coming soon</div>
+    @foreach (var Enrollment in Enrolled)
+    {
+        var User = SiteUsers.SiteUser_GetById(Enrollment.UserId).Get()!;
+        <div class="alert alert-secondary mt-3">
+            <h5><i class="oi oi-person me-1" /> @User.FirstName @User.LastName <i>(@User.Email)</i></h5>
+            @if (User.IsMember)
+            {
+                <h5 class="badge bg-success">Member</h5>
+            } else
+            {
+                <h5 class="badge bg-info">Non-member</h5>
+            }
+        </div>
+    }
 </div>
 </div>
 
@@ -235,6 +249,7 @@
     private CsvSelector? FulfillSelector { get; set; }
     private CsvSelector? RequireSelector { get; set; }
     private ClassScheduler? Scheduler { get; set; }
+    private List<ClassEnrollmentDBO> Enrolled = new();
 
     private bool DeleteDialogOpen { get; set; }
 
@@ -246,7 +261,11 @@
     {
         Scheduler?.Schedule?.Clear();
         if (Id != "Create")
+        {
             ActiveClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
+            Enrolled = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!;
+        }
+
         StateHasChanged();
     }
 
@@ -353,9 +372,9 @@
                 StateHasChanged();
                 return;
             } else if (
-              ActiveClass.MemberEnrollmentDays != null
-              && (ActiveClass.MemberEnrollmentDays != (int)ActiveClass.MemberEnrollmentDays
-              || ActiveClass.MemberEnrollmentDays < 0)
+                ActiveClass.MemberEnrollmentDays != null
+                && (ActiveClass.MemberEnrollmentDays != (int)ActiveClass.MemberEnrollmentDays
+                || ActiveClass.MemberEnrollmentDays < 0)
             )
             {
                 ValidationMessage = "Specify enrollment window length as a number of whole days.";
@@ -386,9 +405,15 @@
             }
         }
 
-        if (FulfillSelector!.Selected.Intersect(RequireSelector.Selected).Count() > 0)
+        if (FulfillSelector!.Selected.Intersect(RequireSelector!.Selected).Count() > 0)
         {
             ValidationMessage = "Each requirement code may only be used once, in either requirements of fullfillments.";
+            StateHasChanged();
+            return;
+        }
+        if (ActiveClass.MaxSeats != 0 && ActiveClass.MaxSeats < Enrolled.Count)
+        {
+            ValidationMessage = "The maximum number of seats must not be lower than the number of currently enrolled patrons.";
             StateHasChanged();
             return;
         }
@@ -421,8 +446,6 @@
             Nav.NavigateTo("ManageClasses");
         } else if (Result.Success)
         {
-            //ActiveClass.PrereqIds = PrereqSelector!.Csv;
-
             ValidationMessage = "";
             StateHasChanged();
         } else

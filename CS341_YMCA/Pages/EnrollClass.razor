@@ -168,7 +168,7 @@
     <div class="col-sm-5">
         @if ((ActiveClass.MaxSeats ?? 0) > 0)
         {
-            <span style="font-size: 1.3em;font-weight: bold;">@ActiveClass.MaxSeats</span>
+            <span style="font-size: 1.3em;font-weight: bold;">@(ActiveClass.MaxSeats - SeatsTaken)</span>
             <span style="font-size: 1.2em;">&nbsp;open seats!</span>
             <br />
         }
@@ -243,10 +243,12 @@
     public string Id { get; set; } = "";
 
     protected ClassDBO ActiveClass { get; set; } = new();
+    private int SeatsTaken;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
         ActiveClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
+        SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
     }
 }
