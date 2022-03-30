@@ -153,7 +153,6 @@
         ThisUserCost = ActiveClass.MemberPrice;
     var CanEnroll = ActiveClass.AllowNonMembers || LoggedIn.IsMember;
 }
-
 @{
     var UserEnrollment = (LoggedIn.Id == 0)
         ? new()
@@ -171,6 +170,7 @@
             @onclick="() =>
             {
                 Classes.Class_DropUser(ActiveClass.Id, LoggedIn!.Id);
+                SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
                 StateHasChanged();
             }">Drop</button>
     </span>
@@ -208,7 +208,17 @@
             <button class="btn btn-success mt-1 mb-1"
                 @onclick="() =>
                 {
+                    SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
+                    var UserEnrollment = Classes.ClassEnrollment_GetByUserId(LoggedIn!.Id).Get()!;
+                    var _IsEnrolled = UserEnrollment.Find((It) => It.ClassId == ActiveClass.Id) is not null;
+                    if ((ActiveClass.MaxSeats != 0 && SeatsTaken >= ActiveClass.MaxSeats) || _IsEnrolled)
+                    {
+                        StateHasChanged();
+                        return;
+                    }
+
                     Classes.Class_EnrollUser(ActiveClass.Id, LoggedIn!.Id);
+                    SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
                     StateHasChanged();
                 }">Enroll</button>
         } else
