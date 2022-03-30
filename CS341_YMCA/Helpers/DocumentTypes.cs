@@ -76,6 +76,32 @@ public class SiteUserDeleteRequest
     public int Id { get; set; }
 }
 
+public class EnterUserPaymentRequest
+{
+    public int UserId { get; set; }
+    public decimal Amount { get; set; }
+    public string CardNumber { get; set; } = "";
+    public int SecurityCode { get; set; }
+    public int PostalCode { get; set; }
+    public string HolderName { get; set; } = "";
+}
+
+public class UserPaymentDBO
+{
+    public int Id { get; set; }
+    public int UserId { get; set; }
+    public decimal Amount { get; set; }
+    public string CardNumber { get; set; } = "";
+    public int SecurityCode { get; set; }
+    public int PostalCode { get; set; }
+    public string HolderName { get; set; } = "";
+}
+
+public class UserPaymentEnterResult
+{
+    public int Id { get; set; }
+}
+
 #endregion
 
 // Region bound to request and result parameters for classes
@@ -171,6 +197,28 @@ public class ClassDeleteRequest
 public class ClassListReqResult
 {
     public string Value { get; set; } = "";
+}
+
+public class ClassDropUserRequest
+{
+    public int UserId { get; set; }
+    public int ClassId { get; set; }
+}
+
+public class ClassEnrollUserRequest
+{
+    public int UserId { get; set; }
+    public int ClassId { get; set; }
+    public int? PaymentId { get; set; }
+}
+
+public class ClassEnrollmentDBO
+{
+    public int Id { get; set; }
+    public int UserId { get; set; }
+    public int? PaymentId { get; set; }
+    DateTime EnrolledDate { get; set; }
+    public bool? PassedYN { get; set; }
 }
 
 #endregion

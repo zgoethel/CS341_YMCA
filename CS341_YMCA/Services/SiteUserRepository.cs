@@ -320,7 +320,7 @@ public class SiteUserRepository
                     Email = Email,
                     IsAdmin = IsAdmin,
                     MemberThru = MemberThru
-                }, (_) => { });
+                }, (_) => {  });
 
             Result.Success = true;
         } catch (SqlException Ex)
@@ -363,6 +363,139 @@ public class SiteUserRepository
                 Result.Success = false;
                 Result.Error = "Record with given ID not found.";
             }
+        } catch (SqlException Ex)
+        {
+            Result.Success = false;
+            Result.Error = Ex.Message;
+        } catch (Exception Ex)
+        {
+            Result.Success = false;
+            Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+        }
+
+        return Result;
+    }
+
+    /**
+     * Enters a payment into the database, returning the ID with which it was stored.
+     */
+    public ResultToken<int> SiteUserPayments_Enter(
+        int UserId,
+        decimal Amount,
+        string CardNumber,
+        int SecurityCode,
+        int PostalCode,
+        string HolderName
+    )
+    {
+        ResultToken<int> Result = new();
+
+        try
+        {
+            Sql.ExecuteProcedure<UserPaymentEnterResult>(
+                "SiteUserPayments_Enter",
+                new EnterUserPaymentRequest()
+                {
+                    UserId = UserId,
+                    Amount = Amount,
+                    CardNumber = CardNumber,
+                    SecurityCode = SecurityCode,
+                    PostalCode = PostalCode,
+                    HolderName = HolderName
+                }, (_Result) =>
+                {
+                    Result.Value = _Result.Id;
+                });
+        } catch (SqlException Ex)
+        {
+            Result.Success = false;
+            Result.Error = Ex.Message;
+        } catch (Exception Ex)
+        {
+            Result.Success = false;
+            Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+        }
+
+        return Result;
+    }
+
+    public ResultToken<UserPaymentDBO> SiteUserPayments_GetById(
+        int Id
+    )
+    {
+        ResultToken<UserPaymentDBO> Result = new();
+
+        try
+        {
+            Sql.ExecuteProcedure<UserPaymentDBO>(
+                "SiteUserPayments_GetById",
+                new { Id },
+                (_Result) =>
+                {
+                    Result.Value = _Result;
+                });
+
+            if (Result.Value == null)
+            {
+                Result.Success = false;
+                Result.Error = "Record with given ID not found.";
+            }
+        } catch (SqlException Ex)
+        {
+            Result.Success = false;
+            Result.Error = Ex.Message;
+        } catch (Exception Ex)
+        {
+            Result.Success = false;
+            Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+        }
+
+        return Result;
+    }
+
+    public ResultToken<List<UserPaymentDBO>> SiteUserPayments_GetByUserId(
+        int UserId
+    )
+    {
+        ResultToken<List<UserPaymentDBO>> Result = new();
+        Result.Value = new();
+
+        try
+        {
+            Sql.ExecuteProcedure<UserPaymentDBO>(
+                "SiteUserPayments_GetByUserId",
+                new { UserId },
+                (_Result) =>
+                {
+                    Result.Value.Add(_Result);
+                });
+        } catch (SqlException Ex)
+        {
+            Result.Success = false;
+            Result.Error = Ex.Message;
+        } catch (Exception Ex)
+        {
+            Result.Success = false;
+            Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+        }
+
+        return Result;
+    }
+
+    public ResultToken<List<UserPaymentDBO>> SiteUserPayments_List()
+    {
+        ResultToken<List<UserPaymentDBO>> Result = new();
+        Result.Value = new();
+
+        try
+        {
+            Sql.ExecuteProcedure<UserPaymentDBO>(
+                "SiteUserPayments_List",
+                new {  },
+                (_Result) =>
+                {
+                    Result.Value.Add(_Result);
+                });
         } catch (SqlException Ex)
         {
             Result.Success = false;

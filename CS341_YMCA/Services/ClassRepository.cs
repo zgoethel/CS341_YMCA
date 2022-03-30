@@ -282,11 +282,10 @@ public class ClassRepository
     )
     {
         ResultToken<object> Result = new();
-        Result.Value = new();
 
         try
         {
-            Sql.ExecuteProcedure<ClassDeleteRequest>(
+            Sql.ExecuteProcedure<object>(
                 "Class_DeleteById",
                 new ClassDeleteRequest()
                 {
@@ -330,6 +329,161 @@ public class ClassRepository
                 (_Result) =>
                 {
                     Result.Value.Add(_Result.Value);
+                });
+        } catch (SqlException Ex)
+        {
+            Result.Success = false;
+            Result.Error = Ex.Message;
+        } catch (Exception Ex)
+        {
+            Result.Success = false;
+            Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+        }
+
+        return Result;
+    }
+
+    /**
+     * Drops the specified user from the specified class.
+     */
+    public ResultToken<object> Class_DropUser(
+        int ClassId,
+        int UserId
+    )
+    {
+        ResultToken<object> Result = new();
+
+        try
+        {
+            Sql.ExecuteProcedure<object>(
+                "Class_DropUser",
+                new ClassDropUserRequest()
+                {
+                    ClassId = ClassId,
+                    UserId = UserId
+                },
+                (_Result) => {  });
+        } catch (SqlException Ex)
+        {
+            Result.Success = false;
+            Result.Error = Ex.Message;
+        } catch (Exception Ex)
+        {
+            Result.Success = false;
+            Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+        }
+
+        return Result;
+    }
+
+    /**
+     * Enrolls the specified user in the specified class, possibly with a payment.
+     */
+    public ResultToken<object> Class_EnrollUser(
+        int ClassId,
+        int UserId,
+        int? PaymentId = null
+    )
+    {
+        ResultToken<object> Result = new();
+
+        try
+        {
+            Sql.ExecuteProcedure<object>(
+                "Class_EnrollUser",
+                new ClassEnrollUserRequest()
+                {
+                    ClassId = ClassId,
+                    UserId = UserId,
+                    PaymentId = PaymentId
+                },
+                (_Result) => {  });
+        } catch (SqlException Ex)
+        {
+            Result.Success = false;
+            Result.Error = Ex.Message;
+        } catch (Exception Ex)
+        {
+            Result.Success = false;
+            Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+        }
+
+        return Result;
+    }
+
+    public ResultToken<List<ClassEnrollmentDBO>> ClassEnrollment_GetByClassId(
+        int ClassId
+    )
+    {
+        ResultToken<List<ClassEnrollmentDBO>> Result = new();
+        Result.Value = new();
+
+        try
+        {
+            Sql.ExecuteProcedure<ClassEnrollmentDBO>(
+                "ClassEnrollment_GetByClassId",
+                new { ClassId },
+                (_Result) =>
+                {
+                    Result.Value.Add(_Result);
+                });
+        } catch (SqlException Ex)
+        {
+            Result.Success = false;
+            Result.Error = Ex.Message;
+        } catch (Exception Ex)
+        {
+            Result.Success = false;
+            Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+        }
+
+        return Result;
+    }
+
+    public ResultToken<List<ClassEnrollmentDBO>> ClassEnrollment_GetByUserId(
+        int UserId
+    )
+    {
+        ResultToken<List<ClassEnrollmentDBO>> Result = new();
+        Result.Value = new();
+
+        try
+        {
+            Sql.ExecuteProcedure<ClassEnrollmentDBO>(
+                "ClassEnrollment_GetByUserId",
+                new { UserId },
+                (_Result) =>
+                {
+                    Result.Value.Add(_Result);
+                });
+        } catch (SqlException Ex)
+        {
+            Result.Success = false;
+            Result.Error = Ex.Message;
+        } catch (Exception Ex)
+        {
+            Result.Success = false;
+            Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+        }
+
+        return Result;
+    }
+
+    public ResultToken<List<ClassScheduleDBO>> ClassSschedule_GetByUserId(
+        int UserId
+    )
+    {
+        ResultToken<List<ClassScheduleDBO>> Result = new();
+        Result.Value = new();
+
+        try
+        {
+            Sql.ExecuteProcedure<ClassScheduleDBO>(
+                "ClassSchedule_GetByUserId",
+                new { UserId },
+                (_Result) =>
+                {
+                    Result.Value.Add(_Result);
                 });
         } catch (SqlException Ex)
         {
