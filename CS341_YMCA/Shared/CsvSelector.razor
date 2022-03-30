@@ -83,13 +83,13 @@
             }
 
             Selected.Add(_Upper);
-            if (!Items.Contains(_Upper)) Items.Add(_Upper);
             if (NotSelected.Contains(_Upper)) NotSelected.Remove(_Upper);
 
             ValidationMessage = _Ep;
             _Bind.Value = _Ep;
             Csv = String.Join(',', Selected);
             
+            Callback();
             AddCsvOpen = false;
             StateHasChanged();
         }">Submit</button>
