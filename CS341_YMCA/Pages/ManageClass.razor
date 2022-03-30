@@ -290,17 +290,12 @@
         if (Accepted)
         {
             var Result = Classes.Class_DeleteById(ActiveClass.Id);
-            if (Result.Success)
-            {
-                Nav.NavigateTo("ManageClasses");
-            } else
-            {
-                // Add some kind of error message here
-            }
+            Nav.NavigateTo("ManageClasses");
+        } else
+        {
+            DeleteDialogOpen = false;
+            StateHasChanged();
         }
-
-        DeleteDialogOpen = false;
-        StateHasChanged();
     }
 
     public void SaveForm(bool Redirect = true)
