@@ -64,14 +64,22 @@
     <CsvSelector Exclude=@(new())
         Csv=@ActiveClass.FulfillCsv
         @ref=FulfillSelector
-        Items=@(Classes.Class_ListReqs().Get()!) />
+        Items=@(Classes.Class_ListReqs().Get()!)
+        Callback="() =>
+        {
+            ActiveClass.FulfillCsv = FulfillSelector!.Csv!;
+        }" />
 </div>
 <div class="col-lg-6">
     <h3>Class Requires</h3>
     <CsvSelector Exclude=@(new())
         Csv=@ActiveClass.RequireCsv
         @ref=RequireSelector
-        Items=@(Classes.Class_ListReqs().Get()!) />
+        Items=@(Classes.Class_ListReqs().Get()!)
+        Callback="() =>
+        {
+            ActiveClass.RequireCsv = RequireSelector!.Csv!;
+        }" />
 </div>
 </div>
 
@@ -224,8 +232,8 @@
 
     private ClassDBO ActiveClass = new();
     public string ValidationMessage = "";
-    private CsvSelector FulfillSelector { get; set; } = new();
-    private CsvSelector RequireSelector { get; set; } = new();
+    private CsvSelector? FulfillSelector { get; set; }
+    private CsvSelector? RequireSelector { get; set; }
     private ClassScheduler? Scheduler { get; set; }
 
     private bool DeleteDialogOpen { get; set; }
@@ -236,8 +244,10 @@
 
     protected override void OnInitialized()
     {
+        Scheduler?.Schedule?.Clear();
         if (Id != "Create")
             ActiveClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
+        StateHasChanged();
     }
 
     private void OpenDeleteDialog()
@@ -306,7 +316,7 @@
             return;
         }
 
-        var Sessions = Scheduler.Schedule;//Classes.ClassSchedule_List(ActiveClass.Id).Get()!;
+        var Sessions = Scheduler!.Schedule;//Classes.ClassSchedule_List(ActiveClass.Id).Get()!;
         if (Sessions.Count > 0
             && ActiveClass.MemberEnrollmentStart != null
             && (ActiveClass.NonMemberEnrollmentStart != null
@@ -376,7 +386,7 @@
             }
         }
 
-        if (FulfillSelector.Selected.Intersect(RequireSelector.Selected).Count() > 0)
+        if (FulfillSelector!.Selected.Intersect(RequireSelector.Selected).Count() > 0)
         {
             ValidationMessage = "Each requirement code may only be used once, in either requirements of fullfillments.";
             StateHasChanged();
@@ -402,14 +412,15 @@
             FulfillCsv: FulfillSelector.Csv,
             RequireCsv: RequireSelector.Csv
         );
-
+        
+        ActiveClass.Id = Result.Get()!;
         if (Result.Success) Scheduler.Save();
+
         if (Result.Success && Redirect)
         {
             Nav.NavigateTo("ManageClasses");
         } else if (Result.Success)
         {
-            ActiveClass.Id = Result.Get()!;
             //ActiveClass.PrereqIds = PrereqSelector!.Csv;
 
             ValidationMessage = "";

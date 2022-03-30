@@ -3,6 +3,8 @@
 @using CS341_YMCA.Helpers
 @using CS341_YMCA.Services
 
+@inject IJSRuntime Js
+
 <h3 style="white-space: break-spaces;">
     @foreach (var Item in Selected)
     {
@@ -12,20 +14,20 @@
         </span>
     }
 
-    @{ Guid _Gen = Guid.NewGuid(); }
-    <InputSelect @bind-Value=DropDown
-        id=@(_Gen.ToString())
-        onclick=@("setTimeout(function() { $('#" + _Gen.ToString() + "').val(-1); }, 200);")
-        class="form-control"
+    <select class="form-control return-to-n1"
+        @onchange="(Event) =>
+        {
+            OnAddSelectorChange(Event.Value?.ToString() ?? (-1).ToString());
+        }"
         style="width:5em;display: inline-block;padding-bottom: 0.2em;">
         
-        <option value="-1" hidden>Add +</option>
+        <option value="-1" selected hidden>Add +</option>
         <option value="-2">Create new code</option>
         @foreach (var Option in NotSelected)
         {
             <option value=@Option>@Option</option>
         }
-    </InputSelect>
+    </select>
 </h3>
 
 @if (AddCsvOpen)
@@ -108,29 +110,22 @@
     private BindModel _Bind = new();
 
     [Parameter]
-    public string Csv { get; set; } = "";
+    public string? Csv { get; set; }
     [Parameter]
     public List<string> Exclude { get; set; } = new();
     [Parameter]
     public List<string> Items { get; set; } = new();
+    [Parameter]
+    public Action? Callback { get; set; }
 
     public List<string> Selected = new();
     private List<string> NotSelected = new();
     private bool AddCsvOpen = false;
     private string ValidationMessage = "";
 
-    private string DropDown
-    {
-        get => "-1";
-        set
-        {
-            OnAddSelectorChange(value);
-        }
-    }
-
     protected override void OnInitialized()
     {
-        var _Selected = Csv.Split(",").ToHashSet();
+        var _Selected = Csv!.Split(",").ToHashSet();
         Selected = Items.FindAll((It) => _Selected.Contains(It) && !Exclude.Contains(It));
         NotSelected = Items.FindAll((It) => !_Selected.Contains(It) && !Exclude.Contains(It));
     }
@@ -139,9 +134,10 @@
     {
         Selected.Remove(Item);
         NotSelected.Add(Item);
-        Csv = String.Join(',', Selected);
+        Csv = string.Join(',', Selected);
 
         StateHasChanged();
+        if (Callback != null) Callback();
     }
 
     private void OnAddSelectorChange(string Item)
@@ -150,15 +146,20 @@
         if (Item == "-2")
         {
             AddCsvOpen = true;
+
+            Js.InvokeVoidAsync("ReturnSelects");
             StateHasChanged();
+            if (Callback != null) Callback();
 
             return;
         }
 
         Selected.Add(Item);
         NotSelected.Remove(Item);
-        Csv = String.Join(',', Selected);
+        Csv = string.Join(',', Selected);
 
+        Js.InvokeVoidAsync("ReturnSelects");
         StateHasChanged();
+        if (Callback != null) Callback();
     }
 }
