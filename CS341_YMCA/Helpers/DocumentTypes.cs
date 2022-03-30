@@ -215,9 +215,10 @@ public class ClassEnrollUserRequest
 public class ClassEnrollmentDBO
 {
     public int Id { get; set; }
+    public int ClassId { get; set; }
     public int UserId { get; set; }
     public int? PaymentId { get; set; }
-    DateTime EnrolledDate { get; set; }
+    public DateTime EnrolledDate { get; set; }
     public bool? PassedYN { get; set; }
 }
 

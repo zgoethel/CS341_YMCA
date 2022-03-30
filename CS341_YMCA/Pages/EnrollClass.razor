@@ -153,7 +153,28 @@
         ThisUserCost = ActiveClass.MemberPrice;
     var CanEnroll = ActiveClass.AllowNonMembers || LoggedIn.IsMember;
 }
-@if (!ActiveClass.AllowEnrollment)
+
+@{
+    var UserEnrollment = (LoggedIn.Id == 0)
+        ? new()
+        : Classes.ClassEnrollment_GetByUserId(LoggedIn!.Id).Get()!;
+    var _IsEnrolled = UserEnrollment.Find((It) => It.ClassId == ActiveClass.Id) is not null;
+}
+@if (_IsEnrolled)
+{
+    @* DISPLAYED WHEN ALREADY ENROLLED IN CLASS *@
+
+     <span class="alert alert-success">
+        <span style="padding-top: 0.3em;display: inline-block;">You are enrolled in this course!</span>
+        <button class="btn btn-success"
+            style="float: right;"
+            @onclick="() =>
+            {
+                Classes.Class_DropUser(ActiveClass.Id, LoggedIn!.Id);
+                StateHasChanged();
+            }">Drop</button>
+    </span>
+} else if (!ActiveClass.AllowEnrollment)
 {
     @* DISPLAYED WHEN ENROLLMENT IS PAUSED *@
 
@@ -163,6 +184,15 @@
     || ActiveClass.NonMemberEnrollmentOpen
 )
 {
+    if  ((ActiveClass.MaxSeats ?? 0) != 0
+        && SeatsTaken >= ActiveClass.MaxSeats)
+    {
+        <span class="alert alert-warning">Sorry, all seats are taken for this course!</span>
+    } else if ((LoggedIn?.Id ?? 0) == 0)
+    {
+        <span class="alert alert-secondary">Please log in to enroll in courses.</span>
+    } else {
+
     @* DISPLAYED IF ALLOWED TO ENROLL AND OPEN *@
 
     <div class="col-sm-5">
@@ -175,13 +205,19 @@
         @if (CanEnroll)
         {   
             <p class="mt-2">Your price: <strong>$@string.Format("{0:0.00}", ThisUserCost)</strong></p>
-            <button class="btn btn-success mt-1 mb-1">Enroll</button>
+            <button class="btn btn-success mt-1 mb-1"
+                @onclick="() =>
+                {
+                    Classes.Class_EnrollUser(ActiveClass.Id, LoggedIn!.Id);
+                    StateHasChanged();
+                }">Enroll</button>
         } else
         {
             <p>A membership is required to enroll in this class.</p>
         }
         <br />
     </div>
+    }
 } else if ((
     // Only check both windows if the logged in user is member
     LoggedIn.IsMember
