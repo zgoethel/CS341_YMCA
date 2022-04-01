@@ -56,14 +56,14 @@
                 $("*[data-action='decrementMinutes']").addClass("oi-chevron-bottom");
             });
         };
+        var GetInputVal = function(id)
+        {
+            return $(`#${id}`).val();
+        };
         var ReturnSelects = function()
         {
             $("select.return-to-n1").val('-1');
         };
-        var GetInputVal = function(id)
-        {
-            return $(`#${id}`).val();
-        }
     </script>
 </body>
 </html>
