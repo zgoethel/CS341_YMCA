@@ -1,0 +1,51 @@
+﻿@using CS341_YMCA.Components
+@using CS341_YMCA.Helpers
+@using CS341_YMCA.Services
+@using CS341_YMCA.Pages
+
+@inject ClassRepository Classes
+@inject IJSRuntime Js
+
+<BsModal @ref=Modal
+    SubmitText="Pay"
+    SubmitAction=PaymentSubmit>
+    @* Add this to params to remove cancellation *@
+    @*CancelText=""*@
+
+    <Title>Make a Payment</Title>
+    <Body>
+    <EditForm Model=PaymentDetails>
+
+
+
+    </EditForm>
+    </Body>
+</BsModal>
+
+@code
+{
+    [Parameter]
+    public Action<int>? PaymentCallback { get; set; }
+
+    private BsModal? Modal;
+    private UserPaymentDBO PaymentDetails = new();
+
+    private async Task<bool> PaymentSubmit()
+    {
+        //TODO Perform the actual payment
+        var _PaymentId = -1;
+        // Alert the caller that the payment is ready
+        PaymentCallback?.Invoke(_PaymentId);
+
+        // Return true to close the modal
+        return true;
+    }
+
+    public void StartProcess()
+    {
+        //TODO Set up form state if necessary
+        //StateHasChanged();
+
+        Modal!.Open();
+    }
+}
