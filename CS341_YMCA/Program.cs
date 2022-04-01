@@ -11,8 +11,8 @@ Builder.Services.AddRazorPages();
 Builder.Services.AddServerSideBlazor();
 Builder.Services.AddAuthorizationCore();
 
-Builder.Services.AddTransient<Database>();
 Builder.Services.AddTransient<EmailSender>();
+Builder.Services.AddTransient<Database>();
 Builder.Services.AddTransient<SiteUserRepository>();
 Builder.Services.AddTransient<ClassRepository>();
 

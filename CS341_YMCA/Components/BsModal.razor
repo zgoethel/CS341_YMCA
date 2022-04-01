@@ -1,0 +1,130 @@
+﻿@using CS341_YMCA.Helpers
+@using CS341_YMCA.Services
+
+@inject IJSRuntime Js
+
+@if (IsOpen)
+{
+    <div class="modal fade show" style="display: block;background-color: rgba(10, 10, 10, 0.8);">
+    <div class="modal-dialog">
+    <div class="modal-content">
+
+    <div class="modal-header">
+        @if (Header is not null)
+        { @Header }
+        @if (Title is not null)
+        { <h4 class="modal-title">@Title</h4> }
+        @if (!string.IsNullOrEmpty(CancelText))
+        { <button type="button" class="btn btn-close close" @onclick=Cancel></button> }
+    </div>
+    <div class="modal-body">
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        { <div class="alert alert-warning">@ErrorMessage</div> }
+        @if (Body is not null)
+        { @Body }
+    </div>
+    <div class="modal-footer">
+        @if (Footer is not null)
+        { @Footer }
+        @if (!string.IsNullOrEmpty(CancelText))
+        { <button type="button" class="btn btn-secondary" @onclick=Cancel>@CancelText</button> }
+        @if (!string.IsNullOrEmpty(SubmitText))
+        { <button type="button" class="btn btn-@SubmitClass" @onclick=Submit>@SubmitText</button> }
+    </div>
+
+    </div>
+    </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Provide this field to add custom components to the modal header.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Header { get; set; }
+
+    /// <summary>
+    /// Provide this field to add header text to the modal (can be used in
+    /// conjunction with the `Header` render fragment).
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Title { get; set; }
+
+    /// <summary>
+    /// Provide this field to add custom components to the modal body.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Body { get; set; }
+
+    /// <summary>
+    /// Provide this field to add buttons and custom components to the modal
+    /// footer.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Footer { get; set; }
+
+    /// <summary>
+    /// The text which list displayed in the modal footer's submit button.
+    /// </summary>
+    [Parameter]
+    public string? SubmitText { get; set; } = "Submit";
+
+    /// <summary>
+    /// The text which is displayed in the modal footer's submit button.
+    /// </summary>
+    [Parameter]
+    public string? CancelText { get; set; } = "Cancel";
+
+    /// <summary>
+    /// Action called when the modal's submit button is pressed.
+    /// </summary>
+    [Parameter]
+    public Func<Task<bool>>? SubmitAction { get; set; }
+
+    [Parameter]
+    public string SubmitClass { get; set; } = "primary";
+
+    /// <summary>
+    /// Action called when the modal's cancel button is pressed.
+    /// </summary>
+    [Parameter]
+    public Func<Task<bool>>? CancelAction { get; set; }
+
+    private string ErrorMessage = "";
+    private bool IsOpen = false;
+
+    public void Open()
+    {
+        IsOpen = true;
+        StateHasChanged();
+    }
+
+    public void Close()
+    {
+        IsOpen = false;
+        StateHasChanged();
+    }
+
+    public async void Submit()
+    {
+        var ShouldClose = SubmitAction is null
+            ? true
+            : (await SubmitAction.Invoke());
+        if (ShouldClose) Close();
+    }
+
+    public async void Cancel()
+    {
+        var ShouldClose = CancelAction is null
+            ? true
+            : (await CancelAction.Invoke());
+        if (ShouldClose) Close();
+    }
+
+    public void Error(string Message)
+    {
+        this.ErrorMessage = Message;
+        StateHasChanged();
+    }
+}
