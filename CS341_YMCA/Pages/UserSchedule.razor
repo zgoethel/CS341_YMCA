@@ -1,7 +1,75 @@
 ﻿@page "/Schedule"
 
+@using CS341_YMCA.Helpers
+@using CS341_YMCA.Services
+
+@inject ClassRepository Classes
+
 <PageTitle>Edit Schedule</PageTitle>
 
 <h1>Edit Schedule</h1>
 <hr />
 <h3>View and change your current class enrollments</h3>
+
+@{
+    var EnrolledClasses = Classes.ClassEnrollment_GetByUserId(LoggedIn!.Id).Get()!;
+    
+}
+
+<div class="overflow-auto">
+<table class="table table-striped mt-4">
+@if(EnrolledClasses.Count==0){
+    <h3>You are not registered for any classes</h3>
+}
+<thead>
+<tr>
+    <th scope="col">Class</th>
+    <th scope="col" style="border-left: 2px solid #621414;">Day(s)/Time</th>
+    <th scope="col" style="border-left: 2px solid #621414;">Start - End</th>
+    
+</tr>
+</thead>
+<tbody>
+    @foreach (var Enrolled in EnrolledClasses)
+    {   
+        var Date = @Classes.ClassSchedule_List(Enrolled.ClassId).Get()![0];
+        <tr>
+        <td>@Classes.Class_GetById(Enrolled.ClassId).Get()!.ClassName</td>
+        <td>@Date.FirstDate.DayOfWeek @Date.FirstDate.ToString("h:mm") - @Date.FirstDate.AddMinutes(Date.Duration).ToString("h:mm")</td>
+        <td>@Date.FirstDate.ToShortDateString() - @Date.FirstDate.Date.AddDays(Date.Recurrence * Date.Occurrences).ToShortDateString()</td>
+        <td><button class="btn btn-danger"
+            style="float: left;"
+            @onclick="() =>
+            {
+                Classes.Class_DropUser(Enrolled.ClassId, LoggedIn!.Id);
+                StateHasChanged();
+            }">Drop</button></td>
+        </tr>
+    }
+</tbody>
+</table>
+</div>
+
+<style>
+    th.col-group
+    {
+        background: #621414;
+        color: white;
+        text-align: center;
+        border: 2px solid #621414;
+    }
+    td
+    {
+        vertical-align: middle;
+    }
+    
+</style>
+
+@code
+{
+    [CascadingParameter]
+    private SiteUserDBO LoggedIn { get; set; } = new();
+
+    [Parameter]
+    public ClassEnrollmentDBO Enrolled {get; set; } = new();
+}
