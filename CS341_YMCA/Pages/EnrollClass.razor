@@ -17,6 +17,7 @@
 
 <h3>@ActiveClass.ShortDescription</h3>
 <br />
+
 @if (!string.IsNullOrEmpty(ActiveClass.FulfillCsv))
 {
     <h4 style="display: inline;" class="me-4">
@@ -27,6 +28,7 @@
         }
     </h4>
 }
+
 @if (!string.IsNullOrEmpty(ActiveClass.RequireCsv))
 {
     <h4 style="display: inline;">
@@ -81,9 +83,7 @@
         <h1>$@((int?)ActiveClass.MemberPrice)<sup>@((ActiveClass.MemberPrice % 1)
             .ToString(".00").Replace(".", ""))</sup></h1>
     } else
-    {
-        <h1>No fee</h1>
-    }
+    { <h1>No fee</h1> }
     <p>For membership holders</p>
 </div>
 @if (ActiveClass.AllowNonMembers)
@@ -94,9 +94,7 @@
             <h1>$@((int?)ActiveClass.NonMemberPrice)<sup>@((ActiveClass.NonMemberPrice % 1)
                 .ToString(".00").Replace(".", ""))</sup></h1>
         } else
-        {
-            <h1>No fee</h1>
-        }
+        { <h1>No fee</h1> }
         <p>Without membership</p>
     </div>
 } else
@@ -152,8 +150,7 @@
     if (LoggedIn.IsMember)
         ThisUserCost = ActiveClass.MemberPrice;
     var CanEnroll = ActiveClass.AllowNonMembers || LoggedIn.IsMember;
-}
-@{
+
     var UserEnrollment = (LoggedIn.Id == 0)
         ? new()
         : Classes.ClassEnrollment_GetByUserId(LoggedIn!.Id).Get()!;
@@ -184,15 +181,12 @@
     || ActiveClass.NonMemberEnrollmentOpen
 )
 {
-    if  ((ActiveClass.MaxSeats ?? 0) != 0
-        && SeatsTaken >= ActiveClass.MaxSeats)
+    if  ((ActiveClass.MaxSeats ?? 0) != 0 && SeatsTaken >= ActiveClass.MaxSeats)
+    { <span class="alert alert-warning">Sorry, all seats are taken for this course!</span>}
+    else if ((LoggedIn?.Id ?? 0) == 0)
+    { <span class="alert alert-secondary">Please log in to enroll in courses.</span> }
+    else
     {
-        <span class="alert alert-warning">Sorry, all seats are taken for this course!</span>
-    } else if ((LoggedIn?.Id ?? 0) == 0)
-    {
-        <span class="alert alert-secondary">Please log in to enroll in courses.</span>
-    } else {
-
     @* DISPLAYED IF ALLOWED TO ENROLL AND OPEN *@
 
     <div class="col-sm-5">
@@ -205,22 +199,7 @@
         @if (CanEnroll)
         {   
             <p class="mt-2">Your price: <strong>$@string.Format("{0:0.00}", ThisUserCost)</strong></p>
-            <button class="btn btn-success mt-1 mb-1"
-                @onclick="() =>
-                {
-                    SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
-                    var UserEnrollment = Classes.ClassEnrollment_GetByUserId(LoggedIn!.Id).Get()!;
-                    var _IsEnrolled = UserEnrollment.Find((It) => It.ClassId == ActiveClass.Id) is not null;
-                    if ((ActiveClass.MaxSeats != 0 && SeatsTaken >= ActiveClass.MaxSeats) || _IsEnrolled)
-                    {
-                        StateHasChanged();
-                        return;
-                    }
-
-                    Classes.Class_EnrollUser(ActiveClass.Id, LoggedIn!.Id);
-                    SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
-                    StateHasChanged();
-                }">Enroll</button>
+            <button class="btn btn-success mt-1 mb-1" @onclick=EnrollClick>Enroll</button>
         } else
         {
             <p>A membership is required to enroll in this class.</p>
@@ -249,23 +228,18 @@
     @* DISPLAYED WHEN ENROLLMENT IS NOT YET OPEN *@
 
     <p>
-        This class opens for
-        @if (LoggedIn.IsMember) { <span>members</span> }
-        else { <span>non-members</span> }
-        starting
-        @if (
-            ActiveClass.MemberEnrollmentStart is null
-            && ActiveClass.NonMemberEnrollmentStart is null
-        )
-        {
-            <h3>TBA</h3>
-        } else if (LoggedIn.IsMember)
-        {
-            <h3>@(AbsoluteOpen.ToLongDateString())</h3>
-        } else
-        {
-            <h3>@(ActiveClass.NonMemberEnrollmentStart?.ToLongDateString() ?? "TBA")</h3>
-        }
+
+    This class opens for
+    @if (LoggedIn.IsMember) { <span>members</span> }
+    else { <span>non-members</span> }
+    starting
+    @if (ActiveClass.MemberEnrollmentStart is null && ActiveClass.NonMemberEnrollmentStart is null)
+    { <h3>TBA</h3> }
+    else if (LoggedIn.IsMember)
+    { <h3>@(AbsoluteOpen.ToLongDateString())</h3> }
+    else
+    { <h3>@(ActiveClass.NonMemberEnrollmentStart?.ToLongDateString() ?? "TBA")</h3> }
+    
     </p>
 }
 </div>
@@ -296,5 +270,21 @@
         base.OnInitialized();
         ActiveClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
         SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
+    }
+
+    private void EnrollClick()
+    {
+        SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
+        var UserEnrollment = Classes.ClassEnrollment_GetByUserId(LoggedIn!.Id).Get()!;
+        var _IsEnrolled = UserEnrollment.Find((It) => It.ClassId == ActiveClass.Id) is not null;
+        if ((ActiveClass.MaxSeats != 0 && SeatsTaken >= ActiveClass.MaxSeats) || _IsEnrolled)
+        {
+            StateHasChanged();
+            return;
+        }
+
+        Classes.Class_EnrollUser(ActiveClass.Id, LoggedIn!.Id);
+        SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
+        StateHasChanged();
     }
 }

@@ -50,35 +50,35 @@
             <span>days</span>
         </div>
         <div>
-            <span>and occurs</span>
-            <InputSelect class="form-control form-select ms-2 me-2 mt-2"
-                    style="display: inline-block;max-width: 14em;"
-                    @bind-Value=OccursIndefinitely>
+        <span>and occurs</span>
+        <InputSelect class="form-control form-select ms-2 me-2 mt-2"
+                style="display: inline-block;max-width: 14em;"
+                @bind-Value=OccursIndefinitely>
 
-                <option value=true>indefinitely.</option>
-                <option value=false>for a fixed time.</option>
-            </InputSelect>
+            <option value=true>indefinitely.</option>
+            <option value=false>for a fixed time.</option>
+        </InputSelect>
 
-            @if (!OccursIndefinitely)
-            {
-                <div class="mt-4">
-                    <span>Repeat</span>
-                    <InputNumber class="form-control ms-2 me-2"
-                        @bind-Value=RelevantSchedule.Occurrences
-                        style="display: inline-block;max-width: 5em;"
-                        min=1
-                        step=1 />
-                    <span>time(s).</span>
-                    <br />
-                    <i style="display: block;" class="mt-2">
-                        (Last day would be <strong>
-                        @(RelevantSchedule.FirstDate.Date
-                            .AddDays(RelevantSchedule.Recurrence * RelevantSchedule.Occurrences)
-                            .ToLongDateString())
-                        </strong>)
-                    </i>
-                </div>
-            }
+    @if (!OccursIndefinitely)
+    {
+        <div class="mt-4">
+            <span>Repeat</span>
+            <InputNumber class="form-control ms-2 me-2"
+                @bind-Value=RelevantSchedule.Occurrences
+                style="display: inline-block;max-width: 5em;"
+                min=1
+                step=1 />
+            <span>time(s).</span>
+            <br />
+            <i style="display: block;" class="mt-2">
+                (Last day would be <strong>
+                @(RelevantSchedule.FirstDate.Date
+                    .AddDays(RelevantSchedule.Recurrence * RelevantSchedule.Occurrences)
+                    .ToLongDateString())
+                </strong>)
+            </i>
+        </div>
+    }
         </div>
     }
 
@@ -155,10 +155,11 @@
 
     private async Task<bool> AddEditSubmit()
     {
-        var JustTime = await Js.InvokeAsync<string>("GetInputVal", "class-sched-timepicker");
+        // Data-binding didn't work for this input
+        JustTime = await Js.InvokeAsync<string>("GetInputVal", "class-sched-timepicker");
+        
         var Split = JustTime.Split(' ', ':');
         Split[2] = Split[2].ToUpper();
-
         if (Split[0] == 12.ToString())
             Split[0] = 0.ToString();
         if (Split[2] == "PM")
@@ -168,12 +169,12 @@
             .Date
             .AddHours(int.Parse(Split[0]))
             .AddMinutes(int.Parse(Split[1]));
+
         if (ClassRepeats)
         {
             if (OccursIndefinitely)
                 RelevantSchedule.Occurrences = 0;
-        }
-        else
+        } else
         {
             RelevantSchedule.Recurrence = 0;
             RelevantSchedule.Occurrences = 0;
@@ -183,6 +184,7 @@
             Schedule.Remove(_RelevantSchedule);
         Schedule.Add(RelevantSchedule);
         _RelevantSchedule = RelevantSchedule;
+        // Setting null-ID to zero makes day display in week calendar
         _RelevantSchedule.Id = _RelevantSchedule.Id ?? 0;
 
         UpdateCallback();
