@@ -1,24 +1,16 @@
-﻿@using CS341_YMCA.Helpers
+﻿@using CS341_YMCA.Components
+@using CS341_YMCA.Helpers
 @using CS341_YMCA.Services
 @using CS341_YMCA.Pages
 
 @inject ClassRepository Classes
 @inject IJSRuntime Js
 
-@if (AddEditOpen)
-{
-    <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
-    <div class="modal-dialog">
-    <div class="modal-content">
-    <div class="modal-header">
-        <h4 class="modal-title">Edit Schedule for <strong>'@Date.ToShortDateString()'</strong></h4>
-        <button type="button" class="btn btn-close close" @onclick="() =>
-            {
-                AddEditOpen = false;
-                StateHasChanged();
-            }"></button>
-    </div>
-    <div class="modal-body">
+<BsModal @ref=AddEditModal
+    SubmitAction=AddEditSubmit>
+
+    <Title>Edit Schedule for <strong>'@Date.ToShortDateString()'</strong></Title>
+    <Body>
     <EditForm Model=RelevantSchedule>
 
     <div class="row">
@@ -34,7 +26,7 @@
     </div>
     <div class="row">
     <div class="col-sm-5">
-        <InputText class="timepicker form-control" @bind-Value=JustTime />
+        <input type="text" class="timepicker form-control" value=@JustTime id="class-sched-timepicker" />
     </div>
     <div class="col-sm-3">
         <InputNumber class="form-control me-2" @bind-Value=RelevantSchedule.Duration min=1 step=1 />
@@ -58,87 +50,41 @@
             <span>days</span>
         </div>
         <div>
-            <span>and occurs</span>
-            <InputSelect class="form-control form-select ms-2 me-2 mt-2"
-                    style="display: inline-block;max-width: 14em;"
-                    @bind-Value=OccursIndefinitely>
+        <span>and occurs</span>
+        <InputSelect class="form-control form-select ms-2 me-2 mt-2"
+                style="display: inline-block;max-width: 14em;"
+                @bind-Value=OccursIndefinitely>
 
-                <option value=true>indefinitely.</option>
-                <option value=false>for a fixed time.</option>
-            </InputSelect>
+            <option value=true>indefinitely.</option>
+            <option value=false>for a fixed time.</option>
+        </InputSelect>
 
-            @if (!OccursIndefinitely)
-            {
-                <div class="mt-4">
-                    <span>Repeat</span>
-                    <InputNumber class="form-control ms-2 me-2"
-                        @bind-Value=RelevantSchedule.Occurrences
-                        style="display: inline-block;max-width: 5em;"
-                        min=1
-                        step=1 />
-                    <span>time(s).</span>
-                    <br />
-                    <i style="display: block;" class="mt-2">
-                        (Last day would be <strong>
-                        @(RelevantSchedule.FirstDate.Date
-                            .AddDays(RelevantSchedule.Recurrence * RelevantSchedule.Occurrences)
-                            .ToLongDateString())
-                        </strong>)
-                    </i>
-                </div>
-            }
+    @if (!OccursIndefinitely)
+    {
+        <div class="mt-4">
+            <span>Repeat</span>
+            <InputNumber class="form-control ms-2 me-2"
+                @bind-Value=RelevantSchedule.Occurrences
+                style="display: inline-block;max-width: 5em;"
+                min=1
+                step=1 />
+            <span>time(s).</span>
+            <br />
+            <i style="display: block;" class="mt-2">
+                (Last day would be <strong>
+                @(RelevantSchedule.FirstDate.Date
+                    .AddDays(RelevantSchedule.Recurrence * RelevantSchedule.Occurrences)
+                    .ToLongDateString())
+                </strong>)
+            </i>
+        </div>
+    }
         </div>
     }
 
-    @code { const string _PM = "PM"; }
-
     </EditForm>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" @onclick="() =>
-            {
-                AddEditOpen = false;
-                StateHasChanged();
-            }">Cancel</button>
-        <button type="button" class="btn btn-primary" @onclick="() =>
-            {
-                var Split = JustTime.Split(' ', ':');
-                Split[2] = Split[2].ToUpper();
-
-                if (Split[0] == 12.ToString())
-                    Split[0] = 0.ToString();
-                if (Split[2] == _PM)
-                    Split[0] = (int.Parse(Split[0]) + 12).ToString();
-
-                RelevantSchedule.FirstDate = RelevantSchedule.FirstDate
-                    .Date
-                    .AddHours(int.Parse(Split[0]))
-                    .AddMinutes(int.Parse(Split[1]));
-                if (ClassRepeats)
-                {
-                    if (OccursIndefinitely)
-                        RelevantSchedule.Occurrences = 0;
-                } else
-                {
-                    RelevantSchedule.Recurrence = 0;
-                    RelevantSchedule.Occurrences = 0;
-                }
-
-                if (_RelevantSchedule.Id is not null)
-                    Schedule.Remove(_RelevantSchedule);
-                Schedule.Add(RelevantSchedule);
-                _RelevantSchedule = RelevantSchedule;
-                _RelevantSchedule.Id = _RelevantSchedule.Id ?? 0;
-
-                AddEditOpen = false;
-                UpdateCallback();
-                StateHasChanged();
-            }">Submit</button>
-    </div>
-    </div>
-    </div>
-    </div>
-}
+    </Body>
+</BsModal>
 
 <div class="schedule-day-block mb-1">
 
@@ -146,11 +92,7 @@
 {
     <i class="oi oi-pencil"
         style="float: right;cursor: pointer;"
-        @onclick = "() =>
-        {
-            AddEditOpen = true;
-            StateHasChanged();
-        }"
+        @onclick = "() => AddEditModal!.Open()"
     />
 }
 
@@ -162,11 +104,7 @@
     @if (ShowEditing)
     {
         <button class="btn btn-primary mt-2"
-            @onclick = "() =>
-            {
-                AddEditOpen = true;
-                StateHasChanged();
-            }">
+            @onclick = "() => AddEditModal!.Open()">
         <i class="oi oi-plus" /></button>
     }
 } else
@@ -204,16 +142,56 @@
     [Parameter]
     public bool ShowEditing { get; set; } = false;
     [Parameter]
-    public Action UpdateCallback { get; set; } = () => { };
+    public Action UpdateCallback { get; set; } = () => {  };
 
     // Parent editor copy (original)
     private ClassScheduleDBO _RelevantSchedule = new();
     // Modal editor copy (in flight)
     private ClassScheduleDBO RelevantSchedule = new();
-    private bool AddEditOpen { get; set; }
-    private bool ClassRepeats { get; set; }
+    private bool ClassRepeats = false;
     private bool OccursIndefinitely = true;
     private string JustTime = "";
+    private BsModal? AddEditModal;
+
+    private async Task<bool> AddEditSubmit()
+    {
+        // Data-binding didn't work for this input
+        JustTime = await Js.InvokeAsync<string>("GetInputVal", "class-sched-timepicker");
+        
+        var Split = JustTime.Split(' ', ':');
+        Split[2] = Split[2].ToUpper();
+        if (Split[0] == 12.ToString())
+            Split[0] = 0.ToString();
+        if (Split[2] == "PM")
+            Split[0] = (int.Parse(Split[0]) + 12).ToString();
+
+        RelevantSchedule.FirstDate = RelevantSchedule.FirstDate
+            .Date
+            .AddHours(int.Parse(Split[0]))
+            .AddMinutes(int.Parse(Split[1]));
+
+        if (ClassRepeats)
+        {
+            if (OccursIndefinitely)
+                RelevantSchedule.Occurrences = 0;
+        } else
+        {
+            RelevantSchedule.Recurrence = 0;
+            RelevantSchedule.Occurrences = 0;
+        }
+
+        if (_RelevantSchedule.Id is not null)
+            Schedule.Remove(_RelevantSchedule);
+        Schedule.Add(RelevantSchedule);
+        _RelevantSchedule = RelevantSchedule;
+        // Setting null-ID to zero makes day display in week calendar
+        _RelevantSchedule.Id = _RelevantSchedule.Id ?? 0;
+
+        UpdateCallback();
+        StateHasChanged();
+
+        return true;
+    }
 
     private DateTime _Date { get; set; } = DateTime.Today;
     [Parameter]

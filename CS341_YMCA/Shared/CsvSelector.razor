@@ -1,7 +1,10 @@
 ﻿@using System.Text.RegularExpressions
 
+@using CS341_YMCA.Components
 @using CS341_YMCA.Helpers
 @using CS341_YMCA.Services
+
+@inject IJSRuntime Js
 
 <h3 style="white-space: break-spaces;">
     @foreach (var Item in Selected)
@@ -12,37 +15,29 @@
         </span>
     }
 
-    @{ Guid _Gen = Guid.NewGuid(); }
-    <InputSelect @bind-Value=DropDown
-        id=@(_Gen.ToString())
-        onclick=@("setTimeout(function() { $('#" + _Gen.ToString() + "').val(-1); }, 200);")
-        class="form-control"
+    <select class="form-control return-to-n1"
+        @onchange="(Event) =>
+        {
+            OnAddSelectorChange(Event.Value?.ToString() ?? (-1).ToString());
+        }"
         style="width:5em;display: inline-block;padding-bottom: 0.2em;">
         
-        <option value="-1" hidden>Add +</option>
+        <option value="-1" selected hidden>Add +</option>
         <option value="-2">Create new code</option>
         @foreach (var Option in NotSelected)
         {
             <option value=@Option>@Option</option>
         }
-    </InputSelect>
+    </select>
 </h3>
 
-@if (AddCsvOpen)
-{
-    <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
-    <div class="modal-dialog">
-    <div class="modal-content">
-    <div class="modal-header">
-        <h4 class="modal-title">Add a new requirement code</h4>
-        <button type="button" class="btn btn-close close" @onclick="() =>
-            {
-                AddCsvOpen = false;
-                StateHasChanged();
-            }"></button>
-    </div>
+<BsModal @ref=AddCodeModal
+    SubmitAction=AddCodeSubmit>
+
+    <Title>Add a new requirement code</Title>
+    <Body>
+
     <EditForm Model=_Bind>
-    <div class="modal-body">
         
     @if (!string.IsNullOrEmpty(ValidationMessage))
     {
@@ -50,54 +45,10 @@
     }
     <InputText class="form-control" @bind-Value=_Bind.Value />
     <span><i>(Use alphanumeric characters)</i></span>
-    </div>
-    <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" @onclick="() =>
-        {
-            AddCsvOpen = false;
-            StateHasChanged();
-        }">Cancel</button>
-    @code {
-        const string _Reg = "^[A-Za-z0-9]+$";
-        const string _ErrMsg = "Please enter an alphanumeric class code.";
-        const string _Ep = "";
-    }
-    <button type="button" class="btn btn-primary" @onclick="() =>
-        {
-            if (!Regex.IsMatch(_Bind.Value, _Reg))
-            {
-                ValidationMessage = _ErrMsg;
-                StateHasChanged();
-                return;
-            }
 
-            var _Upper = _Bind.Value.ToUpper();
-
-            if (Selected.Contains(_Upper))
-            {
-                AddCsvOpen = false;
-                StateHasChanged();
-                return;
-            }
-
-            Selected.Add(_Upper);
-            if (!Items.Contains(_Upper)) Items.Add(_Upper);
-            if (NotSelected.Contains(_Upper)) NotSelected.Remove(_Upper);
-
-            ValidationMessage = _Ep;
-            _Bind.Value = _Ep;
-            Csv = String.Join(',', Selected);
-            
-            AddCsvOpen = false;
-            StateHasChanged();
-        }">Submit</button>
-
-    </div>
     </EditForm>
-    </div>
-    </div>
-    </div>
-}
+    </Body>
+</BsModal>
 
 @code
 {
@@ -108,29 +59,51 @@
     private BindModel _Bind = new();
 
     [Parameter]
-    public string Csv { get; set; } = "";
+    public string? Csv { get; set; }
     [Parameter]
     public List<string> Exclude { get; set; } = new();
     [Parameter]
     public List<string> Items { get; set; } = new();
+    [Parameter]
+    public Action? Callback { get; set; }
 
     public List<string> Selected = new();
     private List<string> NotSelected = new();
-    private bool AddCsvOpen = false;
     private string ValidationMessage = "";
+    private BsModal? AddCodeModal;
 
-    private string DropDown
+    private async Task<bool> AddCodeSubmit() => await Task.Run(() =>
     {
-        get => "-1";
-        set
+        if (!Regex.IsMatch(_Bind.Value, "^[A-Za-z0-9]+$"))
         {
-            OnAddSelectorChange(value);
+            ValidationMessage = "Please enter an alphanumeric class code.";
+            StateHasChanged();
+
+            return false;
         }
-    }
+
+        var _Upper = _Bind.Value.ToUpper();
+
+        if (Selected.Contains(_Upper))
+        {
+            return false;
+        }
+
+        Selected.Add(_Upper);
+        if (NotSelected.Contains(_Upper)) NotSelected.Remove(_Upper);
+
+        ValidationMessage = "";
+        _Bind.Value = "";
+        Csv = String.Join(',', Selected);
+
+        StateHasChanged();
+
+        return true;
+    });
 
     protected override void OnInitialized()
     {
-        var _Selected = Csv.Split(",").ToHashSet();
+        var _Selected = Csv!.Split(",").ToHashSet();
         Selected = Items.FindAll((It) => _Selected.Contains(It) && !Exclude.Contains(It));
         NotSelected = Items.FindAll((It) => !_Selected.Contains(It) && !Exclude.Contains(It));
     }
@@ -139,9 +112,10 @@
     {
         Selected.Remove(Item);
         NotSelected.Add(Item);
-        Csv = String.Join(',', Selected);
+        Csv = string.Join(',', Selected);
 
         StateHasChanged();
+        if (Callback != null) Callback();
     }
 
     private void OnAddSelectorChange(string Item)
@@ -149,16 +123,21 @@
         if (Item == "-1") return;
         if (Item == "-2")
         {
-            AddCsvOpen = true;
+            AddCodeModal.Open();
+
+            Js.InvokeVoidAsync("ReturnSelects");
             StateHasChanged();
+            if (Callback != null) Callback();
 
             return;
         }
 
         Selected.Add(Item);
         NotSelected.Remove(Item);
-        Csv = String.Join(',', Selected);
+        Csv = string.Join(',', Selected);
 
+        Js.InvokeVoidAsync("ReturnSelects");
         StateHasChanged();
+        if (Callback != null) Callback();
     }
 }
