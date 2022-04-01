@@ -285,7 +285,7 @@
         if (LoggedIn.IsMember)
             ThisUserCost = ActiveClass.MemberPrice;
         if (ThisUserCost > 0.0f)
-            PaymentScreen!.StartProcess();
+            PaymentScreen!.StartProcess(ThisUserCost);
         else
             EnrollWithPayment(null);
     }
