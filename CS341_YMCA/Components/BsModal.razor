@@ -11,41 +11,25 @@
 
     <div class="modal-header">
         @if (Header is not null)
-        {
-            @Header
-        }
+        { @Header }
         @if (Title is not null)
-        {
-            <h4 class="modal-title">@Title</h4>
-        }
+        { <h4 class="modal-title">@Title</h4> }
         @if (!string.IsNullOrEmpty(CancelText))
-        {
-            <button type="button" class="btn btn-close close" @onclick=Cancel></button>
-        }
+        { <button type="button" class="btn btn-close close" @onclick=Cancel></button> }
     </div>
     <div class="modal-body">
         @if (!string.IsNullOrEmpty(ErrorMessage))
-        {
-            <div class="alert alert-warning">@ErrorMessage</div>
-        }
+        { <div class="alert alert-warning">@ErrorMessage</div> }
         @if (Body is not null)
-        {
-            @Body
-        }
+        { @Body }
     </div>
     <div class="modal-footer">
         @if (Footer is not null)
-        {
-            @Footer
-        }
+        { @Footer }
         @if (!string.IsNullOrEmpty(CancelText))
-        {
-            <button type="button" class="btn btn-secondary" @onclick=Cancel>@CancelText</button>
-        }
+        { <button type="button" class="btn btn-secondary" @onclick=Cancel>@CancelText</button> }
         @if (!string.IsNullOrEmpty(SubmitText))
-        {
-            <button type="button" class="btn btn-danger" @onclick=Submit>@SubmitText</button>
-        }
+        { <button type="button" class="btn btn-@SubmitClass" @onclick=Submit>@SubmitText</button> }
     </div>
 
     </div>
@@ -98,6 +82,9 @@
     [Parameter]
     public Action? SubmitAction { get; set; }
 
+    [Parameter]
+    public string SubmitClass { get; set; } = "primary";
+
     /// <summary>
     /// Action called when the modal's cancel button is pressed.
     /// </summary>
@@ -106,7 +93,6 @@
 
     private string ErrorMessage = "";
     private bool IsOpen = false;
-    private string ModalClass => IsOpen ? "in" : "";
 
     public void Open()
     {
@@ -130,5 +116,11 @@
     {
         CancelAction?.Invoke();
         Close();
+    }
+
+    public void Error(string Message)
+    {
+        this.ErrorMessage = Message;
+        StateHasChanged();
     }
 }

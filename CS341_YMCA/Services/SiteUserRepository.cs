@@ -1,4 +1,5 @@
 ﻿using CS341_YMCA.Helpers;
+using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 
 namespace CS341_YMCA.Services;
@@ -7,7 +8,7 @@ namespace CS341_YMCA.Services;
  * Provides access to the internal account and authentication
  * subsystems within the database.
  */
-public class SiteUserRepository
+public class SiteUserRepository : Controller
 {
     private readonly LinkGenerator Links;
     private readonly IHttpContextAccessor Con;

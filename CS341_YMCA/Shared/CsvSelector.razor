@@ -1,5 +1,6 @@
 ﻿@using System.Text.RegularExpressions
 
+@using CS341_YMCA.Components
 @using CS341_YMCA.Helpers
 @using CS341_YMCA.Services
 
@@ -30,21 +31,13 @@
     </select>
 </h3>
 
-@if (AddCsvOpen)
-{
-    <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
-    <div class="modal-dialog">
-    <div class="modal-content">
-    <div class="modal-header">
-        <h4 class="modal-title">Add a new requirement code</h4>
-        <button type="button" class="btn btn-close close" @onclick="() =>
-            {
-                AddCsvOpen = false;
-                StateHasChanged();
-            }"></button>
-    </div>
+<BsModal @ref=AddCodeModal
+    SubmitAction=AddCodeSubmit>
+
+    <Title>Add a new requirement code</Title>
+    <Body>
+
     <EditForm Model=_Bind>
-    <div class="modal-body">
         
     @if (!string.IsNullOrEmpty(ValidationMessage))
     {
@@ -52,54 +45,10 @@
     }
     <InputText class="form-control" @bind-Value=_Bind.Value />
     <span><i>(Use alphanumeric characters)</i></span>
-    </div>
-    <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" @onclick="() =>
-        {
-            AddCsvOpen = false;
-            StateHasChanged();
-        }">Cancel</button>
-    @code {
-        const string _Reg = "^[A-Za-z0-9]+$";
-        const string _ErrMsg = "Please enter an alphanumeric class code.";
-        const string _Ep = "";
-    }
-    <button type="button" class="btn btn-primary" @onclick="() =>
-        {
-            if (!Regex.IsMatch(_Bind.Value, _Reg))
-            {
-                ValidationMessage = _ErrMsg;
-                StateHasChanged();
-                return;
-            }
 
-            var _Upper = _Bind.Value.ToUpper();
-
-            if (Selected.Contains(_Upper))
-            {
-                AddCsvOpen = false;
-                StateHasChanged();
-                return;
-            }
-
-            Selected.Add(_Upper);
-            if (NotSelected.Contains(_Upper)) NotSelected.Remove(_Upper);
-
-            ValidationMessage = _Ep;
-            _Bind.Value = _Ep;
-            Csv = String.Join(',', Selected);
-            
-            Callback();
-            AddCsvOpen = false;
-            StateHasChanged();
-        }">Submit</button>
-
-    </div>
     </EditForm>
-    </div>
-    </div>
-    </div>
-}
+    </Body>
+</BsModal>
 
 @code
 {
@@ -120,8 +69,36 @@
 
     public List<string> Selected = new();
     private List<string> NotSelected = new();
-    private bool AddCsvOpen = false;
     private string ValidationMessage = "";
+    private BsModal? AddCodeModal;
+
+    private void AddCodeSubmit()
+    {
+        if (!Regex.IsMatch(_Bind.Value, "^[A-Za-z0-9]+$"))
+        {
+            ValidationMessage = "Please enter an alphanumeric class code.";
+            StateHasChanged();
+            return;
+        }
+
+        var _Upper = _Bind.Value.ToUpper();
+
+        if (Selected.Contains(_Upper))
+        {
+            AddCodeModal!.Close();
+            return;
+        }
+
+        Selected.Add(_Upper);
+        if (NotSelected.Contains(_Upper)) NotSelected.Remove(_Upper);
+
+        ValidationMessage = "";
+        _Bind.Value = "";
+        Csv = String.Join(',', Selected);
+
+        AddCodeModal!.Close();
+        StateHasChanged();
+    }
 
     protected override void OnInitialized()
     {
@@ -145,7 +122,7 @@
         if (Item == "-1") return;
         if (Item == "-2")
         {
-            AddCsvOpen = true;
+            AddCodeModal.Open();
 
             Js.InvokeVoidAsync("ReturnSelects");
             StateHasChanged();

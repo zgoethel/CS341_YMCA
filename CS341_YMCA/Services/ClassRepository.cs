@@ -1,4 +1,5 @@
 ﻿using CS341_YMCA.Helpers;
+using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 
 namespace CS341_YMCA.Services;
@@ -7,7 +8,7 @@ namespace CS341_YMCA.Services;
  * Provides access to the internal class management, scheduling, and
  * browsing subsystems within the database.
  */
-public class ClassRepository
+public class ClassRepository : Controller
 {
     private readonly Database Sql;
 

@@ -12,9 +12,10 @@
 
 <BsModal @ref=DeleteModal
     SubmitText="Delete"
-    SubmitAction=DeleteDialogSubmit>
+    SubmitAction=DeleteDialogSubmit
+    SubmitClass="danger">
 
-    <Title>You are about to delete the account <strong>'@ActiveUser.Email'</strong></Title>
+    <Title>You are about to delete the account <strong>'@ActiveUser!.Email'</strong></Title>
     <Body>
         <p class="font-weight-bold">This action cannot be undone. Are you sure you wish to continue?</p>
     </Body>
@@ -27,7 +28,6 @@
 
 @if (LoggedIn!.IsAdmin)
 {
-    
 
     <h1>User Account Editor</h1>
     <hr />
