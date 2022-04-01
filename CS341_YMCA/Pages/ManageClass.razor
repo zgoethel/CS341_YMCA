@@ -257,11 +257,13 @@
         StateHasChanged();
     }
 
-    private void DeleteDialogSubmit()
+    private async Task<bool> DeleteDialogSubmit() => await Task.Run(() =>
     {
         var Result = Classes.Class_DeleteById(ActiveClass.Id);
         Nav.NavigateTo("ManageClasses");
-    }
+
+        return false;
+    });
 
     public void SaveForm(bool Redirect = true)
     {

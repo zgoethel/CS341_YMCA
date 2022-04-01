@@ -7,7 +7,7 @@
 @inject IJSRuntime Js
 
 <BsModal @ref=AddEditModal
-    SubmitAction="async () => await AddEditSubmit()">
+    SubmitAction=AddEditSubmit>
 
     <Title>Edit Schedule for <strong>'@Date.ToShortDateString()'</strong></Title>
     <Body>
@@ -153,7 +153,7 @@
     private string JustTime = "";
     private BsModal? AddEditModal;
 
-    private async Task AddEditSubmit()
+    private async Task<bool> AddEditSubmit()
     {
         var JustTime = await Js.InvokeAsync<string>("GetInputVal", "class-sched-timepicker");
         var Split = JustTime.Split(' ', ':');
@@ -172,7 +172,8 @@
         {
             if (OccursIndefinitely)
                 RelevantSchedule.Occurrences = 0;
-        } else
+        }
+        else
         {
             RelevantSchedule.Recurrence = 0;
             RelevantSchedule.Occurrences = 0;
@@ -186,6 +187,8 @@
 
         UpdateCallback();
         StateHasChanged();
+
+        return true;
     }
 
     private DateTime _Date { get; set; } = DateTime.Today;

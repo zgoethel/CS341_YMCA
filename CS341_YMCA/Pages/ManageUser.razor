@@ -56,9 +56,11 @@
             ActiveUser = SiteUsers.SiteUser_GetById(int.Parse(Id!)).Get()!;
     }
 
-    private void DeleteDialogSubmit()
+    private async Task<bool> DeleteDialogSubmit() => await Task.Run(() =>
     {
         var Result = SiteUsers.SiteUser_DeleteById(ActiveUser!.Id).Get()!;
         Nav.NavigateTo("ManageUsers");
-    }
+
+        return false;
+    });
 }

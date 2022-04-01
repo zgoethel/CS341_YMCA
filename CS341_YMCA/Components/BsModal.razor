@@ -80,7 +80,7 @@
     /// Action called when the modal's submit button is pressed.
     /// </summary>
     [Parameter]
-    public Action? SubmitAction { get; set; }
+    public Func<Task<bool>>? SubmitAction { get; set; }
 
     [Parameter]
     public string SubmitClass { get; set; } = "primary";
@@ -89,7 +89,7 @@
     /// Action called when the modal's cancel button is pressed.
     /// </summary>
     [Parameter]
-    public Action? CancelAction { get; set; }
+    public Func<Task<bool>>? CancelAction { get; set; }
 
     private string ErrorMessage = "";
     private bool IsOpen = false;
@@ -106,16 +106,20 @@
         StateHasChanged();
     }
 
-    public void Submit()
+    public async void Submit()
     {
-        SubmitAction?.Invoke();
-        Close();
+        var ShouldClose = SubmitAction is null
+            ? true
+            : (await SubmitAction.Invoke());
+        if (ShouldClose) Close();
     }
 
-    public void Cancel()
+    public async void Cancel()
     {
-        CancelAction?.Invoke();
-        Close();
+        var ShouldClose = CancelAction is null
+            ? true
+            : (await CancelAction.Invoke());
+        if (ShouldClose) Close();
     }
 
     public void Error(string Message)

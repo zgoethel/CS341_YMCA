@@ -72,21 +72,21 @@
     private string ValidationMessage = "";
     private BsModal? AddCodeModal;
 
-    private void AddCodeSubmit()
+    private async Task<bool> AddCodeSubmit() => await Task.Run(() =>
     {
         if (!Regex.IsMatch(_Bind.Value, "^[A-Za-z0-9]+$"))
         {
             ValidationMessage = "Please enter an alphanumeric class code.";
             StateHasChanged();
-            return;
+
+            return false;
         }
 
         var _Upper = _Bind.Value.ToUpper();
 
         if (Selected.Contains(_Upper))
         {
-            AddCodeModal!.Close();
-            return;
+            return false;
         }
 
         Selected.Add(_Upper);
@@ -96,9 +96,10 @@
         _Bind.Value = "";
         Csv = String.Join(',', Selected);
 
-        AddCodeModal!.Close();
         StateHasChanged();
-    }
+
+        return true;
+    });
 
     protected override void OnInitialized()
     {
