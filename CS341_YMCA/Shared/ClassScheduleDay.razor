@@ -188,7 +188,7 @@
         _RelevantSchedule.Id = _RelevantSchedule.Id ?? 0;
 
         UpdateCallback();
-        StateHasChanged();
+        await InvokeAsync(() => StateHasChanged());
 
         return true;
     }
@@ -251,7 +251,7 @@
             };
 
             JustTime = RelevantSchedule.FirstDate.ToShortTimeString();
-            StateHasChanged();
+            InvokeAsync(() => StateHasChanged());
         }
     }
 

@@ -255,6 +255,12 @@
 </div>
 </div>
 
+<PaymentModal @ref=PaymentScreen
+    PaymentCallback="(Id) =>
+    {
+        EnrollWithPayment(Id);
+    }" />
+
 @code
 {
     [CascadingParameter]
@@ -264,6 +270,7 @@
 
     protected ClassDBO ActiveClass { get; set; } = new();
     private int SeatsTaken;
+    private PaymentModal? PaymentScreen;
 
     protected override void OnInitialized()
     {
@@ -274,6 +281,17 @@
 
     private void EnrollClick()
     {
+        var ThisUserCost = ActiveClass.NonMemberPrice;
+        if (LoggedIn.IsMember)
+            ThisUserCost = ActiveClass.MemberPrice;
+        if (ThisUserCost > 0.0f)
+            PaymentScreen!.StartProcess(ThisUserCost);
+        else
+            EnrollWithPayment(null);
+    }
+
+    private void EnrollWithPayment(int? PaymentId)
+    {
         SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
         var UserEnrollment = Classes.ClassEnrollment_GetByUserId(LoggedIn!.Id).Get()!;
         var _IsEnrolled = UserEnrollment.Find((It) => It.ClassId == ActiveClass.Id) is not null;
@@ -283,7 +301,7 @@
             return;
         }
 
-        Classes.Class_EnrollUser(ActiveClass.Id, LoggedIn!.Id);
+        Classes.Class_EnrollUser(ActiveClass.Id, LoggedIn!.Id, PaymentId);
         SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
         StateHasChanged();
     }
