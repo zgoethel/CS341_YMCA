@@ -13,26 +13,100 @@
 
     <Title>Make a Payment</Title>
     <Body>
+
+    @if (!string.IsNullOrEmpty(ValidationMessage))
+    {
+        <div class="alert alert-warning">@ValidationMessage</div>
+    }
+
     <EditForm Model=PaymentDetails>
+        <div class="row">
+            <div class="col-sm-8">
+                <label>Cardholder Name:</label>
+            </div>
+            <div class="col-sm-4">
+                <label>Security Code:</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-8">
+                <InputText class="form-control mb-2" type="text" @bind-Value=PaymentDetails.HolderName />
+            </div>
+            <div class="col-sm-4">
+                <InputNumber class="form-control mb-2" @bind-Value=PaymentDetails.SecurityCode />
+            </div>
+        </div>
+            
+        <label>Card Number:</label>
+        <InputText class="form-control mb-2" type="text" @bind-Value=PaymentDetails.CardNumber />
 
+         <div class="row">
+            <div class="col-sm-5">
+                <label>Expiration Date:</label>
+            </div>
+            <div class="col-sm-3">
+                <label>Postal Code:</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-5">
+                <InputDate Type="InputDateType.Month" class="form-control" @bind-Value=PaymentDetails.CardExpiry />
+            </div>
+            <div class="col-sm-3">
+                <InputNumber class="form-control mb-2" @bind-Value=PaymentDetails.PostalCode />
+            </div>
+        </div>
 
+        <hr />
 
+        <div style="text-align: right;">Total due: <strong>$@string.Format("{0:0.00}", PaymentDetails.Amount)</strong></div>
     </EditForm>
     </Body>
 </BsModal>
 
 @code
 {
+    [CascadingParameter]
+    protected SiteUserDBO LoggedIn { get; set; } = new();
+
     [Parameter]
     public Action<int>? PaymentCallback { get; set; }
 
     private BsModal? Modal;
     private UserPaymentDBO? PaymentDetails;
+    public string? ValidationMessage;
 
     private async Task<bool> PaymentSubmit()
     {
-        //TODO Perform the actual payment
-        var _PaymentId = -1;
+        if (
+            string.IsNullOrEmpty(PaymentDetails.HolderName)
+            || string.IsNullOrEmpty(PaymentDetails.CardNumber)
+        )
+        {
+            ValidationMessage = "Please provide all card details.";
+            StateHasChanged();
+            return false;
+        }
+
+        var Result = SiteUsers.SiteUserPayments_Enter(
+            UserId: LoggedIn.Id,
+            Amount: PaymentDetails.Amount,
+            CardNumber: PaymentDetails.CardNumber,
+            SecurityCode: PaymentDetails.SecurityCode,
+            CardExpiry: PaymentDetails.CardExpiry,
+            PostalCode: PaymentDetails.PostalCode,
+            HolderName: PaymentDetails.HolderName
+        );
+
+        var _PaymentId = Result.Get()!;
+
+        if (!Result.Success)
+        {
+            ValidationMessage = Result.Error ?? "An unknown error has occurred.";
+            StateHasChanged();
+            return false;
+        }
+
         // Alert the caller that the payment is ready
         PaymentCallback?.Invoke(_PaymentId);
 
@@ -42,6 +116,7 @@
 
     public void StartProcess(float Amount)
     {
+        ValidationMessage = null;
         // Set up form state if necessary
         PaymentDetails = new()
         {
