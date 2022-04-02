@@ -99,6 +99,8 @@
     {
         foreach (var Session in Schedule)
         {
+            // Remove bogus IDs from new entities
+            if (Session.Id < 0) Session.Id = null;
             var Result = Classes.ClassSchedule_Set(
                 Id: Session.Id,
                 ClassId: Class.Id,
@@ -131,5 +133,23 @@
         max-width: 14%;
         display: inline-block;
         vertical-align: top;
+    }
+    div.schedule-day-block
+    {
+        padding: 0.5em;
+        border: 1px solid grey;
+        border-radius: 0.6em;
+        box-shadow: 0 0 0.3em 0.3em #c2c2c2;
+        border-left: 0.4em solid green;
+        min-height: 10.8em;
+        padding-bottom: 0;
+    }
+    .oi-chevron-top
+    {
+        padding-left: 2em;
+    }
+    .bootstrap-datetimepicker-widget table td span
+    {
+        display: inline;
     }
 </style>
