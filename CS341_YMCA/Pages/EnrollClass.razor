@@ -1,5 +1,6 @@
 ﻿@page "/Enroll/{Id}"
 
+@using CS341_YMCA.Components
 @using CS341_YMCA.Helpers
 @using CS341_YMCA.Services
 
@@ -7,6 +8,21 @@
 @inject Database Sql
 
 <PageTitle>@ActiveClass.ClassName</PageTitle>
+
+<BsModal @ref=DropModal
+    SubmitText="Drop"
+    SubmitAction=DropDialogSubmit
+    SubmitClass="danger">
+
+    <Title>You are about to drop the class <strong>'@ActiveClass!.ClassName'</strong></Title>
+    <Body>
+        <p class="font-weight-bold">This action cannot be undone. Are you sure you wish to continue?</p>
+        <ul class="text-danger">
+            <li>You will no longer be enrolled in this class.</li>
+            <li>The class fee will <strong>not</strong> be refunded.</li>
+        </ul>
+    </Body>
+</BsModal>
 
 <h1>@ActiveClass.ClassName</h1>
 <hr />
@@ -164,12 +180,7 @@
         <span style="padding-top: 0.3em;display: inline-block;">You are enrolled in this course!</span>
         <button class="btn btn-success"
             style="float: right;"
-            @onclick="() =>
-            {
-                Classes.Class_DropUser(ActiveClass.Id, LoggedIn!.Id);
-                SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
-                StateHasChanged();
-            }">Drop</button>
+            @onclick="() => DropModal!.Open()">Drop</button>
     </span>
 } else if (!ActiveClass.AllowEnrollment)
 {
@@ -271,6 +282,7 @@
     protected ClassDBO ActiveClass { get; set; } = new();
     private int SeatsTaken;
     private PaymentModal? PaymentScreen;
+    private BsModal? DropModal;
 
     protected override void OnInitialized()
     {
@@ -305,4 +317,12 @@
         SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
         StateHasChanged();
     }
+
+    private async Task<bool> DropDialogSubmit() => await Task.Run(() =>
+    {
+        var Result = Classes.Class_DropUser(ActiveClass.Id, LoggedIn!.Id);
+        SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
+        InvokeAsync(() => StateHasChanged());
+        return Result.Success;
+    });
 }
