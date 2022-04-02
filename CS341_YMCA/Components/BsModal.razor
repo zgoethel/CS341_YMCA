@@ -95,13 +95,13 @@
     public void Open()
     {
         IsOpen = true;
-        StateHasChanged();
+        InvokeAsync(() => StateHasChanged());
     }
 
     public void Close()
     {
         IsOpen = false;
-        StateHasChanged();
+        InvokeAsync(() => StateHasChanged());
     }
 
     public async void Submit()
@@ -123,6 +123,6 @@
     public void Error(string Message)
     {
         this.ErrorMessage = Message;
-        StateHasChanged();
+        InvokeAsync(() => StateHasChanged());
     }
 }

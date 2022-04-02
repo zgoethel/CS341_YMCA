@@ -385,9 +385,9 @@ public class SiteUserRepository : Controller
         decimal Amount,
         string CardNumber,
         int SecurityCode,
-        DateTime CardExpiry,
         int PostalCode,
-        string HolderName
+        string HolderName,
+        DateTime CardExpiry
     )
     {
         ResultToken<int> Result = new();
@@ -403,7 +403,8 @@ public class SiteUserRepository : Controller
                     CardNumber = CardNumber,
                     SecurityCode = SecurityCode,
                     PostalCode = PostalCode,
-                    HolderName = HolderName
+                    HolderName = HolderName,
+                    CardExpiry = CardExpiry
                 }, (_Result) =>
                 {
                     Result.Value = _Result.Id;

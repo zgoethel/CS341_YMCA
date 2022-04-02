@@ -77,7 +77,7 @@
         if (!Regex.IsMatch(_Bind.Value, "^[A-Za-z0-9]+$"))
         {
             ValidationMessage = "Please enter an alphanumeric class code.";
-            StateHasChanged();
+            InvokeAsync(() => StateHasChanged());
 
             return false;
         }
@@ -95,8 +95,8 @@
         ValidationMessage = "";
         _Bind.Value = "";
         Csv = String.Join(',', Selected);
-
-        StateHasChanged();
+        
+        InvokeAsync(() => StateHasChanged());
 
         return true;
     });
@@ -123,7 +123,7 @@
         if (Item == "-1") return;
         if (Item == "-2")
         {
-            AddCodeModal.Open();
+            AddCodeModal!.Open();
 
             Js.InvokeVoidAsync("ReturnSelects");
             StateHasChanged();

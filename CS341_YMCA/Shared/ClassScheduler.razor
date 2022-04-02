@@ -57,7 +57,7 @@
                 ShowEditing=ShowEditing
                 UpdateCallback="() =>
                 {
-                    StateHasChanged();
+                    InvokeAsync(() => StateHasChanged());
                 }"
             />
         </div>
