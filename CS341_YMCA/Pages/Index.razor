@@ -49,7 +49,7 @@
 
         <div class="card mb-4">
         <div class="card-header">Your payment history</div>
-        <div class="card-body">
+        <div class="card-body overflow-auto p-2" style="height: 24em;">
             @{ var UserPayments = LoggedIn.Id == 0 ? new List<UserPaymentDBO>() : SiteUsers.SiteUserPayments_GetByUserId(LoggedIn.Id).Get()!; }
             @if (LoggedIn.Id == 0)
             {
@@ -71,7 +71,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                @foreach (var Payment in UserPayments.OrderBy((It) => It.Id))
+                @foreach (var Payment in UserPayments.OrderByDescending((It) => It.Id))
                 {
                     <tr>
                         <td><strong>@Payment.Paid.ToShortDateString()</strong> @@ @Payment.Paid.ToShortTimeString()</td>
