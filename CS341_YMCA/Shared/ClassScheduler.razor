@@ -29,14 +29,14 @@
         style="float: right;cursor: pointer;">
     <i class="oi oi-chevron-right"
         style="cursor: pointer;"
-        @onclick="() => { WeekStart = WeekStart.AddDays(7); }"
+        @onclick="() => { WeekStart = WeekStart.AddDays(7 * NumWeeks); }"
     /></h4>
 }
 
 <h4 class="mt-1 me-4">
 <i class="oi oi-chevron-left"
     style="cursor: pointer;"
-    @onclick="() => { WeekStart = WeekStart.AddDays(-7); }"
+    @onclick="() => { WeekStart = WeekStart.AddDays(-7 * NumWeeks); }"
 />
     Week of @WeekStart.ToLongDateString().Replace("Sunday, ", "")
 </h4>
@@ -45,25 +45,28 @@
     string[] _Days = { "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" };
 }
 
+@for (int k = 0; k < NumWeeks; k++)
+{
 <div class="_col-no-margin mt-1">
     @for (int j = 0; j < 7; j++)
     {
         <div style="width: 14%;" class="col">
-            <h3>@_Days[j]</h3>
+            @if (k == 0) { <h3>@_Days[j]</h3> }
             <ClassScheduleDay
                 Class=@Class
                 Schedule=@Schedule
-                Date=@WeekStart.AddDays(j)
+                Date=@WeekStart.AddDays(k * 7 + j)
                 ShowEditing=ShowEditing
                 UpdateCallback="() =>
                 {
                     InvokeAsync(() => StateHasChanged());
                 }"
+                DisplayClassTitles=DisplayClassTitles
             />
         </div>
     }
 </div>
-
+}
 
 @code
 {
@@ -73,6 +76,14 @@
     public bool ShowEditing { get; set; } = false;
     [Parameter]
     public ManageClass Manager { get; set; } = new();
+    [Parameter]
+    public int NumWeeks { get; set; } = 1;
+    [Parameter]
+    public int DisplayUserSched { get; set; } = 0;
+    [Parameter]
+    public bool DisplayClassTitles { get; set; } = false;
+    [Parameter]
+    public bool OverrideDateFocus { get; set; } = false;
 
     public List<ClassScheduleDBO> Schedule = new();
     private string ValidationMessage = "";
@@ -83,9 +94,12 @@
     {
         base.OnInitialized();
 
-        Schedule = Classes.ClassSchedule_List(Class!.Id).Get()!;
+        Schedule = (DisplayUserSched == 0)
+            ? Classes.ClassSchedule_List(Class!.Id).Get()!
+            : Classes.ClassSchedule_GetByUserId(DisplayUserSched).Get()!;
 
         var _WeekStart = Schedule.FirstOrDefault()?.FirstDate ?? DateTime.Today;
+        if (OverrideDateFocus) _WeekStart = DateTime.Today;
         var Offset = -(int)_WeekStart.DayOfWeek;
         WeekStart = _WeekStart.AddDays(Offset);
 
@@ -99,6 +113,8 @@
     {
         foreach (var Session in Schedule)
         {
+            // Remove bogus IDs from new entities
+            if (Session.Id < 0) Session.Id = null;
             var Result = Classes.ClassSchedule_Set(
                 Id: Session.Id,
                 ClassId: Class.Id,
@@ -131,5 +147,23 @@
         max-width: 14%;
         display: inline-block;
         vertical-align: top;
+    }
+    div.schedule-day-block
+    {
+        padding: 0.5em;
+        border: 1px solid grey;
+        border-radius: 0.6em;
+        box-shadow: 0 0 0.3em 0.3em #c2c2c2;
+        border-left: 0.4em solid green;
+        min-height: 10.8em;
+        padding-bottom: 0;
+    }
+    .oi-chevron-top
+    {
+        padding-left: 2em;
+    }
+    .bootstrap-datetimepicker-widget table td span
+    {
+        display: inline;
     }
 </style>

@@ -470,7 +470,7 @@ public class ClassRepository : Controller
         return Result;
     }
 
-    public ResultToken<List<ClassScheduleDBO>> ClassSschedule_GetByUserId(
+    public ResultToken<List<ClassScheduleDBO>> ClassSchedule_GetByUserId(
         int UserId
     )
     {
