@@ -12,14 +12,15 @@ BEGIN
 	SET NOCOUNT ON;
 
 	-- Fetch all payments associated with the user's ID
-	SELECT
+	SELECT [Id],
 		[UserId],
 		[Amount],
 		[CardNumber],
 		[SecurityCode],
 		[PostalCode],
 		[HolderName],
-		[CardExpiry]
+		[CardExpiry],
+		[Paid]
 	FROM [SiteUserPayments]
 	WHERE
 		[UserId] = @UserId;

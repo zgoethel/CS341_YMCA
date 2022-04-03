@@ -17,6 +17,7 @@ BEGIN
 		[SecurityCode],
 		[PostalCode],
 		[HolderName],
-		[CardExpiry]
+		[CardExpiry],
+		[Paid]
 	FROM [SiteUserPayments];
 END

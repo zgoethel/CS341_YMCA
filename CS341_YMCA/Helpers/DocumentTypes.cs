@@ -97,6 +97,7 @@ public class UserPaymentDBO
     public DateTime CardExpiry { get; set; }
     public int PostalCode { get; set; }
     public string HolderName { get; set; } = "";
+    public DateTime Paid { get; set; }
 }
 
 public class UserPaymentEnterResult
