@@ -86,7 +86,7 @@
     </Body>
 </BsModal>
 
-<div class="schedule-day-block mb-1">
+<div class="schedule-day-block mb-1" style="background: @((Date.Month % 2 == 0) ? "#ffffff" : "#e4f5dd")">
 @if (ShowEditing)
 {
     <i class="oi oi-plus"
@@ -112,6 +112,15 @@
             @onclick = "() => OpenAddEdit(Sched)"
         />
     }
+    @if (DisplayClassTitles)
+    {
+        @if (Sched.Recurrence > 0)
+        {
+            <i class="oi oi-loop-square" style="float: right;"
+                title="Repeats every @Sched.Recurrence days, @(Sched.Occurrences == 0 ? "indefinitely" : $"{Sched.Occurrences} times")." />
+        }
+        <a href="Enroll/@Sched.ClassId"><strong>@(Classes.Class_GetById(Sched.ClassId).Get()!.ClassName)</strong></a>
+    }
 
     <p>
         @Sched.FirstDate.ToShortTimeString()&nbsp;-
@@ -119,6 +128,8 @@
     </p>
 
     <p>
+    @if (!DisplayClassTitles)
+    {
     @if (Sched.Recurrence <= 0)
     {
         <i class="oi oi-loop-square" /><i>Never</i>
@@ -131,6 +142,7 @@
             Until
             @(Sched.FirstDate.Date.AddDays(Sched.Recurrence * Sched.Occurrences).ToShortDateString())
         </i>
+    }
     }
     </p>
 }
@@ -348,10 +360,13 @@
 
                 return false;
             });
-            
+
             InvokeAsync(() => StateHasChanged());
         }
     }
+
+    [Parameter]
+    public bool DisplayClassTitles { get; set; } = false;
 
     protected override async Task OnAfterRenderAsync(bool FirstRender)
     {
