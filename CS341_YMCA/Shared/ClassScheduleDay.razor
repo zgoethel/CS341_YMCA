@@ -5,6 +5,7 @@
 
 @inject ClassRepository Classes
 @inject IJSRuntime Js
+@inject ClassValidationService ClassValidation
 
 <BsModal @ref=AddEditModal
     SubmitAction=AddEditSubmit>
@@ -172,10 +173,8 @@
     public Action UpdateCallback { get; set; } = () => {  };
     [Parameter]
     public List<int>? DeleteIds { get; set; }
-    [Parameter]
-    public ClassScheduler? SchedulerParent { get; set; }
 
-    private List<ClassScheduleDBO> _RelevantSchedule => SchedulerParent?.GetClassesOnDay(Schedule, Date.Date) ?? new();
+    private List<ClassScheduleDBO> _RelevantSchedule => ClassValidation.GetClassesOnDay(Schedule, Date.Date);
     
     // Modal editor copy (in flight)
     private ClassScheduleDBO RelevantSchedule = new();
@@ -214,7 +213,7 @@
 
         try
         {
-            SchedulerParent!.Validate(RelevantSchedule, Schedule);
+            ClassValidation.Validate(RelevantSchedule, Schedule);
         } catch (Exception Ex)
         {
             AddEditModal!.Error(Ex.Message);

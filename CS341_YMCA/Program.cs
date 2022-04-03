@@ -15,6 +15,7 @@ Builder.Services.AddTransient<EmailSender>();
 Builder.Services.AddTransient<Database>();
 Builder.Services.AddTransient<SiteUserRepository>();
 Builder.Services.AddTransient<ClassRepository>();
+Builder.Services.AddTransient<ClassValidationService>();
 
 Builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 

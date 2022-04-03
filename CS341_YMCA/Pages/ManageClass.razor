@@ -111,7 +111,7 @@
 
     <h3>Class Scheduler</h3>
     <hr />
-    <ClassScheduler @ref=Scheduler Manager=@this Class=@ActiveClass ShowEditing=@(Enrolled.Count == 0)></ClassScheduler>
+    <ClassScheduler @ref=Scheduler Class=@ActiveClass ShowEditing=@(Enrolled.Count == 0)></ClassScheduler>
     @if (Enrolled.Count > 0)
     {
         <i>Class schedules are locked once the first user has enrolled.</i>
