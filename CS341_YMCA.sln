@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CS341_YMCA", "CS341_YMCA\CS341_YMCA.csproj", "{72FF961A-1507-41BC-9CDC-3B84C67E0579}"
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "CS341_SQL", "CS341_SQL\CS341_SQL.sqlproj", "{493CC241-7E1F-401B-A5D0-3A9823B6DC23}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,12 @@ Global
 		{72FF961A-1507-41BC-9CDC-3B84C67E0579}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72FF961A-1507-41BC-9CDC-3B84C67E0579}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72FF961A-1507-41BC-9CDC-3B84C67E0579}.Release|Any CPU.Build.0 = Release|Any CPU
+		{493CC241-7E1F-401B-A5D0-3A9823B6DC23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{493CC241-7E1F-401B-A5D0-3A9823B6DC23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{493CC241-7E1F-401B-A5D0-3A9823B6DC23}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{493CC241-7E1F-401B-A5D0-3A9823B6DC23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{493CC241-7E1F-401B-A5D0-3A9823B6DC23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{493CC241-7E1F-401B-A5D0-3A9823B6DC23}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

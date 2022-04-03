@@ -5,6 +5,7 @@
 
 @inject ClassRepository Classes
 @inject IJSRuntime Js
+@inject ClassValidationService ClassValidation
 
 <BsModal @ref=AddEditModal
     SubmitAction=AddEditSubmit>
@@ -84,49 +85,76 @@
 
     </EditForm>
     </Body>
+
+    <Footer>
+    @if (RelevantSchedule.Id != Serial + 1)
+    {
+        <a class="btn btn-danger"
+            style="position: absolute;left: 1em;"
+            @onclick=DeleteClick>
+            Delete
+        </a>
+    }
+    </Footer>
 </BsModal>
 
-<div class="schedule-day-block mb-1">
-
-@if (ShowEditing && _RelevantSchedule.Id != null)
+<div class="schedule-day-block mb-1" style="background: @((Date.Month % 2 == 0) ? "#ffffff" : "#e4f5dd")">
+@if (ShowEditing)
 {
-    <i class="oi oi-pencil"
+    <i class="oi oi-plus"
         style="float: right;cursor: pointer;"
-        @onclick = "() => AddEditModal!.Open()"
+        @onclick = "() => OpenAddEdit(null)"
     />
 }
 
 <p style="margin-bottom: 0.2em;"><strong><i>@Date.Month/@Date.Day</i></strong></p>
-<hr style="margin: 0;" />
 
-@if (_RelevantSchedule.Id == null)
+@if (_RelevantSchedule.Count == 0)
 {
+    <hr style="margin-top: 0;" />
+}
+
+@foreach (var Sched in _RelevantSchedule.FindAll((It) => !DeleteIds!.Contains(It.Id ?? -2)))
+{
+    <hr style="margin-top: 0;margin-bottom: 5px;" />
     @if (ShowEditing)
     {
-        <button class="btn btn-primary mt-2"
-            @onclick = "() => AddEditModal!.Open()">
-        <i class="oi oi-plus" /></button>
+        <i class="oi oi-pencil ms-1"
+            style="float: right;cursor: pointer;"
+            @onclick = "() => OpenAddEdit(Sched)"
+        />
     }
-} else
-{
+    @if (DisplayClassTitles)
+    {
+        @if (Sched.Recurrence > 0)
+        {
+            <i class="oi oi-loop-square" style="float: right;"
+                title="Repeats every @Sched.Recurrence days, @(Sched.Occurrences == 0 ? "indefinitely" : $"{Sched.Occurrences} times")." />
+        }
+        <a href="Enroll/@Sched.ClassId"><strong>@(Classes.Class_GetById(Sched.ClassId).Get()!.ClassName)</strong></a>
+    }
+
     <p>
-        @_RelevantSchedule.FirstDate.ToShortTimeString()&nbsp;-
-        @_RelevantSchedule.FirstDate.AddMinutes(_RelevantSchedule.Duration).ToShortTimeString()
+        @Sched.FirstDate.ToShortTimeString()&nbsp;-
+        @Sched.FirstDate.AddMinutes(Sched.Duration).ToShortTimeString()
     </p>
 
     <p>
-    @if (_RelevantSchedule.Recurrence <= 0)
+    @if (!DisplayClassTitles)
+    {
+    @if (Sched.Recurrence <= 0)
     {
         <i class="oi oi-loop-square" /><i>Never</i>
-    } else if (_RelevantSchedule.Occurrences <= 0)
+    } else if (Sched.Occurrences <= 0)
     {
         <i class="oi oi-loop-square" /><i>Forever</i>
     } else
     {
         <i class="oi oi-loop-square" /><i>
             Until
-            @(_RelevantSchedule.FirstDate.Date.AddDays(_RelevantSchedule.Recurrence * _RelevantSchedule.Occurrences).ToShortDateString())
+            @(Sched.FirstDate.Date.AddDays(Sched.Recurrence * Sched.Occurrences).ToShortDateString())
         </i>
+    }
     }
     </p>
 }
@@ -143,21 +171,24 @@
     public bool ShowEditing { get; set; } = false;
     [Parameter]
     public Action UpdateCallback { get; set; } = () => {  };
+    [Parameter]
+    public List<int>? DeleteIds { get; set; }
 
-    // Parent editor copy (original)
-    private ClassScheduleDBO _RelevantSchedule = new();
+    private List<ClassScheduleDBO> _RelevantSchedule => ClassValidation.GetClassesOnDay(Schedule, Date.Date);
+    
     // Modal editor copy (in flight)
     private ClassScheduleDBO RelevantSchedule = new();
     private bool ClassRepeats = false;
     private bool OccursIndefinitely = true;
     private string JustTime = "";
     private BsModal? AddEditModal;
+    public static int Serial = -1;
 
     private async Task<bool> AddEditSubmit()
     {
         // Data-binding didn't work for this input
         JustTime = await Js.InvokeAsync<string>("GetInputVal", "class-sched-timepicker");
-        
+
         var Split = JustTime.Split(' ', ':');
         Split[2] = Split[2].ToUpper();
         if (Split[0] == 12.ToString())
@@ -180,80 +211,73 @@
             RelevantSchedule.Occurrences = 0;
         }
 
-        if (_RelevantSchedule.Id is not null)
-            Schedule.Remove(_RelevantSchedule);
-        Schedule.Add(RelevantSchedule);
-        _RelevantSchedule = RelevantSchedule;
-        // Setting null-ID to zero makes day display in week calendar
-        _RelevantSchedule.Id = _RelevantSchedule.Id ?? 0;
+        try
+        {
+            ClassValidation.Validate(RelevantSchedule, Schedule);
+        } catch (Exception Ex)
+        {
+            AddEditModal!.Error(Ex.Message);
+            return false;
+        }
 
+        if (RelevantSchedule.Id is null)
+            RelevantSchedule.Id = Serial--;
+        else
+        {
+            Schedule.RemoveAll((It) => It.Id == RelevantSchedule.Id);
+            _RelevantSchedule.RemoveAll((It) => It.Id == RelevantSchedule.Id);
+        }
+        Schedule.Add(RelevantSchedule);
+        _RelevantSchedule.Add(RelevantSchedule);
+
+        AddEditModal!.Error("");
+        Serial--;
         UpdateCallback();
-        StateHasChanged();
 
         return true;
     }
 
-    private DateTime _Date { get; set; } = DateTime.Today;
-    [Parameter]
-    public DateTime Date
+    private void OpenAddEdit(ClassScheduleDBO? Schedule)
     {
-        get => _Date;
-        set
-        {
-            _Date = value.Date;
-            // Reload schedule data for new day
-            _RelevantSchedule = Schedule.Find((It) =>
+        // Make a copy so editing only sticks when pressing "Submit"
+        RelevantSchedule = (Schedule is null)
+            ? new()
             {
-                // Select if this is the first day
-                var JustDay = It.FirstDate.Date;
-                if (JustDay == _Date)
-                    return true;
-                // Don't select if class is over
-                if (
-                    It.Recurrence <= 0
-                    || _Date < JustDay
-                ) return false;
-                // Select if today falls on an even recurrence
-                var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
-                var DiffDays = _Date.Subtract(JustDay).Days;
-                if (
-                    (_Date <= EndDate || It.Occurrences <= 0)
-                    && DiffDays % It.Recurrence == 0
-                ) return true;
-
-                return false;
-            }) ?? new()
-            {
-                Id = null,
+                Id = Serial--,
                 ClassId = Class.Id,
-                FirstDate = value.Date.AddHours(12),
-                Recurrence = 0,
+                FirstDate = Date.Date.AddHours(12),
+                Recurrence = 7,
                 Duration = 30,
-                Occurrences = 0
-            };
-            
-            ClassRepeats = _RelevantSchedule.Recurrence != 0;
-            OccursIndefinitely = _RelevantSchedule.Occurrences == 0;
-
-            // Make a copy so editing only sticks when pressing "Submit"
-            RelevantSchedule = new()
+                Occurrences = 1
+            }
+            : new()
             {
-                Id = _RelevantSchedule.Id,
-                ClassId = _RelevantSchedule.ClassId,
-                FirstDate = _RelevantSchedule.FirstDate,
-                Recurrence = (_RelevantSchedule.Recurrence == 0)
+                Id = Schedule.Id,
+                ClassId = Schedule.ClassId,
+                FirstDate = Schedule.FirstDate,
+                Recurrence = (Schedule.Recurrence == 0)
                     ? 7
-                    : _RelevantSchedule.Recurrence,
-                Duration = _RelevantSchedule.Duration,
-                Occurrences = (_RelevantSchedule.Occurrences == 0)
+                    : Schedule.Recurrence,
+                Duration = Schedule.Duration,
+                Occurrences = (Schedule.Occurrences == 0)
                     ? 1
-                    : _RelevantSchedule.Occurrences
+                    : Schedule.Occurrences
             };
 
-            JustTime = RelevantSchedule.FirstDate.ToShortTimeString();
-            StateHasChanged();
-        }
+        ClassRepeats = (Schedule is null) ? false : (Schedule!.Recurrence != 0);
+        OccursIndefinitely = (Schedule is null) ? true : (Schedule.Occurrences == 0);
+
+        JustTime = RelevantSchedule.FirstDate.ToShortTimeString();
+
+        StateHasChanged();
+        AddEditModal!.Open();
     }
+
+    [Parameter]
+    public DateTime Date { get; set; } = DateTime.Today;
+
+    [Parameter]
+    public bool DisplayClassTitles { get; set; } = false;
 
     protected override async Task OnAfterRenderAsync(bool FirstRender)
     {
@@ -261,24 +285,20 @@
 
         await Js.InvokeVoidAsync("InitializeTimePickers");
     }
-}
 
-<style>
-    div.schedule-day-block
+    private void DeleteClick()
     {
-        padding: 0.5em;
-        border: 1px solid grey;
-        border-radius: 0.6em;
-        box-shadow: 0 0 0.3em 0.3em #c2c2c2;
-        border-left: 0.4em solid green;
-        height: 9.8em;
+        // Register for hard deletion if in database
+        if (RelevantSchedule.Id > 0)
+            DeleteIds?.Add(RelevantSchedule.Id ?? -1);
+        // Soft delete from lists in memory
+        if (RelevantSchedule is not null)
+        {
+            _RelevantSchedule.RemoveAll((It) => It.Id == RelevantSchedule.Id);
+            Schedule.RemoveAll((It) => It.Id == RelevantSchedule.Id);
+        }
+        
+        AddEditModal!.Close();
+        UpdateCallback();
     }
-    .oi-chevron-top
-    {
-        padding-left: 2em;
-    }
-    .bootstrap-datetimepicker-widget table td span
-    {
-        display: inline;
-    }
-</style>
+}

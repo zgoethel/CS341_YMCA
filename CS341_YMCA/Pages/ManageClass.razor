@@ -24,6 +24,11 @@
     <Title>You are about to delete the class <strong>'@(ActiveClass.ClassName)'</strong></Title>
     <Body>
         <p class="font-weight-bold">This action cannot be undone. Are you sure you wish to continue?</p>
+        <ul class="text-danger">
+            <li>Payments for this course will <strong>not</strong> be automatically refunded.</li>
+            <li>All users will be dropped from the course, and the course will disappear from users' enrollment histories.</li>
+            <li><strong>Ensure all patrons have been refunded accordingly prior to deleting any course or account.</strong></li>
+        </ul>
     </Body>
 </BsModal>
 
@@ -106,7 +111,11 @@
 
     <h3>Class Scheduler</h3>
     <hr />
-    <ClassScheduler @ref=Scheduler Manager=@this Class=@ActiveClass ShowEditing=true></ClassScheduler>
+    <ClassScheduler @ref=Scheduler Class=@ActiveClass ShowEditing=@(Enrolled.Count == 0)></ClassScheduler>
+    @if (Enrolled.Count > 0)
+    {
+        <i>Class schedules are locked once the first user has enrolled.</i>
+    }
 
     @* PAGE LEFT COLUMN ENDS HERE *@
     </div>

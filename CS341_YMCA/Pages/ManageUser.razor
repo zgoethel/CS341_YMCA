@@ -18,6 +18,12 @@
     <Title>You are about to delete the account <strong>'@ActiveUser!.Email'</strong></Title>
     <Body>
         <p class="font-weight-bold">This action cannot be undone. Are you sure you wish to continue?</p>
+        <ul class="text-danger">
+            <li>Payments for this account will <strong>not</strong> be automatically refunded.</li>
+            <li>The user will be dropped from all class in which they are enrolled.</li>
+            <li>All acquired prerequisites of the account will be reset, and the enrollment history will be lost.</li>
+            <li><strong>Ensure all patrons have been refunded accordingly prior to deleting any course or account.</strong></li>
+        </ul>
     </Body>
 </BsModal>
 

@@ -84,6 +84,7 @@ public class EnterUserPaymentRequest
     public int SecurityCode { get; set; }
     public int PostalCode { get; set; }
     public string HolderName { get; set; } = "";
+    public DateTime CardExpiry { get; set; }
 }
 
 public class UserPaymentDBO
@@ -93,6 +94,7 @@ public class UserPaymentDBO
     public decimal Amount { get; set; }
     public string CardNumber { get; set; } = "";
     public int SecurityCode { get; set; }
+    public DateTime CardExpiry { get; set; }
     public int PostalCode { get; set; }
     public string HolderName { get; set; } = "";
 }
