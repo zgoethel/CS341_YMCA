@@ -144,7 +144,7 @@
         PaymentDetails = new()
         {
             Amount = (decimal)Amount,
-            CardExpiry = DateTime.Now.Date.AddDays(-DateTime.Now.Date.Day)
+            CardExpiry = DateTime.Now.Date.AddDays(1 - DateTime.Now.Date.Day)
         };
         PostalCode = "";
         SecurityCode = "";
