@@ -118,7 +118,7 @@
     <hr style="margin-top: 0;margin-bottom: 5px;" />
     @if (ShowEditing)
     {
-        <i class="oi oi-pencil"
+        <i class="oi oi-pencil ms-1"
             style="float: right;cursor: pointer;"
             @onclick = "() => OpenAddEdit(Sched)"
         />
@@ -172,86 +172,18 @@
     public Action UpdateCallback { get; set; } = () => {  };
     [Parameter]
     public List<int>? DeleteIds { get; set; }
+    [Parameter]
+    public ClassScheduler? SchedulerParent { get; set; }
 
-    // Parent editor copy (original)
-    private List<ClassScheduleDBO> _RelevantSchedule = new();
+    private List<ClassScheduleDBO> _RelevantSchedule => SchedulerParent?.GetClassesOnDay(Schedule, Date.Date) ?? new();
+    
     // Modal editor copy (in flight)
     private ClassScheduleDBO RelevantSchedule = new();
     private bool ClassRepeats = false;
     private bool OccursIndefinitely = true;
     private string JustTime = "";
     private BsModal? AddEditModal;
-    private static int Serial = -1;
-
-    private bool PeriodsOverlap(DateTime StartA, DateTime EndA, DateTime StartB, DateTime EndB)
-    {
-        return StartA < EndB && StartB < EndA;
-    }
-
-    private void ValidateDay(DateTime Day)
-    {
-        // Calculation ASSUMES relevant schedule happens on `Day`;
-        // find all classes which occur on that day
-        var OnDay = GetClassesOnDay(Day.Date)
-            // Filter out the record being edited
-            .FindAll((It) => It.Id != RelevantSchedule.Id);
-        foreach (var Other in OnDay)
-        {
-            // Calculate the actual date/time on that specific day
-            var RelStart = Day.Date
-                .AddHours(RelevantSchedule.FirstDate.Hour)
-                .AddMinutes(RelevantSchedule.FirstDate.Minute);
-            var OtherStart = Day.Date
-                .AddHours(Other.FirstDate.Hour)
-                .AddMinutes(Other.FirstDate.Minute);
-            if (PeriodsOverlap(
-                RelStart, RelStart.AddMinutes(RelevantSchedule.Duration),
-                OtherStart, OtherStart.AddMinutes(Other.Duration)
-            ))
-                throw new Exception($"This session would conflict with the session starting on {Other.FirstDate.ToShortDateString()} @ {Other.FirstDate.ToShortTimeString()} on {Day.ToShortDateString()}.");
-        }
-    }
-
-    private void Validate()
-    {
-        if (!ClassRepeats)
-        {
-            ValidateDay(RelevantSchedule.FirstDate.Date);
-            return;
-        }
-
-        for (int i = 0;
-            i < (RelevantSchedule.Occurrences <= 0 ? 1024 : RelevantSchedule.Occurrences);
-            i++)
-        {
-            var Date = RelevantSchedule.FirstDate
-                .Date
-                .AddDays(RelevantSchedule.Recurrence * i);
-            ValidateDay(Date);
-        }
-    }
-
-    private List<ClassScheduleDBO> GetClassesOnDay(DateTime Day)
-    {
-        return Schedule.FindAll((It) =>
-        {
-        // Select if this is the first day
-        var JustDay = It.FirstDate.Date;
-            if (JustDay == Day.Date)
-                return true;
-        // Don't select if class is over (or hasn't started yet)
-        if (It.Recurrence <= 0 || Day.Date < JustDay)
-                return false;
-        // Select if today falls on an even recurrence
-        var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
-            var DiffDays = Day.Date.Subtract(JustDay).Days;
-            if ((Day.Date <= EndDate || It.Occurrences <= 0)
-                && DiffDays % It.Recurrence == 0)
-                return true;
-
-            return false;
-        });
-    }
+    public static int Serial = -1;
 
     private async Task<bool> AddEditSubmit()
     {
@@ -282,7 +214,7 @@
 
         try
         {
-            Validate();
+            SchedulerParent!.Validate(RelevantSchedule, Schedule);
         } catch (Exception Ex)
         {
             AddEditModal!.Error(Ex.Message);
@@ -300,8 +232,8 @@
         _RelevantSchedule.Add(RelevantSchedule);
 
         AddEditModal!.Error("");
+        Serial--;
         UpdateCallback();
-        await InvokeAsync(() => StateHasChanged());
 
         return true;
     }
@@ -342,20 +274,8 @@
         AddEditModal!.Open();
     }
 
-    private DateTime _Date { get; set; } = DateTime.Today;
     [Parameter]
-    public DateTime Date
-    {
-        get => _Date;
-        set
-        {
-            _Date = value.Date;
-            // Reload schedule data for new day
-            _RelevantSchedule = GetClassesOnDay(_Date.Date);
-
-            InvokeAsync(() => StateHasChanged());
-        }
-    }
+    public DateTime Date { get; set; } = DateTime.Today;
 
     [Parameter]
     public bool DisplayClassTitles { get; set; } = false;
