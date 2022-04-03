@@ -52,8 +52,7 @@
     {
         <div style="width: 14%;" class="col">
             @if (k == 0) { <h3>@_Days[j]</h3> }
-            <ClassScheduleDay
-                Class=@Class
+            <ClassScheduleDay Class=@Class
                 Schedule=@Schedule
                 Date=@WeekStart.AddDays(k * 7 + j)
                 ShowEditing=ShowEditing
