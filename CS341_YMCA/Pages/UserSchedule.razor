@@ -24,12 +24,12 @@
     {
         <div class="m-2 p-2 bg-light shadow">
             <div style="display: block;height: 9.5em;" class="overflow-auto">
-                <a href="Enroll/@(Class.Id)"><h5>@(Class.ClassName)</h5></a>
+                <a href="Enroll/@(Class.ClassId)"><h5>@(Class.ClassName)</h5></a>
                 <p>@Class.ShortDescription</p>
             </div>
             <div style="display: block;">
                 <hr class="mt-2 mb-2" />
-                <a class="btn btn-primary me-1" href="Enroll/@(Class.Id)">View</a>
+                <a class="btn btn-primary me-1" href="Enroll/@(Class.ClassId)">View</a>
                 <a class="btn btn-danger" @onclick="() => OpenDropModal(Class)">Drop</a>
             </div>
         </div>
@@ -116,7 +116,7 @@
 
     private async Task<bool> DropDialogSubmit() => await Task.Run(() =>
     {
-        var Result = Classes.Class_DropUser(DropClass!.Id, LoggedIn!.Id);
+        var Result = Classes.Class_DropUser(DropClass!.ClassId, LoggedIn!.Id);
         DropClass = null;
         InvokeAsync(() => StateHasChanged());
         return Result.Success;
