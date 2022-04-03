@@ -38,7 +38,7 @@ public class ClassValidationService
             ))
             {
                 var _Class = Classes.Class_GetById(Other.ClassId).Get()!;
-                throw new Exception($"This schedule would conflict a session of '{_Class.ClassName}' at {Other.FirstDate.ToShortTimeString()} on {Day.ToShortDateString()}.");
+                throw new Exception($"This schedule would conflict with a session of '{_Class.ClassName}' at {Other.FirstDate.ToShortTimeString()} on {Day.ToShortDateString()}.");
             }
         }
     }
