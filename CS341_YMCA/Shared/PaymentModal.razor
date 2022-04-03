@@ -36,7 +36,7 @@
         </div>
             
         <label>Card Number:</label>
-        <InputText class="form-control mb-2" type="text" @bind-Value=PaymentDetails.CardNumber placeholder="XXXX XXXX XXXX XXXX" />
+        <InputText class="form-control mb-2" type="text" @bind-Value=PaymentDetails.CardNumber placeholder="&middot;&nbsp;&middot;&nbsp;&middot;&nbsp;&middot;&nbsp; &middot;&nbsp;&middot;&nbsp;&middot;&nbsp;&middot;&nbsp; &middot;&nbsp;&middot;&nbsp;&middot;&nbsp;&middot;&nbsp; &middot;&nbsp;&middot;&nbsp;&middot;&nbsp;&middot;&nbsp;" />
 
          <div class="row">
             <div class="col-sm-5">
@@ -144,7 +144,7 @@
         PaymentDetails = new()
         {
             Amount = (decimal)Amount,
-            CardExpiry = DateTime.Now.Date.AddDays(-DateTime.Now.Date.Day)
+            CardExpiry = DateTime.Now.Date.AddDays(1 - DateTime.Now.Date.Day)
         };
         PostalCode = "";
         SecurityCode = "";

@@ -3,11 +3,91 @@
 @using CS341_YMCA.Helpers
 @using CS341_YMCA.Services
 
+@inject SiteUserRepository SiteUsers
+@inject ClassRepository Classes
+
 <PageTitle>Home</PageTitle>
 
 <h1>Howdy, <strong>@LoggedIn.FirstName</strong>!</h1>
 <hr />
 <h3>We're glad you stopped by.</h3>
+
+<div class="row mt-4">
+    <div class="col-lg-6">
+        <div style="height: 46em;border: 1px solid grey; border-radius: 0.2em;" class="overflow-auto shadow">
+            <h3 class="m-4">Getting Started</h3>
+            <div style="display: block;height: 200em;"></div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card mb-4">
+        <div class="card-header">Your membership status</div>
+        <div class="card-body">
+            @if (LoggedIn.Id == 0)
+            {
+                <h5>Please <a href="SiteUser/LoginFlow">log in</a> or <a href="SiteUser/RegisterFlow">register</a>
+                    to view membership status.</h5>
+            } else if (LoggedIn.MemberThru == null)
+            {
+                <h5>You are not a member. You can purchase a membership by calling or visiting your local YMCA.</h5>
+                <br />
+                <a class="btn btn-info" href="https://www.laxymca.org/membership/" target="_blank">View Pricing</a>
+            } else if (!LoggedIn.IsMember)
+            {
+                <h5>It looks like your membership expired on <strong>@(LoggedIn.MemberThru.Value.ToLongDateString()).
+                    If you would like to renew your membership, please call or visit your local YMCA.
+                </strong></h5>
+                <br />
+                <a class="btn btn-info" href="https://www.laxymca.org/membership/" target="_blank">View Pricing</a>
+            } else
+            {
+                <h5>You are an active member! Your membership is valid until:</h5>
+                <h2>@LoggedIn.MemberThru.Value.ToLongDateString()</h2>
+            }
+        </div>
+        </div>
+
+        <div class="card mb-4">
+        <div class="card-header">Your payment history</div>
+        <div class="card-body overflow-auto p-2" style="height: 24em;">
+            @{ var UserPayments = LoggedIn.Id == 0 ? new List<UserPaymentDBO>() : SiteUsers.SiteUserPayments_GetByUserId(LoggedIn.Id).Get()!; }
+            @if (LoggedIn.Id == 0)
+            {
+                <h5>Please <a href="SiteUser/LoginFlow">log in</a> or <a href="SiteUser/RegisterFlow">register</a>
+                    to view payment history.</h5>
+            } else if (UserPayments.Count == 0)
+            {
+                <h5>You have no payment history to view.</h5>
+            } else
+            {
+                <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Date</th>
+                        <th scope="col">Item</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Card Number</th>
+                        <th scope="col">Expr.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var Payment in UserPayments.OrderByDescending((It) => It.Id))
+                {
+                    <tr>
+                        <td><strong>@Payment.Paid.ToShortDateString()</strong> @@ @Payment.Paid.ToShortTimeString()</td>
+                        <td>@((MarkupString)(Payment.Item is null ? "&mdash;" : Payment.Item))</td>
+                        <td>$@Payment.Amount.ToString("0.00")</td>
+                        <td><i>&middot;&nbsp;&middot;&nbsp;&middot;&nbsp;&middot;&nbsp; &middot;&nbsp;&middot;&nbsp;&middot;&nbsp;&middot;&nbsp; &middot;&nbsp;&middot;&nbsp;&middot;&nbsp;&middot;&nbsp; @Payment.CardNumber[^4..]</i></td>
+                        <td>@Payment.CardExpiry.Month/@Payment.CardExpiry.Year.ToString()[^2..]</td>
+                    </tr>
+                }
+                </tbody>
+                </table>
+            }
+        </div>
+        </div>
+    </div>
+</div>
 
 @code {
     [CascadingParameter]

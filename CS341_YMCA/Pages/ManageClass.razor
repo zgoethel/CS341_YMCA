@@ -210,10 +210,9 @@
 
         @foreach (var Enrollment in Enrolled)
         {
-            var User = SiteUsers.SiteUser_GetById(Enrollment.UserId).Get()!;
             <div class="alert alert-secondary mt-3">
-                <h5><i class="oi oi-person me-1" /> @User.FirstName @User.LastName <i>(@User.Email)</i></h5>
-                @if (User.IsMember)
+                <h5><i class="oi oi-person me-1" /> @Enrollment.FirstName @Enrollment.LastName <i>(@Enrollment.Email)</i></h5>
+                @if (Enrollment.IsMember)
                 {
                     <h5 class="badge bg-success">Member</h5>
                 } else

@@ -12,16 +12,18 @@ BEGIN
 	SET NOCOUNT ON;
 
 	-- Get all schedule records associated with the user
-	SELECT
-		[Id],
+	SELECT cs.[Id],
 		[ClassId],
 		[FirstDate],
 		[Recurrence],
 		[Duration],
-		[Created],
-		[Updated],
-		[Occurrences]
-	FROM [ClassSchedule]
+		cs.[Created],
+		cs.[Updated],
+		[Occurrences],
+		cm.[ClassName],
+		cm.[ShortDescription]
+	FROM [ClassSchedule] cs
+	LEFT JOIN [ClassMain] cm on cm.[Id] = [ClassId]
 	WHERE
 		-- Check each ID to see if it's in the enrollment set
 		[ClassId] IN (
