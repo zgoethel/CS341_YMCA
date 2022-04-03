@@ -103,10 +103,12 @@
         var Offset = -(int)_WeekStart.DayOfWeek;
         WeekStart = _WeekStart.AddDays(Offset);
 
+        @*
         HasMoreRight = Schedule.Find((It) =>
-            {
-                return It.FirstDate.AddDays(It.Recurrence * It.Occurrences) >= WeekStart.AddDays(7);
-            }) != null;
+        {
+            return It.FirstDate.AddDays(It.Recurrence * It.Occurrences) >= WeekStart.AddDays(7 * NumWeeks);
+        }) != null;
+        *@
     }
 
     public void Save()
