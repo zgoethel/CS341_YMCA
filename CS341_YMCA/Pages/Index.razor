@@ -50,7 +50,6 @@
         <div class="card-header">Your payment history</div>
         <div class="card-body">
             @{ var UserPayments = LoggedIn.Id == 0 ? new List<UserPaymentDBO>() : SiteUsers.SiteUserPayments_GetByUserId(LoggedIn.Id).Get()!; }
-            @{ var UserEnrollment = LoggedIn.Id == 0 ? new List<ClassEnrollmentDBO>() : Classes.ClassEnrollment_GetByUserId(LoggedIn.Id).Get()!; }
             @if (LoggedIn.Id == 0)
             {
                 <h5>Please <a href="SiteUser/LoginFlow">log in</a> or <a href="SiteUser/RegisterFlow">register</a>
@@ -75,11 +74,7 @@
                 {
                     <tr>
                         <td><strong>@Payment.Paid.ToShortDateString()</strong> @@ @Payment.Paid.ToShortTimeString()</td>
-                        @{ 
-                            var Related = UserEnrollment.Find((It) => It.PaymentId == Payment.Id);
-                            var Class = Related is null ? null : Classes.Class_GetById(Related!.ClassId).Get()!;
-                        }
-                        <td>@((MarkupString)(Class is null ? "&mdash;" : Class.ClassName))</td>
+                        <td>@((MarkupString)(Payment.Item is null ? "&mdash;" : Payment.Item))</td>
                         <td>$@Payment.Amount.ToString("0.00")</td>
                         <td><i>---- ---- ---- @Payment.CardNumber[^4..]</i></td>
                         <td>@Payment.CardExpiry.Month/@Payment.CardExpiry.Year.ToString()[^2..]</td>

@@ -98,6 +98,7 @@ public class UserPaymentDBO
     public int PostalCode { get; set; }
     public string HolderName { get; set; } = "";
     public DateTime Paid { get; set; }
+    public string? Item { get; set; }
 }
 
 public class UserPaymentEnterResult

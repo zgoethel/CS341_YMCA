@@ -9,6 +9,7 @@ BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
+	
 
 	SELECT [Id],
 		[UserId],
@@ -18,6 +19,15 @@ BEGIN
 		[PostalCode],
 		[HolderName],
 		[CardExpiry],
-		[Paid]
-	FROM [SiteUserPayments];
+		[Paid],
+		-- Search enrollment for references to purchase
+		(
+			SELECT [ClassName]
+			FROM [SiteUserPayments] sup
+			LEFT JOIN [ClassEnrollment] ce on ce.[PaymentId] = sup.[Id]
+			LEFT JOIN [ClassMain] cm ON cm.Id = ce.ClassId
+			WHERE ce.[PaymentId] IS NOT NULL
+				AND sup0.[Id] = sup.[Id]
+		) AS [Item]
+	FROM [SiteUserPayments] sup0;
 END
