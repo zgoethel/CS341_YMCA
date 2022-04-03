@@ -84,6 +84,17 @@
 
     </EditForm>
     </Body>
+
+    <Footer>
+    @if (RelevantSchedule.Id != Serial + 1)
+    {
+        <a class="btn btn-danger"
+            style="position: absolute;left: 1em;"
+            @onclick=DeleteClick>
+            Delete
+        </a>
+    }
+    </Footer>
 </BsModal>
 
 <div class="schedule-day-block mb-1" style="background: @((Date.Month % 2 == 0) ? "#ffffff" : "#e4f5dd")">
@@ -102,7 +113,7 @@
     <hr style="margin-top: 0;" />
 }
 
-@foreach (var Sched in _RelevantSchedule)
+@foreach (var Sched in _RelevantSchedule.FindAll((It) => !DeleteIds!.Contains(It.Id ?? -2)))
 {
     <hr style="margin-top: 0;margin-bottom: 5px;" />
     @if (ShowEditing)
@@ -159,6 +170,8 @@
     public bool ShowEditing { get; set; } = false;
     [Parameter]
     public Action UpdateCallback { get; set; } = () => {  };
+    [Parameter]
+    public List<int>? DeleteIds { get; set; }
 
     // Parent editor copy (original)
     private List<ClassScheduleDBO> _RelevantSchedule = new();
@@ -218,28 +231,27 @@
         }
     }
 
-    private List<ClassScheduleDBO> GetClassesOnDay(DateTime Day) =>
-        Schedule.FindAll((It) =>
+    private List<ClassScheduleDBO> GetClassesOnDay(DateTime Day)
+    {
+        return Schedule.FindAll((It) =>
         {
-            // Select if this is the first day
-            var JustDay = It.FirstDate.Date;
+        // Select if this is the first day
+        var JustDay = It.FirstDate.Date;
             if (JustDay == Day.Date)
                 return true;
-            // Don't select if class is over (or hasn't started yet)
-            if (
-                It.Recurrence <= 0
-                || Day.Date < JustDay
-            ) return false;
-            // Select if today falls on an even recurrence
-            var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
+        // Don't select if class is over (or hasn't started yet)
+        if (It.Recurrence <= 0 || Day.Date < JustDay)
+                return false;
+        // Select if today falls on an even recurrence
+        var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
             var DiffDays = Day.Date.Subtract(JustDay).Days;
-            if (
-                (Day.Date <= EndDate || It.Occurrences <= 0)
-                && DiffDays % It.Recurrence == 0
-            ) return true;
+            if ((Day.Date <= EndDate || It.Occurrences <= 0)
+                && DiffDays % It.Recurrence == 0)
+                return true;
 
             return false;
         });
+    }
 
     private async Task<bool> AddEditSubmit()
     {
@@ -339,27 +351,7 @@
         {
             _Date = value.Date;
             // Reload schedule data for new day
-            _RelevantSchedule = Schedule.FindAll((It) =>
-            {
-                // Select if this is the first day
-                var JustDay = It.FirstDate.Date;
-                if (JustDay == _Date)
-                    return true;
-                // Don't select if class is over
-                if (
-                    It.Recurrence <= 0
-                    || _Date < JustDay
-                ) return false;
-                // Select if today falls on an even recurrence
-                var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
-                var DiffDays = _Date.Subtract(JustDay).Days;
-                if (
-                    (_Date <= EndDate || It.Occurrences <= 0)
-                    && DiffDays % It.Recurrence == 0
-                ) return true;
-
-                return false;
-            });
+            _RelevantSchedule = GetClassesOnDay(_Date.Date);
 
             InvokeAsync(() => StateHasChanged());
         }
@@ -373,5 +365,21 @@
         base.OnAfterRender(FirstRender);
 
         await Js.InvokeVoidAsync("InitializeTimePickers");
+    }
+
+    private void DeleteClick()
+    {
+        // Register for hard deletion if in database
+        if (RelevantSchedule.Id > 0)
+            DeleteIds?.Add(RelevantSchedule.Id ?? -1);
+        // Soft delete from lists in memory
+        if (RelevantSchedule is not null)
+        {
+            _RelevantSchedule.RemoveAll((It) => It.Id == RelevantSchedule.Id);
+            Schedule.RemoveAll((It) => It.Id == RelevantSchedule.Id);
+        }
+        
+        AddEditModal!.Close();
+        UpdateCallback();
     }
 }

@@ -61,6 +61,7 @@
                     InvokeAsync(() => StateHasChanged());
                 }"
                 DisplayClassTitles=DisplayClassTitles
+                DeleteIds=DeleteIds
             />
         </div>
     }
@@ -88,6 +89,7 @@
     private string ValidationMessage = "";
     private DateTime WeekStart = DateTime.Today;
     private bool HasMoreRight = false;
+    private List<int> DeleteIds = new();
 
     protected override void OnInitialized()
     {
@@ -108,10 +110,12 @@
             return It.FirstDate.AddDays(It.Recurrence * It.Occurrences) >= WeekStart.AddDays(7 * NumWeeks);
         }) != null;
         *@
-    }
+    } 
 
     public void Save()
     {
+        Classes.ClassSchedule_DeleteByIds(string.Join(',', DeleteIds.Select((It) => It.ToString()))).Get();
+
         foreach (var Session in Schedule)
         {
             // Remove bogus IDs from new entities
