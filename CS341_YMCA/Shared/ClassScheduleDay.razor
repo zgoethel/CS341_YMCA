@@ -5,6 +5,7 @@
 
 @inject ClassRepository Classes
 @inject IJSRuntime Js
+@inject ClassValidationService ClassValidation
 
 <BsModal @ref=AddEditModal
     SubmitAction=AddEditSubmit>
@@ -84,6 +85,17 @@
 
     </EditForm>
     </Body>
+
+    <Footer>
+    @if (RelevantSchedule.Id != Serial + 1)
+    {
+        <a class="btn btn-danger"
+            style="position: absolute;left: 1em;"
+            @onclick=DeleteClick>
+            Delete
+        </a>
+    }
+    </Footer>
 </BsModal>
 
 <div class="schedule-day-block mb-1" style="background: @((Date.Month % 2 == 0) ? "#ffffff" : "#e4f5dd")">
@@ -102,12 +114,12 @@
     <hr style="margin-top: 0;" />
 }
 
-@foreach (var Sched in _RelevantSchedule)
+@foreach (var Sched in _RelevantSchedule.FindAll((It) => !DeleteIds!.Contains(It.Id ?? -2)))
 {
     <hr style="margin-top: 0;margin-bottom: 5px;" />
     @if (ShowEditing)
     {
-        <i class="oi oi-pencil"
+        <i class="oi oi-pencil ms-1"
             style="float: right;cursor: pointer;"
             @onclick = "() => OpenAddEdit(Sched)"
         />
@@ -159,87 +171,18 @@
     public bool ShowEditing { get; set; } = false;
     [Parameter]
     public Action UpdateCallback { get; set; } = () => {  };
+    [Parameter]
+    public List<int>? DeleteIds { get; set; }
 
-    // Parent editor copy (original)
-    private List<ClassScheduleDBO> _RelevantSchedule = new();
+    private List<ClassScheduleDBO> _RelevantSchedule => ClassValidation.GetClassesOnDay(Schedule, Date.Date);
+    
     // Modal editor copy (in flight)
     private ClassScheduleDBO RelevantSchedule = new();
     private bool ClassRepeats = false;
     private bool OccursIndefinitely = true;
     private string JustTime = "";
     private BsModal? AddEditModal;
-    private static int Serial = -1;
-
-    private bool PeriodsOverlap(DateTime StartA, DateTime EndA, DateTime StartB, DateTime EndB)
-    {
-        return StartA < EndB && StartB < EndA;
-    }
-
-    private void ValidateDay(DateTime Day)
-    {
-        // Calculation ASSUMES relevant schedule happens on `Day`;
-        // find all classes which occur on that day
-        var OnDay = GetClassesOnDay(Day.Date)
-            // Filter out the record being edited
-            .FindAll((It) => It.Id != RelevantSchedule.Id);
-        foreach (var Other in OnDay)
-        {
-            // Calculate the actual date/time on that specific day
-            var RelStart = Day.Date
-                .AddHours(RelevantSchedule.FirstDate.Hour)
-                .AddMinutes(RelevantSchedule.FirstDate.Minute);
-            var OtherStart = Day.Date
-                .AddHours(Other.FirstDate.Hour)
-                .AddMinutes(Other.FirstDate.Minute);
-            if (PeriodsOverlap(
-                RelStart, RelStart.AddMinutes(RelevantSchedule.Duration),
-                OtherStart, OtherStart.AddMinutes(Other.Duration)
-            ))
-                throw new Exception($"This session would conflict with the session starting on {Other.FirstDate.ToShortDateString()} @ {Other.FirstDate.ToShortTimeString()} on {Day.ToShortDateString()}.");
-        }
-    }
-
-    private void Validate()
-    {
-        if (!ClassRepeats)
-        {
-            ValidateDay(RelevantSchedule.FirstDate.Date);
-            return;
-        }
-
-        for (int i = 0;
-            i < (RelevantSchedule.Occurrences <= 0 ? 1024 : RelevantSchedule.Occurrences);
-            i++)
-        {
-            var Date = RelevantSchedule.FirstDate
-                .Date
-                .AddDays(RelevantSchedule.Recurrence * i);
-            ValidateDay(Date);
-        }
-    }
-
-    private List<ClassScheduleDBO> GetClassesOnDay(DateTime Day) =>
-        Schedule.FindAll((It) =>
-        {
-            // Select if this is the first day
-            var JustDay = It.FirstDate.Date;
-            if (JustDay == Day.Date)
-                return true;
-            // Don't select if class is over (or hasn't started yet)
-            if (
-                It.Recurrence <= 0
-                || Day.Date < JustDay
-            ) return false;
-            // Select if today falls on an even recurrence
-            var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
-            var DiffDays = Day.Date.Subtract(JustDay).Days;
-            if (
-                (Day.Date <= EndDate || It.Occurrences <= 0)
-                && DiffDays % It.Recurrence == 0
-            ) return true;
-
-            return false;
-        });
+    public static int Serial = -1;
 
     private async Task<bool> AddEditSubmit()
     {
@@ -270,7 +213,7 @@
 
         try
         {
-            Validate();
+            ClassValidation.Validate(RelevantSchedule, Schedule);
         } catch (Exception Ex)
         {
             AddEditModal!.Error(Ex.Message);
@@ -288,8 +231,8 @@
         _RelevantSchedule.Add(RelevantSchedule);
 
         AddEditModal!.Error("");
+        Serial--;
         UpdateCallback();
-        await InvokeAsync(() => StateHasChanged());
 
         return true;
     }
@@ -330,40 +273,8 @@
         AddEditModal!.Open();
     }
 
-    private DateTime _Date { get; set; } = DateTime.Today;
     [Parameter]
-    public DateTime Date
-    {
-        get => _Date;
-        set
-        {
-            _Date = value.Date;
-            // Reload schedule data for new day
-            _RelevantSchedule = Schedule.FindAll((It) =>
-            {
-                // Select if this is the first day
-                var JustDay = It.FirstDate.Date;
-                if (JustDay == _Date)
-                    return true;
-                // Don't select if class is over
-                if (
-                    It.Recurrence <= 0
-                    || _Date < JustDay
-                ) return false;
-                // Select if today falls on an even recurrence
-                var EndDate = JustDay.AddDays(It.Recurrence * It.Occurrences);
-                var DiffDays = _Date.Subtract(JustDay).Days;
-                if (
-                    (_Date <= EndDate || It.Occurrences <= 0)
-                    && DiffDays % It.Recurrence == 0
-                ) return true;
-
-                return false;
-            });
-
-            InvokeAsync(() => StateHasChanged());
-        }
-    }
+    public DateTime Date { get; set; } = DateTime.Today;
 
     [Parameter]
     public bool DisplayClassTitles { get; set; } = false;
@@ -373,5 +284,21 @@
         base.OnAfterRender(FirstRender);
 
         await Js.InvokeVoidAsync("InitializeTimePickers");
+    }
+
+    private void DeleteClick()
+    {
+        // Register for hard deletion if in database
+        if (RelevantSchedule.Id > 0)
+            DeleteIds?.Add(RelevantSchedule.Id ?? -1);
+        // Soft delete from lists in memory
+        if (RelevantSchedule is not null)
+        {
+            _RelevantSchedule.RemoveAll((It) => It.Id == RelevantSchedule.Id);
+            Schedule.RemoveAll((It) => It.Id == RelevantSchedule.Id);
+        }
+        
+        AddEditModal!.Close();
+        UpdateCallback();
     }
 }

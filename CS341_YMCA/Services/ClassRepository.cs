@@ -498,4 +498,32 @@ public class ClassRepository : Controller
 
         return Result;
     }
+
+    /**
+     * Deletes all class sessions with IDs in the CSV.
+     */
+    public ResultToken<object> ClassSchedule_DeleteByIds(
+        string IdCsv
+    )
+    {
+        ResultToken<object> Result = new();
+
+        try
+        {
+            Sql.ExecuteProcedure<object>(
+                "ClassSchedule_DeleteByIds",
+                new { IdCsv },
+                (_Result) => {  });
+        } catch (SqlException Ex)
+        {
+            Result.Success = false;
+            Result.Error = Ex.Message;
+        } catch (Exception Ex)
+        {
+            Result.Success = false;
+            Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+        }
+
+        return Result;
+    }
 }

@@ -15,11 +15,12 @@
 <h3>Manage patron account, membership, and payment details</h3>
     
 var UserList = Users.SiteUser_List().Get()!;
+
+<div class="overflow-auto" style="max-width: 70em;">
     
 <table class="table table-striped mt-4">
 <thead>
 <tr>
-    <th scope="col">ID</th>
     <th scope="col">First</th>
     <th scope="col">Last</th>
     <th scope="col">Email</th>
@@ -37,6 +38,8 @@ var UserList = Users.SiteUser_List().Get()!;
     }
 </tbody>
 </table>
+
+</div>
     
 <style>
     td
