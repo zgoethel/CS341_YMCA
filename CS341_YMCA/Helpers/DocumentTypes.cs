@@ -176,6 +176,8 @@ public class ClassScheduleDBO
     public int Recurrence { get; set; }
     public int Duration { get; set; }
     public int Occurrences { get; set; }
+    public string ClassName { get; set; } = "";
+    public string ShortDescription { get; set; } = "";
 }
 
 public class ClassScheduleSetRequest
@@ -224,6 +226,12 @@ public class ClassEnrollmentDBO
     public int? PaymentId { get; set; }
     public DateTime EnrolledDate { get; set; }
     public bool? PassedYN { get; set; }
+    public string ClassName { get; set; } = "";
+    public string ShortDescription { get; set; } = "";
+    public string FirstName { get; set; } = "";
+    public string? LastName { get; set; }
+    public string Email { get; set; } = "";
+    public bool IsMember { get; set; }
 }
 
 #endregion

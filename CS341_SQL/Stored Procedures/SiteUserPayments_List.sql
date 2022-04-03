@@ -11,8 +11,8 @@ BEGIN
 	SET NOCOUNT ON;
 	
 
-	SELECT [Id],
-		[UserId],
+	SELECT sup.[Id],
+		sup.[UserId],
 		[Amount],
 		[CardNumber],
 		[SecurityCode],
@@ -20,14 +20,8 @@ BEGIN
 		[HolderName],
 		[CardExpiry],
 		[Paid],
-		-- Search enrollment for references to purchase
-		(
-			SELECT [ClassName]
-			FROM [SiteUserPayments] sup
-			LEFT JOIN [ClassEnrollment] ce on ce.[PaymentId] = sup.[Id]
-			LEFT JOIN [ClassMain] cm ON cm.Id = ce.ClassId
-			WHERE ce.[PaymentId] IS NOT NULL
-				AND sup0.[Id] = sup.[Id]
-		) AS [Item]
-	FROM [SiteUserPayments] sup0;
+		cm.[ClassName] AS [Item]
+	FROM [SiteUserPayments] sup
+	LEFT JOIN [ClassEnrollment] ce ON ce.[PaymentId] = sup.[Id]
+	LEFT JOIN [ClassMain] cm ON cm.Id = ce.ClassId;
 END

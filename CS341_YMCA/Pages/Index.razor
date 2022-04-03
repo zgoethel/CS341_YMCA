@@ -76,7 +76,7 @@
                         <td><strong>@Payment.Paid.ToShortDateString()</strong> @@ @Payment.Paid.ToShortTimeString()</td>
                         <td>@((MarkupString)(Payment.Item is null ? "&mdash;" : Payment.Item))</td>
                         <td>$@Payment.Amount.ToString("0.00")</td>
-                        <td><i>---- ---- ---- @Payment.CardNumber[^4..]</i></td>
+                        <td><i>&middot;&nbsp;&middot;&nbsp;&middot;&nbsp;&middot;&nbsp; &middot;&nbsp;&middot;&nbsp;&middot;&nbsp;&middot;&nbsp; &middot;&nbsp;&middot;&nbsp;&middot;&nbsp;&middot;&nbsp; @Payment.CardNumber[^4..]</i></td>
                         <td>@Payment.CardExpiry.Month/@Payment.CardExpiry.Year.ToString()[^2..]</td>
                     </tr>
                 }

@@ -12,15 +12,9 @@
 <hr />
 <h3>View and change your class enrollments</h3>
 
-@{
-    var Enrollments = Classes.ClassEnrollment_GetByUserId(LoggedIn!.Id).Get()!;
-    var EnrolledCsv = string.Join(',', Enrollments.Select((It) => It.ClassId.ToString()));
-    var EnrolledClasses = Classes.Class_GetByIds(EnrolledCsv).Get()!;
-}
-
 <div class="overflow-auto mt-3">
 
-@if (EnrolledClasses.Count == 0)
+@if (EnrolledClasses!.Count == 0)
 {
     <h4 class="mt-3">You are not registered for any classes</h4>
 } else
@@ -100,13 +94,19 @@
 {
     [CascadingParameter]
     private SiteUserDBO LoggedIn { get; set; } = new();
-    [Parameter]
-    public ClassEnrollmentDBO Enrolled {get; set; } = new();
 
+    private List<ClassEnrollmentDBO>? EnrolledClasses;
     private BsModal? DropModal;
-    private ClassDBO? DropClass;
+    private ClassEnrollmentDBO? DropClass;
 
-    private void OpenDropModal(ClassDBO Class)
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        EnrolledClasses = Classes.ClassEnrollment_GetByUserId(LoggedIn.Id).Get()!;
+    }
+
+    private void OpenDropModal(ClassEnrollmentDBO Class)
     {
         DropClass = Class;
         StateHasChanged();

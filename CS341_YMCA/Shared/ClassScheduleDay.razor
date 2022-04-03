@@ -131,7 +131,7 @@
             <i class="oi oi-loop-square" style="float: right;"
                 title="Repeats every @Sched.Recurrence days, @(Sched.Occurrences == 0 ? "indefinitely" : $"{Sched.Occurrences} times")." />
         }
-        <a href="Enroll/@Sched.ClassId"><strong>@(Classes.Class_GetById(Sched.ClassId).Get()!.ClassName)</strong></a>
+        <a href="Enroll/@Sched.ClassId"><strong>@(Sched.ClassName)</strong></a>
     }
 
     <p>

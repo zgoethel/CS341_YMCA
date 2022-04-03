@@ -12,13 +12,21 @@ BEGIN
 	SET NOCOUNT ON;
 
 	-- Get all enrollment records associated with class
-	SELECT [Id],
+	SELECT ce.[Id],
 		[UserId],
 		[ClassId],
 		[PaymentId],
 		[EnrolledDate],
-		[PassedYN]
-	FROM [ClassEnrollment]
+		[PassedYN],
+		cm.[ClassName],
+		cm.[ShortDescription],
+		su.[FirstName],
+		su.[LastName],
+		su.[Email],
+		(CASE WHEN su.[MemberThru] IS NOT NULL AND su.[MemberThru] > GETDATE() THEN 1 ELSE 0 END) AS [IsMember]
+	FROM [ClassEnrollment] ce
+	LEFT JOIN [ClassMain] cm on cm.[Id] = [ClassId]
+	LEFT JOIN [SiteUser] su on su.[Id] = [UserId]
 	WHERE
 		[ClassId] = @ClassId;
 END
