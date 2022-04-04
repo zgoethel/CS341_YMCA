@@ -34,8 +34,16 @@
 
 @if (LoggedIn.IsAdmin)
 {
-
+    <div style="float: right;">
+        <a class="btn btn-outline-secondary m-2" href="javascript:history.back()">Cancel</a>
+        @if (Id != "Create")
+        {
+            <button class="btn btn-danger m-2" @onclick="() => DeleteModal!.Open()">Delete Class</button>
+        }
+        <button class="btn btn-success m-2" type="submit" @onclick="() => SaveForm(Redirect: true)">Save Changes</button>
+    </div>
     <h1>Class Editor</h1>
+    <br style="height: 0;display: block;" />
     <hr />
     
     <EditForm Model=ActiveClass>
@@ -101,12 +109,6 @@
     </div>
     </div>
 
-    <button class="btn btn-primary mt-4" type="submit" @onclick="() => SaveForm(Redirect: true)">Submit</button>
-    @if (Id != "Create")
-    {
-        <button class="btn btn-danger mt-4" style="float:right;" @onclick="() => DeleteModal!.Open()">Delete Class</button>
-    }
-    <br />
     <br />
 
     <h3>Class Scheduler</h3>
