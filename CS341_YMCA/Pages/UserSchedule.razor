@@ -95,16 +95,9 @@
     [CascadingParameter]
     private SiteUserDBO LoggedIn { get; set; } = new();
 
-    private List<ClassEnrollmentDBO>? EnrolledClasses;
+    private List<ClassEnrollmentDBO> EnrolledClasses => Classes.ClassEnrollment_GetByUserId(LoggedIn.Id).Get()!;
     private BsModal? DropModal;
     private ClassEnrollmentDBO? DropClass;
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-
-        EnrolledClasses = Classes.ClassEnrollment_GetByUserId(LoggedIn.Id).Get()!;
-    }
 
     private void OpenDropModal(ClassEnrollmentDBO Class)
     {
