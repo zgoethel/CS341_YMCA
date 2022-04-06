@@ -10,6 +10,7 @@
 
 <PageTitle>Manage User Details</PageTitle>
 
+@* DELETE CONFIRMATION MODAL*@
 <BsModal @ref=DeleteModal
     SubmitText="Delete"
     SubmitAction=DeleteDialogSubmit
@@ -27,6 +28,7 @@
     </Body>
 </BsModal>
 
+@* DISPLAY VALIDATION MESSAGE IF EXISTS *@
 @if (!string.IsNullOrEmpty(ValidationMessage))
 {
     <div class="alert alert-warning">@ValidationMessage</div>
@@ -35,10 +37,12 @@
 @if (LoggedIn!.IsAdmin)
 {
 
+    @* HEAD AREA*@
     <h1>User Account Editor</h1>
     <hr />
     <h3>Managing details for <strong>@ActiveUser!.FirstName @ActiveUser.LastName</strong> ('@ActiveUser.Email')</h3>
 
+    @* USER DELETE BUTTON *@
     <button class="btn btn-danger mt-4" @onclick="() => DeleteModal!.Open()">Delete User</button>
 
 } else
@@ -47,8 +51,15 @@
 }
 
 @code {
+    /// <summary>
+    /// DBO of the currently logged in user.
+    /// </summary>
     [CascadingParameter]
     protected SiteUserDBO? LoggedIn { get; set; }
+
+    /// <summary>
+    /// ID of the user being edited.
+    /// </summary>
     [Parameter]
     public string? Id { get; set; }
 
@@ -58,15 +69,22 @@
 
     protected override void OnInitialized()
     {
+        // Load the existing user record
         if (Id != "Create")
             ActiveUser = SiteUsers.SiteUser_GetById(int.Parse(Id!)).Get()!;
     }
 
+    /// <summary>
+    /// Called when the delete dialog is accepted to perform deletion.
+    /// </summary>
+    /// <returns>Whether the modal should close.</returns>
     private async Task<bool> DeleteDialogSubmit() => await Task.Run(() =>
     {
+        // Perform the deletion
         var Result = SiteUsers.SiteUser_DeleteById(ActiveUser!.Id).Get()!;
         Nav.NavigateTo("ManageUsers");
 
+        // Leave dialog open; can mess with redirect to close
         return false;
     });
 }

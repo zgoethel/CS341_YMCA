@@ -48,36 +48,36 @@
     protected Task<AuthenticationState>? Auth { get; set; }
 
     protected SiteUserDBO LoggedIn { get; set; } = new();
-    protected bool Authenticated => Auth!.Result.User.Identity!.IsAuthenticated;
+    protected bool authenticated => Auth!.Result.User.Identity!.IsAuthenticated;
 
-    protected override async Task OnAfterRenderAsync(bool FirstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await base.OnAfterRenderAsync(FirstRender);
+        await base.OnAfterRenderAsync(firstRender);
 
-        if (FirstRender && !Authenticated)
+        if (firstRender && !authenticated)
         {
             try
             {
-                var SessionKey = await ProtectedStorage.GetAsync<string?>("SessionKey");
-                if (SessionKey.Value != null)
+                var sessionKey = await ProtectedStorage.GetAsync<string?>("SessionKey");
+                if (sessionKey.Value != null)
                 {
-                    var SessionName = await ProtectedStorage.GetAsync<string>("SessionName");
-                    ((AuthStateProvider)AuthState).LogIn(SessionName.Value!, SessionKey.Value!);
+                    var sessionName = await ProtectedStorage.GetAsync<string>("SessionName");
+                    ((AuthStateProvider)AuthState).LogIn(sessionName.Value!, sessionKey.Value!);
                 }
-            } catch (Exception Ex)
+            } catch (Exception ex)
             {
                 Console.WriteLine("Something went wrong while reading session storage");
-                Console.WriteLine(Ex.ToString());
+                Console.WriteLine(ex.ToString());
             }
 
             StateHasChanged();
         }
 
-        if (FirstRender && Authenticated)
+        if (firstRender && authenticated)
         {
             LoggedIn = SiteUsers.SiteUser_GetByEmail(Auth!.Result.User.Identity!.Name!).Get()!;
             StateHasChanged();
-        } else if (!Authenticated)
+        } else if (!authenticated)
         {
             //var Path = Links.GetPathByAction(Con.HttpContext!, "LoginFlow", "SiteUser");
             //Nav.NavigateTo(Path!);

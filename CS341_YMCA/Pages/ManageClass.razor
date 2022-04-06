@@ -11,17 +11,19 @@
 
 <PageTitle>Manage Class</PageTitle>
 
-@if (!string.IsNullOrEmpty(ValidationMessage))
+@* DISPLAY VALIDATION ERROR IF EXISTS *@
+@if (!string.IsNullOrEmpty(validationMessage))
 {
-    <div class="alert alert-warning">@ValidationMessage</div>
+    <div class="alert alert-warning">@validationMessage</div>
 }
 
-<BsModal @ref=DeleteModal
+@* DELETE CONFIRM MODAL *@
+<BsModal @ref=deleteModal
     SubmitText="Delete"
     SubmitAction=DeleteDialogSubmit
     SubmitClass="danger">
 
-    <Title>You are about to delete the class <strong>'@(ActiveClass.ClassName)'</strong></Title>
+    <Title>You are about to delete the class <strong>'@(activeClass.ClassName)'</strong></Title>
     <Body>
         <p class="font-weight-bold">This action cannot be undone. Are you sure you wish to continue?</p>
         <ul class="text-danger">
@@ -32,19 +34,38 @@
     </Body>
 </BsModal>
 
+@* ALLOW ONLY ADMINS TO VIEW SETTINGS *@
 @if (LoggedIn.IsAdmin)
 {
+    <div style="float: right;">
 
+        @* BACK BUTTON *@
+        <a class="btn btn-outline-secondary m-2" href="javascript:history.back()">Cancel</a>
+        
+        @* DELETE BUTTON IF NOT NEW *@
+        @if (Id != "Create")
+        {
+            <button class="btn btn-danger m-2" @onclick="() => deleteModal!.Open()">Delete Class</button>
+        }
+
+        @* SAVE BUTTON *@
+        <button class="btn btn-success m-2" type="submit" @onclick="() => SaveForm(redirect: true)">Save Changes</button>
+    
+    </div>
+
+    @* TITLE AREA *@
     <h1>Class Editor</h1>
+    <br style="height: 0;display: block;" />
     <hr />
     
-    <EditForm Model=ActiveClass>
+    <EditForm Model=activeClass>
     <div class="row">
     <div class="col-lg-8">
     @* PAGE LEFT COLUMN BEGINS HERE *@
 
-    <h3>Manage details for '@ActiveClass.ClassName'</h3>
+    <h3>Manage details for '@activeClass.ClassName'</h3>
 
+    @* CLASS NAME/LOCATION LABELS *@
     <div class="row">
         <div class="col-sm-8">
             <label>Class name:<i style="color: red">*</i></label>
@@ -53,67 +74,75 @@
             <label>Class location:</label>
         </div>
     </div>
+    @* CLASS NAME/LOCATION FIELDS *@
     <div class="row">
         <div class="col-sm-8">
-            <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.ClassName />
+            <InputText class="form-control mb-2" type="text" @bind-Value=activeClass.ClassName />
         </div>
         <div class="col-sm-4">
-            <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.Location />
+            <InputText class="form-control mb-2" type="text" @bind-Value=activeClass.Location />
         </div>
     </div>
             
+    @* SHORT DESCRIPTION TEXT INPUT *@
     <label>Short description:<i style="color: red">*</i></label>
-    <InputText class="form-control mb-2" type="text" @bind-Value=ActiveClass.ShortDescription />        
-        
+    <InputText class="form-control mb-2" type="text" @bind-Value=activeClass.ShortDescription />        
+    
+    @* LONG DESCRIPTION TEXT AREA*@
     <label>Detailed description:</label>
-    <InputTextArea rows=8 class="form-control mb-2" type="text" @bind-Value=ActiveClass.LongDescription />
-        
-    <InputCheckbox class="mb-2" @bind-Value=ActiveClass.AllowEnrollment />&nbsp;
+    <InputTextArea rows=8 class="form-control mb-2" type="text" @bind-Value=activeClass.LongDescription />
+    
+    @* ENROLLMENT FREEZE TOGGLE *@
+    <InputCheckbox class="mb-2" @bind-Value=activeClass.AllowEnrollment />&nbsp;
     <label>Allow Enrollment <i>(within dates)</i></label>
 
-    <InputCheckbox class="mb-2 ms-2" @bind-Value=ActiveClass.Enabled />&nbsp;
+    @* VISIBLE IN CLASS BROWSER TOGGLE*@
+    <InputCheckbox class="mb-2 ms-2" @bind-Value=activeClass.Enabled />&nbsp;
     <label>Show Publicly</label>
+
     <br />
     <br />
             
     <div class="row">
     <div class="col-lg-6">
+
+        @* REQ. CODE FULFILLMENT EDITING *@
         <h3>Class Fulfills</h3>
         <CsvSelector Exclude=@(new())
-            Csv=@ActiveClass.FulfillCsv
-            @ref=FulfillSelector
+            Csv=@activeClass.FulfillCsv
+            @ref=fulfillSelector
             Items=@(Classes.Class_ListReqs().Get()!)
             Callback="() =>
             {
-                ActiveClass.FulfillCsv = FulfillSelector!.Csv!;
+                activeClass.FulfillCsv = fulfillSelector!.Csv!;
             }" />
+
     </div>
     <div class="col-lg-6">
+
+        @* REQ. CODE REQUIREMENT EDITING *@
         <h3>Class Requires</h3>
         <CsvSelector Exclude=@(new())
-            Csv=@ActiveClass.RequireCsv
-            @ref=RequireSelector
+            Csv=@activeClass.RequireCsv
+            @ref=requireSelector
             Items=@(Classes.Class_ListReqs().Get()!)
             Callback="() =>
             {
-                ActiveClass.RequireCsv = RequireSelector!.Csv!;
+                activeClass.RequireCsv = requireSelector!.Csv!;
             }" />
+
     </div>
     </div>
 
-    <button class="btn btn-primary mt-4" type="submit" @onclick="() => SaveForm(Redirect: true)">Submit</button>
-    @if (Id != "Create")
-    {
-        <button class="btn btn-danger mt-4" style="float:right;" @onclick="() => DeleteModal!.Open()">Delete Class</button>
-    }
-    <br />
     <br />
 
+    @* CLASS SCHEDULE EDITOR *@
     <h3>Class Scheduler</h3>
     <hr />
-    <ClassScheduler @ref=Scheduler Class=@ActiveClass ShowEditing=@(Enrolled.Count == 0)></ClassScheduler>
-    @if (Enrolled.Count > 0)
+    <ClassScheduler @ref=scheduler Class=@activeClass ShowEditing=@(enrolled.Count == 0)></ClassScheduler>
+    @if (enrolled.Count > 0)
     {
+        @* EDITING IS DiSABLED IF ANY USERS ENROLLED DUE TO VALIDATION LIMITATIONS *@
         <i>Class schedules are locked once the first user has enrolled.</i>
     }
 
@@ -124,77 +153,93 @@
 
     <h3 class="mb-4">Pricing and Enrollment</h3>
 
+    @* MEMBER PRICING CARD *@
     <div class="card mb-4">
     <div class="card-header">Settings for Members</div>
     <div class="card-body">
 
-    <div class="row">
-    <div class="col-sm-7">
-        <label>Enrollment start date:</label>
-    </div>
-    <div class="col-sm-5">
-        <label>Length (days):</label>
-    </div>
-    </div>
-    <div class="row">
-    <div class="col-sm-7">
-        <InputDate class="form-control" @bind-Value=ActiveClass.MemberEnrollmentStart />
-    </div>
-    <div class="col-sm-5">
-        <InputNumber step=1 min=1 class="form-control" @bind-Value=ActiveClass.MemberEnrollmentDays />
-    </div>
-    </div>
-    <br />
-            
-    <label>Class fee for members:</label>
-    <div class="row">
-    <div class="col-sm-7">
-        <div class="input-group mb-3">
-            <div class="input-group-prepend"><span class="input-group-text">$</span></div>
-            <InputNumber step="any" min=0 class="form-control" @bind-Value=ActiveClass.MemberPrice />
+        @* ENROLL START DATE/LENGTH LABELS *@
+        <div class="row">
+        <div class="col-sm-7">
+            <label>Enrollment start date:</label>
         </div>
-    </div>
-    </div>
+        <div class="col-sm-5">
+            <label>Length (days):</label>
+        </div>
+        </div>
+        @* ENROLL START DATE?LENGTH FIELDS *@
+        <div class="row">
+        <div class="col-sm-7">
+            <InputDate class="form-control" @bind-Value=activeClass.MemberEnrollmentStart />
+        </div>
+        <div class="col-sm-5">
+            <InputNumber step=1 min=1 class="form-control" @bind-Value=activeClass.MemberEnrollmentDays />
+        </div>
+        </div>
+        <br />
+            
+        <label>Class fee for members:</label>
+        <div class="row">
+        <div class="col-sm-7">
+
+            @* MEMBER FEE NUMBER FIELD *@
+            <div class="input-group mb-3">
+                <div class="input-group-prepend"><span class="input-group-text">$</span></div>
+                <InputNumber step="any" min=0 class="form-control" @bind-Value=activeClass.MemberPrice />
+            </div>
+
+        </div>
+        </div>
 
     </div>
     </div>
 
+    @* NON-MEMBER PRICING CARD *@
     <div class="card mb-4">
     <div class="card-header">Settings for non-members</div>
     <div class="card-body">
 
-    <InputCheckbox @bind-Value=ActiveClass.AllowNonMembers />
-    <span class="ms-2">Allow non-members to join this class</span>
-    <br />
-    <br />
+        @* ALLOW NON-MEMBERS TOGGLE *@
+        <InputCheckbox @bind-Value=activeClass.AllowNonMembers />
+        <span class="ms-2">Allow non-members to join this class</span>
 
-    <div style="@NonMemberStyle">
-    <div class="row">
-    <div class="col-sm-7">
-        <label>Enrollment start date:</label>
-    </div>
-    <div class="col-sm-5">
-        <label>Length (days):</label>
-    </div>
-    </div>
-    <div class="row">
-    <div class="col-sm-7">
-        <InputDate class="form-control" @bind-Value=ActiveClass.NonMemberEnrollmentStart />
-    </div>
-    <div class="col-sm-5">
-        <InputNumber step=1 min=1 class="form-control" @bind-Value=ActiveClass.NonMemberEnrollmentDays />
-    </div>
-    </div>
-    <br />
-                
-    <label>Class fee for non-members:</label>
-    <div class="row">
-    <div class="col-sm-7">
-        <div class="input-group mb-3">
-            <div class="input-group-prepend"><span class="input-group-text">$</span></div>
-            <InputNumber step="any" min=0 class="form-control" @bind-Value=ActiveClass.NonMemberPrice />
+        <br />
+        <br />
+
+        @* ONLY DISPLAY IF NON-MEMBERS ALLOWED *@
+        @* COULD'VE USED AN @if STATEMENT      *@
+        <div style="@nonMemberStyle">
+            @* ENROLL START DATE/LENGTH LABELS *@
+            <div class="row">
+            <div class="col-sm-7">
+                <label>Enrollment start date:</label>
+            </div>
+            <div class="col-sm-5">
+                <label>Length (days):</label>
+            </div>
+            </div>
+            @* ENROLL START DATE/LENGTH FIELDS *@
+            <div class="row">
+            <div class="col-sm-7">
+                <InputDate class="form-control" @bind-Value=activeClass.NonMemberEnrollmentStart />
+            </div>
+            <div class="col-sm-5">
+                <InputNumber step=1 min=1 class="form-control" @bind-Value=activeClass.NonMemberEnrollmentDays />
+            </div>
         </div>
-    </div>
+        <br />
+                
+        <label>Class fee for non-members:</label>
+        <div class="row">
+        <div class="col-sm-7">
+
+            @* NON-MEMBER FEE NUMBER FIELD *@
+            <div class="input-group mb-3">
+                <div class="input-group-prepend"><span class="input-group-text">$</span></div>
+                <InputNumber step="any" min=0 class="form-control" @bind-Value=activeClass.NonMemberPrice />
+            </div>
+
+        </div>
     </div>
     </div>
 
@@ -202,16 +247,23 @@
     </div>
             
     <h3 class="mb-4 mt-4">Enrolled Patrons</h3>
+
+    @* ENROLLMENT LIST CARD *@
     <div class="card mb-4">
     <div class="card-header">Enrollment status</div>
     <div class="card-body">
-        <label>Seat limit <i>(zero for no limit)</i>:</label>
-        <InputNumber class="form-control" style="max-width: 6em;" @bind-Value=ActiveClass.MaxSeats min=0 step=1></InputNumber>
 
-        @foreach (var Enrollment in Enrolled)
+        @* SEAT LIMIT NUMBER INPUT *@
+        <label>Seat limit <i>(zero for no limit)</i>:</label>
+        <InputNumber class="form-control" style="max-width: 6em;" @bind-Value=activeClass.MaxSeats min=0 step=1></InputNumber>
+
+        @* ITERATE THROUGH ENROLLED USERS *@
+        @foreach (var Enrollment in enrolled)
         {
             <div class="alert alert-secondary mt-3">
+                @* DISPLAY USER DETAILS *@
                 <h5><i class="oi oi-person me-1" /> @Enrollment.FirstName @Enrollment.LastName <i>(@Enrollment.Email)</i></h5>
+                @* DISPLAY USER MEMBERSHIP STATUS *@
                 @if (Enrollment.IsMember)
                 {
                     <h5 class="badge bg-success">Member</h5>
@@ -221,6 +273,7 @@
                 }
             </div>
         }
+
     </div>
     </div>
 
@@ -236,191 +289,214 @@
 }
 
 @code {
+    /// <summary>
+    /// DBO of the currently logged in user.
+    /// </summary>
     [CascadingParameter]
     protected SiteUserDBO LoggedIn { get; set; } = new();
+
+    /// <summary>
+    /// ID of the class being edited.
+    /// </summary>
     [Parameter]
     public string? Id { get; set; }
 
-    private ClassDBO ActiveClass = new();
-    public string? ValidationMessage;
-    private CsvSelector? FulfillSelector;
-    private CsvSelector? RequireSelector;
-    private ClassScheduler? Scheduler;
-    private List<ClassEnrollmentDBO> Enrolled = new();
-    private BsModal? DeleteModal;
+    private ClassDBO activeClass = new();
+    public string? validationMessage;
+    private CsvSelector? fulfillSelector;
+    private CsvSelector? requireSelector;
+    private ClassScheduler? scheduler;
+    private List<ClassEnrollmentDBO> enrolled = new();
+    private BsModal? deleteModal;
 
-    private string NonMemberStyle => ActiveClass.AllowNonMembers
+    @* CALCULATED CSS CLASS OF NON-MEMBER SETTINGS *@
+    private string nonMemberStyle => activeClass.AllowNonMembers
         ? "display: block;"
         : "display: none;";
 
     protected override void OnInitialized()
     {
-        Scheduler?.Schedule?.Clear();
         if (Id != "Create")
         {
-            ActiveClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
-            Enrolled = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!;
+            // Load class into editor
+            activeClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
+            // Load list of user enrollments
+            enrolled = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!;
         }
 
         StateHasChanged();
     }
 
+    /// <summary>
+    /// Called after delete dialog accepted to perform deletion.
+    /// </summary>
+    /// <returns></returns>
     private async Task<bool> DeleteDialogSubmit() => await Task.Run(() =>
     {
-        var Result = Classes.Class_DeleteById(ActiveClass.Id);
+        // Delete class and related details
+        var result = Classes.Class_DeleteById(activeClass.Id);
         Nav.NavigateTo("ManageClasses");
 
         return false;
     });
 
-    public void SaveForm(bool Redirect = true)
+    /// <summary>
+    /// Saves the class details from the editing form and schedule.
+    /// </summary>
+    /// <param name="redirect">Whether to send back to class list.</param>
+    public void SaveForm(bool redirect = true)
     {
         // Validation for required text fields
         if (
-            string.IsNullOrEmpty(ActiveClass.ClassName)
-            || string.IsNullOrEmpty(ActiveClass.ShortDescription)
+            string.IsNullOrEmpty(activeClass.ClassName)
+            || string.IsNullOrEmpty(activeClass.ShortDescription)
         )
         {
-            ValidationMessage = "Please provide all required fields.";
+            validationMessage = "Please provide all required fields.";
             StateHasChanged();
             return;
         }
         // Validation for pricing values
-        if (ActiveClass.MemberPrice < 0
-            || ActiveClass.NonMemberPrice < 0
+        if (activeClass.MemberPrice < 0
+            || activeClass.NonMemberPrice < 0
         )
         {
-            ValidationMessage = "Please use positive dollar amounts.";
+            validationMessage = "Please use positive dollar amounts.";
             StateHasChanged();
             return;
         }
         // Validation for seat limit value
-        if (
-            (ActiveClass.MaxSeats ?? 0) < 0
-            || (ActiveClass.MaxSeats ?? 0) != (int)(ActiveClass.MaxSeats ?? 0)
+        if ((activeClass.MaxSeats ?? 0) < 0
+            || (activeClass.MaxSeats ?? 0) != (int)(activeClass.MaxSeats ?? 0)
         )
         {
-            ValidationMessage = "Please use whole, positive number of max seats.";
+            validationMessage = "Please use whole, positive number of max seats.";
             StateHasChanged();
             return;
         }
 
-        var Sessions = Scheduler!.Schedule;//Classes.ClassSchedule_List(ActiveClass.Id).Get()!;
-        if (Sessions.Count > 0
-            && ActiveClass.MemberEnrollmentStart != null
-            && (ActiveClass.NonMemberEnrollmentStart != null
-            || !ActiveClass.AllowNonMembers)
+        var sessions = scheduler!.schedule;//Classes.ClassSchedule_List(ActiveClass.Id).Get()!;
+        if (sessions.Count > 0
+            && activeClass.MemberEnrollmentStart != null
+            && (activeClass.NonMemberEnrollmentStart != null
+            || !activeClass.AllowNonMembers)
         )
         {
             // Validate the first session is after enrollment period
-            var EnrollmentEnd = ActiveClass.MemberEnrollmentStart!.Value.AddDays(ActiveClass.MemberEnrollmentDays ?? 1);
-            if (ActiveClass.AllowNonMembers)
+            var enrollmentEnd = activeClass.MemberEnrollmentStart!.Value.AddDays(activeClass.MemberEnrollmentDays ?? 1);
+            if (activeClass.AllowNonMembers)
             {
-                var _EnrollmentEnd = ActiveClass.NonMemberEnrollmentStart!.Value.AddDays(ActiveClass.NonMemberEnrollmentDays ?? 1);
-                if (_EnrollmentEnd > EnrollmentEnd)
-                    EnrollmentEnd = _EnrollmentEnd;
+                var _enrollmentEnd = activeClass.NonMemberEnrollmentStart!.Value.AddDays(activeClass.NonMemberEnrollmentDays ?? 1);
+                if (_enrollmentEnd > enrollmentEnd)
+                    enrollmentEnd = _enrollmentEnd;
             }
 
-            if (EnrollmentEnd > Sessions[0].FirstDate)
+            if (enrollmentEnd > sessions[0].FirstDate)
             {
-                ValidationMessage = "Classes cannot start before enrollment closes. Please change the enrollment window(s) or class schedule date(s).";
+                validationMessage = "Classes cannot start before enrollment closes. Please change the enrollment window(s) or class schedule date(s).";
                 StateHasChanged();
                 return;
             }
         }
 
         // Validation for requiring enrollment dates
-        if (ActiveClass.AllowEnrollment)
+        if (activeClass.AllowEnrollment)
         {
             // Ensure that enrollment is set up if opened
             if (
-                ActiveClass.MemberEnrollmentStart == null
-                || (ActiveClass.MemberEnrollmentDays ?? 0) == 0
+                activeClass.MemberEnrollmentStart == null
+                || (activeClass.MemberEnrollmentDays ?? 0) == 0
             )
             {
-                ValidationMessage = "You cannot \"Allow Enrollment\" without first setting an enrollment window.";
+                validationMessage = "You cannot \"Allow Enrollment\" without first setting an enrollment window.";
                 StateHasChanged();
                 return;
             } else if (
-                ActiveClass.MemberEnrollmentDays != null
-                && (ActiveClass.MemberEnrollmentDays != (int)ActiveClass.MemberEnrollmentDays
-                || ActiveClass.MemberEnrollmentDays < 0)
+                activeClass.MemberEnrollmentDays != null
+                && (activeClass.MemberEnrollmentDays != (int)activeClass.MemberEnrollmentDays
+                || activeClass.MemberEnrollmentDays < 0)
             )
             {
-                ValidationMessage = "Specify enrollment window length as a number of whole days.";
+                validationMessage = "Specify enrollment window length as a number of whole days.";
                 StateHasChanged();
                 return;
             }
 
             // Ensure enrollment set up for non-members if applicable
             if (
-                ActiveClass.AllowNonMembers
-                && (ActiveClass.MemberEnrollmentStart == null
-                || (ActiveClass.NonMemberEnrollmentDays ?? 0) == 0)
+                activeClass.AllowNonMembers
+                && (activeClass.MemberEnrollmentStart == null
+                || (activeClass.NonMemberEnrollmentDays ?? 0) == 0)
             )
             {
-                ValidationMessage = "Please either disable non-members, or specify their enrollment window.";
+                validationMessage = "Please either disable non-members, or specify their enrollment window.";
                 StateHasChanged();
                 return;
             } else if (
-                ActiveClass.AllowNonMembers
-                && ActiveClass.NonMemberEnrollmentDays != null
-                && (ActiveClass.NonMemberEnrollmentDays != (int)ActiveClass.NonMemberEnrollmentDays
-                || ActiveClass.NonMemberEnrollmentDays < 0)
+                activeClass.AllowNonMembers
+                && activeClass.NonMemberEnrollmentDays != null
+                && (activeClass.NonMemberEnrollmentDays != (int)activeClass.NonMemberEnrollmentDays
+                || activeClass.NonMemberEnrollmentDays < 0)
             )
             {
-                ValidationMessage = "Specify enrollment window length as a number of whole days.";
+                validationMessage = "Specify enrollment window length as a number of whole days.";
                 StateHasChanged();
                 return;
             }
         }
 
-        if (FulfillSelector!.Selected.Intersect(RequireSelector!.Selected).Count() > 0)
+        if (fulfillSelector!.selected.Intersect(requireSelector!.selected).Count() > 0)
         {
-            ValidationMessage = "Each requirement code may only be used once, in either requirements of fullfillments.";
+            validationMessage = "Each requirement code may only be used once, in either requirements of fullfillments.";
             StateHasChanged();
             return;
         }
-        if (ActiveClass.MaxSeats != 0 && ActiveClass.MaxSeats < Enrolled.Count)
+        if (activeClass.MaxSeats != 0 && activeClass.MaxSeats < enrolled.Count)
         {
-            ValidationMessage = "The maximum number of seats must not be lower than the number of currently enrolled patrons.";
+            validationMessage = "The maximum number of seats must not be lower than the number of currently enrolled patrons.";
             StateHasChanged();
             return;
         }
 
+        // Store the validated values to the database
         var Result = Classes.Class_Set(
-            Id: ActiveClass.Id,
-            ClassName: ActiveClass.ClassName,
-            AllowEnrollment: ActiveClass.AllowEnrollment,
-            Enabled: ActiveClass.Enabled,
-            ShortDescription: ActiveClass.ShortDescription,
-            LongDescription: ActiveClass.LongDescription,
-            MemberEnrollmentStart: ActiveClass.MemberEnrollmentStart,
-            MemberEnrollmentDays: ActiveClass.MemberEnrollmentDays,
-            NonMemberEnrollmentStart: ActiveClass.NonMemberEnrollmentStart,
-            NonMemberEnrollmentDays: ActiveClass.NonMemberEnrollmentDays,
-            AllowNonMembers: ActiveClass.AllowNonMembers,
-            MemberPrice: ActiveClass.MemberPrice,
-            NonMemberPrice: ActiveClass.NonMemberPrice,
-            Location: ActiveClass.Location,
-            MaxSeats: ActiveClass.MaxSeats,
-            FulfillCsv: FulfillSelector.Csv,
-            RequireCsv: RequireSelector.Csv
+            Id: activeClass.Id,
+            ClassName: activeClass.ClassName,
+            AllowEnrollment: activeClass.AllowEnrollment,
+            Enabled: activeClass.Enabled,
+            ShortDescription: activeClass.ShortDescription,
+            LongDescription: activeClass.LongDescription,
+            MemberEnrollmentStart: activeClass.MemberEnrollmentStart,
+            MemberEnrollmentDays: activeClass.MemberEnrollmentDays,
+            NonMemberEnrollmentStart: activeClass.NonMemberEnrollmentStart,
+            NonMemberEnrollmentDays: activeClass.NonMemberEnrollmentDays,
+            AllowNonMembers: activeClass.AllowNonMembers,
+            MemberPrice: activeClass.MemberPrice,
+            NonMemberPrice: activeClass.NonMemberPrice,
+            Location: activeClass.Location,
+            MaxSeats: activeClass.MaxSeats,
+            FulfillCsv: fulfillSelector.Csv,
+            RequireCsv: requireSelector.Csv
         );
         
-        ActiveClass.Id = Result.Get()!;
-        if (Result.Success) Scheduler.Save();
+        // Write back created (or returned) ID
+        activeClass.Id = Result.Get()!;
+        // Save schedule as well
+        if (Result.Success) scheduler.Save();
 
-        if (Result.Success && Redirect)
+        if (Result.Success && redirect)
         {
+            // Redirect after save
             Nav.NavigateTo("ManageClasses");
         } else if (Result.Success)
         {
-            ValidationMessage = "";
+            // Clear validation message after save
+            validationMessage = "";
             StateHasChanged();
         } else
         {
-            ValidationMessage = Result.Error ?? "An unknown error has occurred.";
+            // Display an error after attempt
+            validationMessage = Result.Error ?? "An unknown error has occurred.";
             StateHasChanged();
         }
     }

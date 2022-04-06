@@ -1,85 +1,122 @@
-﻿@using CS341_YMCA.Components
+﻿@using CS341_YMCA.Pages
+@using CS341_YMCA.Components
 @using CS341_YMCA.Helpers
 @using CS341_YMCA.Services
-@using CS341_YMCA.Pages
 
 @inject ClassRepository Classes
-@inject IJSRuntime Js
 @inject ClassValidationService ClassValidation
 
-<BsModal @ref=AddEditModal
+@* CLASS SESSION ADD/EDIT MODAL *@
+<BsModal @ref=addEditModal
     SubmitAction=AddEditSubmit>
 
     <Title>Edit Schedule for <strong>'@Date.ToShortDateString()'</strong></Title>
     <Body>
-    <EditForm Model=RelevantSchedule>
+    <EditForm Model=activeSchedule>
 
     <div class="row">
     <div class="col-sm-5">
+
+        @* SESSION'S FIRST DATE PICKER *@
         <label>First occurrence date:</label>
-        <InputDate class="form-control" @bind-Value=RelevantSchedule.FirstDate />
+        <InputDate class="form-control" TValue=DateTime
+            Value=activeSchedule.FirstDate
+            ValueExpression="() => activeSchedule.FirstDate"
+            ValueChanged="(value) =>
+            {
+                // Rebuild date/time with new date
+                activeSchedule.FirstDate = value
+                    .Date
+                    .AddHours(activeSchedule.FirstDate.Hour)
+                    .AddMinutes(activeSchedule.FirstDate.Minute);
+                StateHasChanged();
+            }" />
+
     </div>
     </div>
     
     <div class="row mt-4">
-        <div class="col-sm-5"><label>Start time</label></div>
-        <div class="col-sm-3"><label>Duration</label></div>
-    </div>
-    <div class="row">
-    <div class="col-sm-5">
-        <input type="text" class="timepicker form-control" value=@JustTime id="class-sched-timepicker" />
-    </div>
-    <div class="col-sm-3">
-        <InputNumber class="form-control me-2" @bind-Value=RelevantSchedule.Duration min=1 step=1 />
-        <span><i>(minutes)</i></span>
-    </div>
+        <div class="col-sm-5">
+
+            @* SESSION START TIME PICKER *@
+            <label>Start time</label>
+            <BsTimePicker Value=activeSchedule.FirstDate ChangeAction="(value) =>
+                {
+                    // Rebuild date/time with new time
+                    activeSchedule.FirstDate = activeSchedule.FirstDate
+                        .Date
+                        .AddHours(value.Hour)
+                        .AddMinutes(value.Minute);
+                    StateHasChanged();
+                }" />
+
+        </div>
+        <div class="col-sm-3">
+
+            @* SESSION DURATION INPUT *@
+            <label>Duration</label>
+            <InputNumber class="form-control me-2" @bind-Value=activeSchedule.Duration min=1 step=1 />
+            <span><i>(minutes)</i></span>
+
+        </div>
     </div>
 
-    <InputCheckbox class="me-2 mt-4" @bind-Value=ClassRepeats />
+    @* SESSION REPETITION TOGGLE *@
+    <InputCheckbox class="me-2 mt-4" @bind-Value=classRepeats />
     <span>Session repeats</span>
-
-    @if (ClassRepeats)
+    
+    @* TOGGLABLE CLASS REPETION SECTION *@
+    @if (classRepeats)
     {
         <h5 class="mt-4">Recurrence Settings</h5>
         <div>
+
+            @* REPETITION INTERVAL INPUT *@
             <span>Repeats every</span>
             <InputNumber class="form-control ms-2 me-2 mt-2"
-                @bind-Value=RelevantSchedule.Recurrence
+                @bind-Value=activeSchedule.Recurrence
                 style="display: inline-block;max-width: 5em;"
                 min=1
                 step=1 />
             <span>days</span>
+
         </div>
         <div>
-        <span>and occurs</span>
-        <InputSelect class="form-control form-select ms-2 me-2 mt-2"
-                style="display: inline-block;max-width: 14em;"
-                @bind-Value=OccursIndefinitely>
 
-            <option value=true>indefinitely.</option>
-            <option value=false>for a fixed time.</option>
-        </InputSelect>
+            @* DROPDOWN FOR INDEFINITE/n-TIME RECURRENCE *@
+            <span>and occurs</span>
+            <InputSelect class="form-control form-select ms-2 me-2 mt-2"
+                    style="display: inline-block;max-width: 14em;"
+                    @bind-Value=occursIndefinitely>
 
-    @if (!OccursIndefinitely)
-    {
-        <div class="mt-4">
-            <span>Repeat</span>
-            <InputNumber class="form-control ms-2 me-2"
-                @bind-Value=RelevantSchedule.Occurrences
-                style="display: inline-block;max-width: 5em;"
-                min=1
-                step=1 />
-            <span>time(s).</span>
-            <br />
-            <i style="display: block;" class="mt-2">
-                (Last day would be <strong>
-                @(RelevantSchedule.FirstDate.Date
-                    .AddDays(RelevantSchedule.Recurrence * RelevantSchedule.Occurrences)
-                    .ToLongDateString())
-                </strong>)
-            </i>
-        </div>
-    }
+                <option value=true>indefinitely.</option>
+                <option value=false>for a fixed time.</option>
+            </InputSelect>
+
+            @* TOGGLABLE OCCURRENCE COUNT SECTION *@
+            @if (!occursIndefinitely)
+            {
+                @* REPETITION COUNT INPUT *@
+                <span clsas="mt-4">Repeat</span>
+                <InputNumber class="form-control ms-2 me-2"
+                    @bind-Value=activeSchedule.Occurrences
+                    style="display: inline-block;max-width: 5em;"
+                    min=1
+                    step=1 />
+                <span>time(s).</span>
+
+                <br />
+
+                @* CALCULATED END DATE *@
+                <i style="display: block;" class="mt-2">
+                    (Last day would be <strong>
+                    @(activeSchedule.FirstDate
+                        .Date
+                        .AddDays(activeSchedule.Recurrence * activeSchedule.Occurrences)
+                        .ToLongDateString())
+                    </strong>)
+                </i>
+            }
         </div>
     }
 
@@ -87,169 +124,221 @@
     </Body>
 
     <Footer>
-    @if (RelevantSchedule.Id != Serial + 1)
+
+    @* HIDE IF NEW *@
+    @if (activeSchedule.Id != tempIdCount + 1)
     {
+        @* MODAL DELETE BUTTON *@
         <a class="btn btn-danger"
             style="position: absolute;left: 1em;"
             @onclick=DeleteClick>
             Delete
         </a>
     }
+
     </Footer>
 </BsModal>
 
-<div class="schedule-day-block mb-1" style="background: @((Date.Month % 2 == 0) ? "#ffffff" : "#e4f5dd")">
-@if (ShowEditing)
-{
-    <i class="oi oi-plus"
-        style="float: right;cursor: pointer;"
-        @onclick = "() => OpenAddEdit(null)"
-    />
+
+@* ALTERNATING MONTH COLOR CODES *@
+@{
+    const string evenColor = "#ffffff";
+    const string oddColor = "#e4f5dd";
 }
-
-<p style="margin-bottom: 0.2em;"><strong><i>@Date.Month/@Date.Day</i></strong></p>
-
-@if (_RelevantSchedule.Count == 0)
-{
-    <hr style="margin-top: 0;" />
-}
-
-@foreach (var Sched in _RelevantSchedule.FindAll((It) => !DeleteIds!.Contains(It.Id ?? -2)))
-{
-    <hr style="margin-top: 0;margin-bottom: 5px;" />
+@* MAIN SCHEDULE DAY DISPLAY *@
+<div class="schedule-day-block mb-1" style="background: @((Date.Month % 2 == 0) ? evenColor : oddColor)">
+    @* SHOW OR HIDE EDITING*@
     @if (ShowEditing)
     {
-        <i class="oi oi-pencil ms-1"
+        @* EDIT BUTTON ELEMENT *@
+        <i class="oi oi-plus"
             style="float: right;cursor: pointer;"
-            @onclick = "() => OpenAddEdit(Sched)"
-        />
+            @onclick = "() => OpenAddEdit(null)" />
     }
-    @if (DisplayClassTitles)
+
+    @* DAY MM/DD HEADER *@
+    <p style="margin-bottom: 0.2em;"><strong><i>@Date.Month/@Date.Day</i></strong></p>
+
+    @if (onDay.Count == 0)
     {
-        @if (Sched.Recurrence > 0)
+        <hr style="margin-top: 0;" />
+    } @* ELSE ... DISPLAY ALL UNDELETED SCHEDULE ON DAY *@
+    @foreach (var sched in onDay.FindAll((It) => !DeleteIds!.Contains(It.Id ?? -2)))
+    {
+        <hr style="margin-top: 0;margin-bottom: 5px;" />
+
+        @* SHOW OR HIDE EDITING CONTROLS *@
+        @if (ShowEditing)
         {
-            <i class="oi oi-loop-square" style="float: right;"
-                title="Repeats every @Sched.Recurrence days, @(Sched.Occurrences == 0 ? "indefinitely" : $"{Sched.Occurrences} times")." />
+            <i class="oi oi-pencil ms-1"
+                style="float: right;cursor: pointer;"
+                @onclick = "() => OpenAddEdit(sched)" />
         }
-        <a href="Enroll/@Sched.ClassId"><strong>@(Sched.ClassName)</strong></a>
-    }
 
-    <p>
-        @Sched.FirstDate.ToShortTimeString()&nbsp;-
-        @Sched.FirstDate.AddMinutes(Sched.Duration).ToShortTimeString()
-    </p>
+        @* SHOW OR HIDE CLASS TITLE/LINK *@
+        @if (DisplayClassTitles)
+        {
+            @* SHOWING TITLES SHOWS SMALLER RECURRENCE INDICATOR *@
+            @if (sched.Recurrence > 0)
+            {
+                <i class="oi oi-loop-square" style="float: right;"
+                    title="Repeats every @sched.Recurrence days, @(sched.Occurrences == 0 ? "indefinitely" : $"{sched.Occurrences} times")." />
+            }
 
-    <p>
-    @if (!DisplayClassTitles)
-    {
-    @if (Sched.Recurrence <= 0)
-    {
-        <i class="oi oi-loop-square" /><i>Never</i>
-    } else if (Sched.Occurrences <= 0)
-    {
-        <i class="oi oi-loop-square" /><i>Forever</i>
-    } else
-    {
-        <i class="oi oi-loop-square" /><i>
-            Until
-            @(Sched.FirstDate.Date.AddDays(Sched.Recurrence * Sched.Occurrences).ToShortDateString())
-        </i>
-    }
-    }
-    </p>
-}
+            @* CLASS NAME LINK TO ENROLL *@
+            <a href="Enroll/@sched.ClassId"><strong>@(sched.ClassName)</strong></a>
+        }
 
+        @* CALCULATED BEGIN AND END TIMES *@
+        <p>
+            @sched.FirstDate.ToShortTimeString()&nbsp;-
+            @sched.FirstDate.AddMinutes(sched.Duration).ToShortTimeString()
+        </p>
+
+        <p>
+            @* DISPLAY LONGER RECURRENCE DATA IF NO TITLES *@
+            @if (!DisplayClassTitles)
+            {
+                @if (sched.Recurrence <= 0)
+                {
+                    <i class="oi oi-loop-square" /><i>Never</i>
+                } else if (sched.Occurrences <= 0)
+                {
+                    <i class="oi oi-loop-square" /><i>Forever</i>
+                } else
+                {
+                    <i class="oi oi-loop-square" />
+                    <i>
+                        Until
+                        @(sched.FirstDate.Date.AddDays(sched.Recurrence * sched.Occurrences).ToShortDateString())
+                    </i>
+                }
+            }
+        </p>
+    }
 </div>
 
 @code
 {
+    /// <summary>
+    /// Active editing class; required when editing to create new sessions.
+    /// </summary>
     [Parameter]
     public ClassDBO Class { get; set; } = new();
+
+    /// <summary>
+    /// Schedule list from which to filter daily schedules.
+    /// </summary>
     [Parameter]
     public List<ClassScheduleDBO> Schedule { get; set; } = new();
+
+    /// <summary>
+    /// Whether editing controls should display; provides editing access.
+    /// </summary>
     [Parameter]
     public bool ShowEditing { get; set; } = false;
+
+    /// <summary>
+    /// The callback will be invoked when this component's state may affect the
+    /// rest of the parent schedule editor.
+    /// </summary>
     [Parameter]
     public Action UpdateCallback { get; set; } = () => {  };
+
+    /// <summary>
+    /// Pass-by-reference list of IDs which have been soft deleted.
+    /// </summary>
     [Parameter]
     public List<int>? DeleteIds { get; set; }
 
-    private List<ClassScheduleDBO> _RelevantSchedule => ClassValidation.GetClassesOnDay(Schedule, Date.Date);
-    
-    // Modal editor copy (in flight)
-    private ClassScheduleDBO RelevantSchedule = new();
-    private bool ClassRepeats = false;
-    private bool OccursIndefinitely = true;
-    private string JustTime = "";
-    private BsModal? AddEditModal;
-    public static int Serial = -1;
+    /// <summary>
+    /// Date which this component list responsible for displaying.
+    /// </summary>
+    [Parameter]
+    public DateTime Date { get; set; } = DateTime.Today;
 
-    private async Task<bool> AddEditSubmit()
+    /// <summary>
+    /// Whether to display class title links; affects recurrence info.
+    /// </summary>
+    [Parameter]
+    public bool DisplayClassTitles { get; set; } = false;
+
+    private List<ClassScheduleDBO> onDay => ClassValidation.GetClassesOnDay(Schedule, Date.Date);
+    private ClassScheduleDBO activeSchedule = new();
+    private bool classRepeats = false;
+    private bool occursIndefinitely = true;
+    private BsModal? addEditModal;
+    public static int tempIdCount = -1;
+
+    /// <summary>
+    /// Called when the add/edit modal's submit button is clicked.
+    /// </summary>
+    /// <returns>Whether the modal should close.</returns>
+    private async Task<bool> AddEditSubmit() => await Task.Run(() =>
     {
-        // Data-binding didn't work for this input
-        JustTime = await Js.InvokeAsync<string>("GetInputVal", "class-sched-timepicker");
-
-        var Split = JustTime.Split(' ', ':');
-        Split[2] = Split[2].ToUpper();
-        if (Split[0] == 12.ToString())
-            Split[0] = 0.ToString();
-        if (Split[2] == "PM")
-            Split[0] = (int.Parse(Split[0]) + 12).ToString();
-
-        RelevantSchedule.FirstDate = RelevantSchedule.FirstDate
-            .Date
-            .AddHours(int.Parse(Split[0]))
-            .AddMinutes(int.Parse(Split[1]));
-
-        if (ClassRepeats)
+        // Update model's values to match checkboxes
+        if (classRepeats)
         {
-            if (OccursIndefinitely)
-                RelevantSchedule.Occurrences = 0;
+            if (occursIndefinitely)
+                activeSchedule.Occurrences = 0;
         } else
         {
-            RelevantSchedule.Recurrence = 0;
-            RelevantSchedule.Occurrences = 0;
+            activeSchedule.Recurrence = 0;
+            activeSchedule.Occurrences = 0;
         }
 
+        // Ensure the schedule will be valid.
         try
         {
-            ClassValidation.Validate(RelevantSchedule, Schedule);
+            ClassValidation.Validate(activeSchedule, Schedule);
         } catch (Exception Ex)
         {
-            AddEditModal!.Error(Ex.Message);
+            addEditModal!.Error(Ex.Message);
             return false;
         }
 
-        if (RelevantSchedule.Id is null)
-            RelevantSchedule.Id = Serial--;
+        // Check if this is a brand new record (never submitted)
+        if (activeSchedule.Id is null)
+            // Assign a new temporary ID if fresh
+            activeSchedule.Id = tempIdCount--;
         else
         {
-            Schedule.RemoveAll((It) => It.Id == RelevantSchedule.Id);
-            _RelevantSchedule.RemoveAll((It) => It.Id == RelevantSchedule.Id);
+            // Remove old versions if ID already assigned
+            Schedule.RemoveAll((It) => It.Id == activeSchedule.Id);
+            onDay.RemoveAll((It) => It.Id == activeSchedule.Id);
         }
-        Schedule.Add(RelevantSchedule);
-        _RelevantSchedule.Add(RelevantSchedule);
 
-        AddEditModal!.Error("");
-        Serial--;
+        // Add newest version of schedule session
+        Schedule.Add(activeSchedule);
+        onDay.Add(activeSchedule);
+        // Clean up modal state and notify parent of update
+        addEditModal!.Error("");
+        tempIdCount--;
         UpdateCallback();
 
+        // Return true to close the add/edit modal
         return true;
-    }
+    });
 
+    /// <summary>
+    /// Called to set up the add/edit modal with a specific session.
+    /// </summary>
+    /// <param name="Schedule">Session to edit; null for a new session.</param>
     private void OpenAddEdit(ClassScheduleDBO? Schedule)
     {
         // Make a copy so editing only sticks when pressing "Submit"
-        RelevantSchedule = (Schedule is null)
+        activeSchedule = (Schedule is null)
+            // Create a brand new session
             ? new()
             {
-                Id = Serial--,
+                Id = tempIdCount--,
                 ClassId = Class.Id,
                 FirstDate = Date.Date.AddHours(12),
                 Recurrence = 7,
                 Duration = 30,
                 Occurrences = 1
             }
+            // Make a copy of the existing session
             : new()
             {
                 Id = Schedule.Id,
@@ -264,41 +353,30 @@
                     : Schedule.Occurrences
             };
 
-        ClassRepeats = (Schedule is null) ? false : (Schedule!.Recurrence != 0);
-        OccursIndefinitely = (Schedule is null) ? true : (Schedule.Occurrences == 0);
-
-        JustTime = RelevantSchedule.FirstDate.ToShortTimeString();
+        // Set up checkbox states from schedule values
+        classRepeats = (Schedule is null) ? false : (Schedule!.Recurrence != 0);
+        occursIndefinitely = (Schedule is null) ? true : (Schedule.Occurrences == 0);
 
         StateHasChanged();
-        AddEditModal!.Open();
+        addEditModal!.Open();
     }
 
-    [Parameter]
-    public DateTime Date { get; set; } = DateTime.Today;
-
-    [Parameter]
-    public bool DisplayClassTitles { get; set; } = false;
-
-    protected override async Task OnAfterRenderAsync(bool FirstRender)
-    {
-        base.OnAfterRender(FirstRender);
-
-        await Js.InvokeVoidAsync("InitializeTimePickers");
-    }
-
+    /// <summary>
+    /// Called when delete is clicked to soft delete the active session.
+    /// </summary>
     private void DeleteClick()
     {
         // Register for hard deletion if in database
-        if (RelevantSchedule.Id > 0)
-            DeleteIds?.Add(RelevantSchedule.Id ?? -1);
+        if (activeSchedule.Id > 0)
+            DeleteIds?.Add(activeSchedule.Id ?? -1);
         // Soft delete from lists in memory
-        if (RelevantSchedule is not null)
+        if (activeSchedule is not null)
         {
-            _RelevantSchedule.RemoveAll((It) => It.Id == RelevantSchedule.Id);
-            Schedule.RemoveAll((It) => It.Id == RelevantSchedule.Id);
+            onDay.RemoveAll((It) => It.Id == activeSchedule.Id);
+            Schedule.RemoveAll((It) => It.Id == activeSchedule.Id);
         }
         
-        AddEditModal!.Close();
+        addEditModal!.Close();
         UpdateCallback();
     }
 }

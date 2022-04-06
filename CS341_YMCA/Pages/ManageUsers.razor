@@ -10,43 +10,49 @@
 @if (LoggedIn.IsAdmin)
 {
 
-<h1>Member Accounts</h1>
-<hr />
-<h3>Manage patron account, membership, and payment details</h3>
+    <h1>Member Accounts</h1>
+    <hr />
+    <h3>Manage patron account, membership, and payment details</h3>
     
-var UserList = Users.SiteUser_List().Get()!;
+    @* LOAD LIST OF USERS INLINE *@
+    var userList = Users.SiteUser_List().Get()!;
 
-<div class="overflow-auto" style="max-width: 70em;">
+    @* TABLE SCROLL PANE *@
+    <div class="overflow-auto" style="max-width: 70em;">
     
-<table class="table table-striped mt-4">
-<thead>
-<tr>
-    <th scope="col">First</th>
-    <th scope="col">Last</th>
-    <th scope="col">Email</th>
-    <th scope="col">Y Member</th>
-    <th scope="col">Admin</th>
-    <th scope="col">Created</th>
-    <th scope="col">Modified</th>
-    <th scope="col"></th>
-</tr>
-</thead>
-<tbody>
-    @foreach (var User in UserList)
-    {
-        <ManageUsersEntry User=@User></ManageUsersEntry>
-    }
-</tbody>
-</table>
+    @* USER LIST TABLE *@
+    <table class="table table-striped mt-4">
+    <thead>
+    <tr>
+        <th scope="col">First</th>
+        <th scope="col">Last</th>
+        <th scope="col">Email</th>
+        <th scope="col">Y Member</th>
+        <th scope="col">Admin</th>
+        <th scope="col">Created</th>
+        <th scope="col">Modified</th>
+        <th scope="col"></th>
+    </tr>
+    </thead>
+    <tbody>
 
-</div>
+        @* ITERATE EACH USER ROW *@
+        @foreach (var user in userList)
+        {
+            <ManageUsersEntry User=@user></ManageUsersEntry>
+        }
+
+    </tbody>
+    </table>
+
+    </div>
     
-<style>
-    td
-    {
-        vertical-align: middle;
-    }
-</style>
+    <style>
+        td
+        {
+            vertical-align: middle;
+        }
+    </style>
 
 } else
 {
@@ -54,6 +60,9 @@ var UserList = Users.SiteUser_List().Get()!;
 }
 
 @code {
+    /// <summary>
+    /// DBO of the currently logged in user.
+    /// </summary>
     [CascadingParameter]
     protected SiteUserDBO LoggedIn { get; set; } = new();
 }

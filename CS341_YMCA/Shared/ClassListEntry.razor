@@ -3,28 +3,38 @@
 <div class="card class-list-item" style="vertical-align: top;">
     @if (LoggedIn?.IsAdmin ?? false)
     {
+        @* ADMIN EDIT BUTTON BAR *@
         <div class="class-list-admin-actions">
             <p><strong>Admin actions</strong></p>
-
+            @* CLASS EDITOR LINK *@
             <a href="ManageClasses/@Class.Id"><i class="oi oi-pencil" style="float: right;" title="Edit this class"></i></a>
         </div>
     }
 
     @if (Class.MemberEnrollmentOpen && !Class.NonMemberEnrollmentOpen)
     {
+
+        @* MEMBER-ONLY ENROLLMENT OPEN *@
         <h4 style="float: left;position: absolute;"><span class="badge bg-info bg-info-glow mt-2 ms-2">Open early for<br />Y members!</span></h4>
+    
     } else if (Class.MemberEnrollmentOpen || Class.NonMemberEnrollmentOpen)
     {
+        @* CLASS IS OPEN FOR ENROLLMENT *@
         <h4 style="float: left;position: absolute;"><span class="badge bg-success bg-success-glow mt-2 ms-2">Open for<br />enrollment!</span></h4>
 
         @if (!(LoggedIn?.IsMember ?? false) && !Class.AllowNonMembers)
         {
+
+            @* ENROLLMENT IS OPEN BUT REQUIRES MEMBERSHIP *@
             <h4 style="float: left;position: absolute;margin-top: 2.7em;"><span class="badge bg-danger bg-danger-glow mt-2 ms-2">Requires<br />membership</span></h4>
+        
         }
     }
 
+    @* CLASS DISPLAY CARD IMAGE *@
     <img class="card-img-top" src="images/stripe_pattern.jpg" alt="Class image is missing">
     <div class="card-body">
+        @* CARD BODY CONTENTS *@
         <h5 class="card-title">@Class.ClassName</h5>
         <p class="card-text">@Class.ShortDescription</p>
         <a href="Enroll/@Class.Id" class="btn btn-primary">Learn more</a>
@@ -33,8 +43,15 @@
 
 @code
 {
+    /// <summary>
+    /// Class displayed on this list row.
+    /// </summary>
     [Parameter]
     public ClassDBO Class { get; set; } = new();
+
+    /// <summary>
+    /// DBO of the currently logged in user.
+    /// </summary>
     [CascadingParameter]
     public SiteUserDBO? LoggedIn { get; set; }
 }

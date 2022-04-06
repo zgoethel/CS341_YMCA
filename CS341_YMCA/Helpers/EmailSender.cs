@@ -3,8 +3,14 @@ using System.Net.Mail;
 
 namespace CS341_YMCA.Helpers;
 
+/// <summary>
+/// Utility for sending basic emails via an SMTP server.
+/// </summary>
 public class EmailSender
 {
+    /// <summary>
+    /// Email configuration section field definitions.
+    /// </summary>
     private class EmailConfigSection
     {
         public string ServerUrl { get; set; } = "";
@@ -14,27 +20,40 @@ public class EmailSender
         public bool UseSsl { get; set; } = true;
     }
 
-    private readonly EmailConfigSection ConfigSection = new();
+    /// <summary>
+    /// Object bound to the email config section.
+    /// </summary>
+    private readonly EmailConfigSection configSection = new();
 
     public EmailSender(IConfiguration Configuration)
     {
-        Configuration.GetSection("SmtpServer").Bind(ConfigSection);
+        // Bind the SMTP section to the config object
+        Configuration.GetSection("SmtpServer").Bind(configSection);
     }
 
-    public void SendEmail(string? From, string To, string Subject, string Body)
+    /// <summary>
+    /// Sends an email via a remote SMTP server.
+    /// </summary>
+    /// <param name="from">Sent email "from" address.</param>
+    /// <param name="to">Sent email 'to" address.</param>
+    /// <param name="subject">Sent email "subject" line.</param>
+    /// <param name="body">Sent email body HTML text.</param>
+    public void SendEmail(string? from, string to, string subject, string body)
     {
-        using var Smtp = new SmtpClient(ConfigSection.ServerUrl)
+        // Open an SMTP connection (scoped)
+        using var smtp = new SmtpClient(configSection.ServerUrl)
         {
-            Port = ConfigSection.Port,
+            Port = configSection.Port,
             Credentials = new NetworkCredential(
-                ConfigSection.Username,
-                ConfigSection.Password),
-            EnableSsl = ConfigSection.UseSsl,
+                configSection.Username,
+                configSection.Password),
+            EnableSsl = configSection.UseSsl,
         };
 
-        MailMessage MailMessage = new(From ?? ConfigSection.Username, To, Subject, Body);
-        MailMessage.IsBodyHtml = true;
-
-        Smtp.Send(MailMessage);
+        // Create the mail message from the details
+        MailMessage mailMessage = new(from ?? configSection.Username, to, subject, body);
+        mailMessage.IsBodyHtml = true;
+        // Send the constructed message via SMTP
+        smtp.Send(mailMessage);
     }
 }

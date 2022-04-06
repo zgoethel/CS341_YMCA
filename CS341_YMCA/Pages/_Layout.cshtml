@@ -36,34 +36,7 @@
     </div>
 
     <script src="_framework/blazor.server.js"></script>
-
-    <script>
-        var InitializeTimePickers = function()
-        {
-            $('.timepicker').datetimepicker(
-            {
-                format: 'hh:mm a'
-            });
-            $('.timepicker').click(function()
-            {
-                $("*[data-action='incrementHours']").addClass("oi");
-                $("*[data-action='incrementHours']").addClass("oi-chevron-top");
-                $("*[data-action='decrementHours']").addClass("oi");
-                $("*[data-action='decrementHours']").addClass("oi-chevron-bottom");
-                $("*[data-action='incrementMinutes']").addClass("oi");
-                $("*[data-action='incrementMinutes']").addClass("oi-chevron-top");
-                $("*[data-action='decrementMinutes']").addClass("oi");
-                $("*[data-action='decrementMinutes']").addClass("oi-chevron-bottom");
-            });
-        };
-        var GetInputVal = function(id)
-        {
-            return $(`#${id}`).val();
-        };
-        var ReturnSelects = function()
-        {
-            $("select.return-to-n1").val('-1');
-        };
-    </script>
+    <script src="js/InteropImpl.js"></script>
+    <script src="js/BsTimePicker.js"></script>
 </body>
 </html>

@@ -8,34 +8,60 @@
 
 <PageTitle>Edit Schedule</PageTitle>
 
+@* DROP CONFIRMATION DIALOG *@
+<BsModal @ref=dropModal
+    SubmitText="Drop"
+    SubmitAction=DropDialogSubmit
+    SubmitClass="danger">
+
+    <Title>You are about to drop the class <strong>'@dropClass?.ClassName'</strong></Title>
+    <Body>
+        <p class="font-weight-bold">This action cannot be undone. Are you sure you wish to continue?</p>
+        <ul class="text-danger">
+            <li>You will no longer be enrolled in this class.</li>
+            <li>The class fee will <strong>not</strong> be refunded.</li>
+        </ul>
+    </Body>
+</BsModal>
+
 <h1>Edit Schedule</h1>
 <hr />
 <h3>View and change your class enrollments</h3>
 
+@* SCROLL PANE *@
 <div class="overflow-auto mt-3">
 
-@if (EnrolledClasses!.Count == 0)
+@if (enrolledClasses!.Count == 0)
 {
+    @* DISPLAY IF NOT ENROLLED IN ANY CLASSES *@
     <h4 class="mt-3">You are not registered for any classes</h4>
 } else
 {
+    @* ENROLLED CLASSES CONTAINER (GREY BOX) *@
     <div class="bg-secondary bg-opacity-50 overflow-auto p-2" id="sched-holder">
-    @foreach(var Class in EnrolledClasses)
-    {
-        <div class="m-2 p-2 bg-light shadow">
-            <div style="display: block;height: 9.5em;" class="overflow-auto">
-                <a href="Enroll/@(Class.Id)"><h5>@(Class.ClassName)</h5></a>
-                <p>@Class.ShortDescription</p>
+        @* ITERATE THROUGH ENROLLED CLASSE *@
+        @foreach(var Class in enrolledClasses)
+        {
+            @* DISPLAY SHADOWED CARD FOR EACH CLASS *@
+            <div class="m-2 p-2 bg-light shadow">
+                <div style="display: block;height: 9.5em;" class="overflow-auto">
+                    <a href="Enroll/@(Class.ClassId)"><h5>@(Class.ClassName)</h5></a>
+                    <p>@Class.ShortDescription</p>
+                </div>
+                <div style="display: block;">
+                    <hr class="mt-2 mb-2" />
+
+                    @* CLASS VIEW LINK *@
+                    <a class="btn btn-primary me-1" href="Enroll/@(Class.ClassId)">View</a>
+                    @* CLASS DROP BUTTON *@
+                    <a class="btn btn-danger" @onclick="() => OpenDropModal(Class)">Drop</a>
+                
+                </div>
             </div>
-            <div style="display: block;">
-                <hr class="mt-2 mb-2" />
-                <a class="btn btn-primary me-1" href="Enroll/@(Class.Id)">View</a>
-                <a class="btn btn-danger" @onclick="() => OpenDropModal(Class)">Drop</a>
-            </div>
-        </div>
-    }
+        }
     </div>
 
+    @* 5-WEEK SCHEDULE VIEWER *@
     <h3 class="mt-4 mb-3">Your upcoming weekly schedules</h3>
     <ClassScheduler DisplayClassTitles=true
         ShowEditing=false
@@ -46,21 +72,9 @@
 </div>
 
 <style>
-    th.col-group
-    {
-        background: #621414;
-        color: white;
-        text-align: center;
-        border-left: 2px solid #621414;
-    }
-    td
-    {
-        vertical-align: middle;
-    }
     div#sched-holder
     {
         box-shadow: 0 0 1em 1em #9da4ac inset;
-        /*white-space: nowrap;*/
     }
     div#sched-holder > div
     {
@@ -69,55 +83,42 @@
         height: 14em;
         display: inline-block;
         border-radius: 0.2em;
-        /* white-space: initial; */
         border: 1px solid #625353;
     }
 </style>
 
-<BsModal @ref=DropModal
-    SubmitText="Drop"
-    SubmitAction=DropDialogSubmit
-    SubmitClass="danger">
-
-    <Title>You are about to drop the class <strong>'@DropClass?.ClassName'</strong></Title>
-    <Body>
-        <p class="font-weight-bold">This action cannot be undone. Are you sure you wish to continue?</p>
-        <ul class="text-danger">
-            <li>You will no longer be enrolled in this class.</li>
-            <li>The class fee will <strong>not</strong> be refunded.</li>
-        </ul>
-    </Body>
-</BsModal>
-
-
 @code
 {
+    /// <summary>
+    /// Layout of bound form data.
+    /// </summary>
     [CascadingParameter]
     private SiteUserDBO LoggedIn { get; set; } = new();
 
-    private List<ClassEnrollmentDBO>? EnrolledClasses;
-    private BsModal? DropModal;
-    private ClassEnrollmentDBO? DropClass;
+    private List<ClassEnrollmentDBO> enrolledClasses => Classes.ClassEnrollment_GetByUserId(LoggedIn.Id).Get()!;
+    private BsModal? dropModal;
+    private ClassEnrollmentDBO? dropClass;
 
-    protected override void OnInitialized()
+    /// <summary>
+    /// Displays drop modal to drop a selected class.
+    /// </summary>
+    /// <param name="_class">Class enrollment to nullify.</param>
+    private void OpenDropModal(ClassEnrollmentDBO _class)
     {
-        base.OnInitialized();
-
-        EnrolledClasses = Classes.ClassEnrollment_GetByUserId(LoggedIn.Id).Get()!;
-    }
-
-    private void OpenDropModal(ClassEnrollmentDBO Class)
-    {
-        DropClass = Class;
+        dropClass = _class;
         StateHasChanged();
 
-        DropModal!.Open();
+        dropModal!.Open();
     }
 
+    /// <summary>
+    /// Performs the confirmed drop dialog action.
+    /// </summary>
+    /// <returns>Whether the dialog should close.</returns>
     private async Task<bool> DropDialogSubmit() => await Task.Run(() =>
     {
-        var Result = Classes.Class_DropUser(DropClass!.Id, LoggedIn!.Id);
-        DropClass = null;
+        var Result = Classes.Class_DropUser(dropClass!.ClassId, LoggedIn!.Id);
+        dropClass = null;
         InvokeAsync(() => StateHasChanged());
         return Result.Success;
     });

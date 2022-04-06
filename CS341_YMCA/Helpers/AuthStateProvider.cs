@@ -6,20 +6,20 @@ namespace CS341_YMCA.Helpers;
 
 public class AuthStateProvider : AuthenticationStateProvider
 {
-    private readonly SiteUserRepository SiteUsers;
+    private readonly SiteUserRepository siteUsers;
 
-    private string Email = "";
-    private string PasswordHash = "";
+    private string email = "";
+    private string passwordHash = "";
 
-    public AuthStateProvider(SiteUserRepository SiteUsers)
+    public AuthStateProvider(SiteUserRepository siteUsers)
     {
-        this.SiteUsers = SiteUsers;
+        this.siteUsers = siteUsers;
     }
 
-    public void LogIn(string Email, string Password)
+    public void LogIn(string email, string password)
     {
-        this.Email = Email;
-        PasswordHash = Password.CalculateSha512();
+        this.email = email;
+        passwordHash = password.CalculateSha512();
 
         var _State = GetAuthenticationStateAsync();
         NotifyAuthenticationStateChanged(_State);
@@ -27,26 +27,25 @@ public class AuthStateProvider : AuthenticationStateProvider
 
     public void LogOut()
     {
-        Email = "";
-        PasswordHash = "";
+        email = "";
+        passwordHash = "";
 
-        var _State = GetAuthenticationStateAsync();
-        NotifyAuthenticationStateChanged(_State);
+        var state = GetAuthenticationStateAsync();
+        NotifyAuthenticationStateChanged(state);
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var AuthResult = SiteUsers.SiteUser_Authenticate(Email, PasswordHash);
-        var Authenticated = AuthResult.Success;
+        var authResult = siteUsers.SiteUser_Authenticate(email, passwordHash);
+        var isAuthenticated = authResult.Success;
 
-        var Identity = Authenticated ? new ClaimsIdentity(new[]
+        var identity = isAuthenticated ? new ClaimsIdentity(new[]
             {
-                new Claim(ClaimTypes.Name, Email)
+                new Claim(ClaimTypes.Name, email)
             }, "LoggedIn") : new ClaimsIdentity();
 
-        var Result = new AuthenticationState(new ClaimsPrincipal(Identity));
-        var ResultTask = Task.FromResult(Result);
+        var result = new AuthenticationState(new ClaimsPrincipal(identity));
         
-        return await ResultTask;
+        return await Task.FromResult(result);
     }
 }

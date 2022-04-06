@@ -18,12 +18,14 @@
 
 <PageTitle>Member Registration</PageTitle>
 
-@if (!string.IsNullOrEmpty(ValidationMessage))
+@* DISPLAY VALIDATION ERROR IF IT EXISTS *@
+@if (!string.IsNullOrEmpty(validationMessage))
 {
-    <div class="alert alert-danger">@ValidationMessage</div>
+    <div class="alert alert-danger">@validationMessage</div>
 }
 
-@if (string.IsNullOrEmpty(SuccessMessage))
+@* DISPLAY UI IF SUCCESS IS BLANK *@
+@if (string.IsNullOrEmpty(successMessage))
 {
     <h2>Member Registration</h2>
 
@@ -37,33 +39,42 @@
         Please provide the following details:
     </p>
 
-    <EditForm Model=FormBind>
+    <EditForm Model=formBind>
 
+     @* FIRST NAME FIELD *@
     <label>First Name:</label>
     <InputText class="form-control mb-2"
         type="text"
-        @bind-Value=FormBind.FirstName />
+        @bind-Value=formBind.FirstName />
 
+    @* LAST NAME FIELD *@
     <label>Last Name:</label>
     <InputText class="form-control mb-2"
         type="text" 
-        @bind-Value=FormBind.LastName />
+        @bind-Value=formBind.LastName />
 
+     @* EMAIL FIELD *@
     <label>Email:</label>
     <InputText class="form-control"
         type="text" 
-        @bind-Value=FormBind.Email />
+        @bind-Value=formBind.Email />
 
+    @* REGISTER BUTTON *@
     <button class="btn btn-primary mt-4 me-2" type="submit" @onclick=SubmitRegistration>Create Account</button>
+    @* RETURN TO SIGNIN BUTTON *@
     <a class="btn btn-secondary mt-4" type="button" href="SiteUser/LoginFlow">Sign In</a>
     
     </EditForm>
 } else
 {
-    <div class="alert alert-success">@SuccessMessage</div>
+    @* DISPLAY SUCCESS MESSAGE IF EXISTS *@
+    <div class="alert alert-success">@successMessage</div>
 }
 
 @code {
+    /// <summary>
+    /// Layout of bound form data.
+    /// </summary>
     private class FormBinding
     {
         [Required]
@@ -76,31 +87,40 @@
         public string Email = "";
     }
 
-    private FormBinding FormBind = new();
-    private string SuccessMessage = "";
-    private string ValidationMessage = "";
+    /// <summary>
+    /// Form-bound object instance.
+    /// </summary>
+    private FormBinding formBind = new();
 
+    private string successMessage = "";
+    private string validationMessage = "";
+
+    /// <summary>
+    /// Performs the registration from form submission.
+    /// </summary>
     private void SubmitRegistration()
     {
-        if (string.IsNullOrEmpty(FormBind.FirstName)
-            || string.IsNullOrEmpty(FormBind.LastName)
-            || string.IsNullOrEmpty(FormBind.Email)
+        // Validate provided details
+        if (string.IsNullOrEmpty(formBind.FirstName)
+            || string.IsNullOrEmpty(formBind.LastName)
+            || string.IsNullOrEmpty(formBind.Email)
         )
         {
-            ValidationMessage = "Please fill in all of the form values.";
+            validationMessage = "Please fill in all of the form values.";
             return;
         }
+        // Perform the registration
+        var result = SiteUsers.SiteUser_Register(formBind.FirstName, formBind.LastName, formBind.Email);
 
-        var Result = SiteUsers.SiteUser_Register(FormBind.FirstName, FormBind.LastName, FormBind.Email);
-
-        if (Result.Success)
+        // Display the proper message for the result
+        if (result.Success)
         {
-            ValidationMessage = "";
-            SuccessMessage = "A confirmation email has been sent to you. Check your inbox to continue the registration process; the message may be incorrectly marked as spam.";
+            validationMessage = "";
+            successMessage = "A confirmation email has been sent to you. Check your inbox to continue the registration process; the message may be incorrectly marked as spam.";
         } else
         {
-            SuccessMessage = "";
-            ValidationMessage = Result.Error!;
+            successMessage = "";
+            validationMessage = result.Error!;
         }
     }
 }

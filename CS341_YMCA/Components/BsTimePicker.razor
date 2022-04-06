@@ -1,0 +1,57 @@
+﻿@using CS341_YMCA.Helpers
+@using CS341_YMCA.Services
+
+@inject IJSRuntime Js
+
+@* TIMEPICKER TEXT INPUT *@
+<input type="text" class="timepicker form-control @Classes" style="@Style" value="@Value.ToShortTimeString()" id="@guid" />
+
+@code {
+    /// <summary>
+    /// Time parameter as a source for the initial picker value.
+    /// </summary>
+    [Parameter]
+    public DateTime Value { get; set; }
+
+    /// <summary>
+    /// Invokable action called whenever the value changes.
+    /// </summary>
+    [Parameter]
+    public Action<DateTime>? ChangeAction { get; set; }
+
+    /// <summary>
+    /// Extra parameter available to provide CSS styling syntax.
+    /// </summary>
+    [Parameter]
+    public string? Style { get; set; }
+
+    /// <summary>
+    /// Extra parameter available to provide CSS styling tags.
+    /// </summary>
+    [Parameter]
+    public string? Classes { get; set; }
+
+    private Guid guid = Guid.NewGuid();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        // Set up time-picker library via JS interop
+        var self = DotNetObjectReference.Create(this);
+        await Js.InvokeVoidAsync("BsTimePicker.bindTimePicker", self, guid.ToString());
+    }
+
+    /// <summary>
+    /// Invoked via JavaScript interop when the time-picker value changes.
+    /// </summary>
+    /// <param name="value">New date and time value from the time-picker.</param>
+    [JSInvokable]
+    public void OnValueChanged(string value)
+    {
+        // Parse in .NET insted of JavaScript
+        var parsedDate = DateTime.Parse(value);
+        // Invoke callback in the async UI context
+        InvokeAsync(() => ChangeAction?.Invoke(parsedDate));
+    }
+}

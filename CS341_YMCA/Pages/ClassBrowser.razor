@@ -11,11 +11,19 @@
 <hr />
 <h3>Find fun new classes to add to your schedule</h3>
 
-@{
-    var ClassList = Classes.Class_List(IncludeDisabled: false).Get()!;
+@foreach (var c in classList!)
+{
+    <ClassListEntry Class=@c></ClassListEntry>
 }
 
-@foreach (var Class in ClassList)
-{
-    <ClassListEntry Class=@Class></ClassListEntry>
+@code {
+    private List<ClassDBO>? classList;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        // Load class list from database
+        classList = Classes.Class_List(IncludeDisabled: false).Get()!;
+    }
 }
