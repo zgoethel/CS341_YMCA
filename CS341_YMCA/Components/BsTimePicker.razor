@@ -1,7 +1,7 @@
 ﻿@using CS341_YMCA.Helpers
 @using CS341_YMCA.Services
 
-@inject IJSRuntime js
+@inject IJSRuntime Js
 
 @* TIMEPICKER TEXT INPUT *@
 <input type="text" class="timepicker form-control @Classes" style="@Style" value="@Value.ToShortTimeString()" id="@guid" />
@@ -39,7 +39,7 @@
 
         // Set up time-picker library via JS interop
         var self = DotNetObjectReference.Create(this);
-        await js.InvokeVoidAsync("BsTimePicker.bindTimePicker", self, guid.ToString());
+        await Js.InvokeVoidAsync("BsTimePicker.bindTimePicker", self, guid.ToString());
     }
 
     /// <summary>

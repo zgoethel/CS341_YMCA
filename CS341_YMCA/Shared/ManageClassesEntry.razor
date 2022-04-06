@@ -7,6 +7,8 @@
 <td style="white-space: nowrap;">@Class.ClassName</td>
 <td>
     <h5>
+
+        @* DISPLAY ENROLLMENT WINDOW STATUS BADGE *@
         @if (Class.MemberEnrollmentOpen && !Class.NonMemberEnrollmentOpen)
         {
             <span class="badge bg-info bg-info-glow">Members</span>
@@ -17,8 +19,11 @@
         {
             <span class="badge bg-danger bg-danger-glow">Closed</span>   
         }
+        
     </h5>
 </td>
+
+@* DISPLAY # SEATS TAKEN OR DISPLAY DASH *@
 @if (CalculatedSeatsTaken > 0)
 {
     <td>@CalculatedSeatsTaken</td>
@@ -26,27 +31,44 @@
 {
     <td>&mdash;</td>
 }
+
+@* DISPLAY SEATS TAKEN VS. AVAILABLE *@
 @if ((Class.MaxSeats ?? 0) != 0)
 {
     <td>@(Class.MaxSeats - CalculatedSeatsTaken)</td>
     <td>@Class.MaxSeats</td>
 } else
 {
+    @* DISPLAY INFINITY FOR NO SEAT LIMIT *@
     <td>&infin;</td>
     <td>&infin;</td>
 }
+
+
 <td>@Class.Created.ToShortDateString()<br />@Class.Created.ToShortTimeString()</td>
 <td>@Class.Updated.ToShortDateString()<br />@Class.Updated.ToShortTimeString()</td>
+
 <td style="white-space: nowrap;">
+
+    @* CLASS EDITOR LINK *@
     <a href="ManageClasses/@Class.Id" class="btn btn-primary">Editor</a>
+    @* VIEW CLASS LINK *@
     <a href="Enroll/@Class.Id" class="btn btn-secondary">Enrollment page</a>
+
 </td>
 </tr>
 
 @code
 {
+    /// <summary>
+    /// Class displayed in the list item.
+    /// </summary>
     [Parameter]
     public ClassDBO Class { get; set; } = new();
+
+    /// <summary>
+    /// DBO of the currently logged in user.
+    /// </summary>
     [CascadingParameter]
     public SiteUserDBO? LoggedIn { get; set; }
 
@@ -56,6 +78,7 @@
     {
         base.OnInitialized();
 
+        // Count the number of taken seats
         CalculatedSeatsTaken = Classes.ClassEnrollment_GetByClassId(Class.Id).Get()!.Count;
     }
 }

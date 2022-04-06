@@ -117,10 +117,10 @@
     /// </summary>
     public async void Submit()
     {
-        var ShouldClose = SubmitAction is null
+        var shouldClose = SubmitAction is null
             ? true
             : (await SubmitAction.Invoke());
-        if (ShouldClose) Close();
+        if (shouldClose) Close();
     }
 
     /// <summary>
@@ -128,10 +128,10 @@
     /// </summary>
     public async void Cancel()
     {
-        var ShouldClose = CancelAction is null
+        var shouldClose = CancelAction is null
             ? true
             : (await CancelAction.Invoke());
-        if (ShouldClose) Close();
+        if (shouldClose) Close();
     }
 
     /// <summary>

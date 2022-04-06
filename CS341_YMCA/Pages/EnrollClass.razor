@@ -8,15 +8,15 @@
 @inject Database Sql
 @inject ClassValidationService ClassValidation
 
-<PageTitle>@ActiveClass.ClassName</PageTitle>
+<PageTitle>@activeClass.ClassName</PageTitle>
 
 @* CLASS DROP CONFIRMATION MODAL*@
-<BsModal @ref=DropModal
+<BsModal @ref=dropModal
     SubmitText="Drop"
     SubmitAction=DropDialogSubmit
     SubmitClass="danger">
 
-    <Title>You are about to drop the class <strong>'@ActiveClass!.ClassName'</strong></Title>
+    <Title>You are about to drop the class <strong>'@activeClass!.ClassName'</strong></Title>
     <Body>
         <p class="font-weight-bold">This action cannot be undone. Are you sure you wish to continue?</p>
         <ul class="text-danger">
@@ -26,23 +26,23 @@
     </Body>
 </BsModal>
 
-<h1>@ActiveClass.ClassName</h1>
+<h1>@activeClass.ClassName</h1>
 <hr />
 
 <div class="row">
 <div class="col-lg-7">
 @* PAGE LEFT COLUMN BEGINS HERE *@
 
-<h3>@ActiveClass.ShortDescription</h3>
+<h3>@activeClass.ShortDescription</h3>
 <br />
 
-@if (!string.IsNullOrEmpty(ActiveClass.FulfillCsv))
+@if (!string.IsNullOrEmpty(activeClass.FulfillCsv))
 {
     <h4 style="display: inline;" class="me-4">
 
         @* REQ. CODE FULLFILLMENT LIST *@
         Fulfills: 
-        @foreach (var Item in ActiveClass.FulfillCsv.Split(","))
+        @foreach (var Item in activeClass.FulfillCsv.Split(","))
         {
             <span class="ms-2 badge bg-info">@Item</span>
         }
@@ -50,13 +50,13 @@
     </h4>
 }
 
-@if (!string.IsNullOrEmpty(ActiveClass.RequireCsv))
+@if (!string.IsNullOrEmpty(activeClass.RequireCsv))
 {
     <h4 style="display: inline;">
 
         @* REQ. CODE REQUIREMENT LIST *@
         Prerequisites: 
-        @foreach (var Item in ActiveClass.RequireCsv.Split(","))
+        @foreach (var Item in activeClass.RequireCsv.Split(","))
         {
             <span class="ms-2 badge bg-secondary">@Item</span>
         }
@@ -67,7 +67,7 @@
 @* LONG DESCRIPTION (SUPPORTS HTML) *@
 @{
     // Replaces newlines with HTML newlines
-    var DescriptionNewlines = (MarkupString)(ActiveClass.LongDescription.Replace("\n", "<br />"));
+    var DescriptionNewlines = (MarkupString)(activeClass.LongDescription.Replace("\n", "<br />"));
 }
 <p class="mt-4 col-11">@DescriptionNewlines</p>
 <br />
@@ -92,7 +92,7 @@
 <div class="card-body">
 
 @* DISPLAY WHO CAN ENROLL *@
-@if(ActiveClass.AllowNonMembers)
+@if(activeClass.AllowNonMembers)
 {
     <p>
     Both members with paid memberships and public non-members
@@ -110,23 +110,23 @@
 <div class="col-sm-6" style="text-align: center;">
 
     @* MEMBER PRICING *@
-    @if (ActiveClass.MemberPrice > 0.0)
+    @if (activeClass.MemberPrice > 0.0)
     {
-        <h1>$@((int?)ActiveClass.MemberPrice)<sup>@((ActiveClass.MemberPrice % 1)
+        <h1>$@((int?)activeClass.MemberPrice)<sup>@((activeClass.MemberPrice % 1)
             .ToString(".00").Replace(".", ""))</sup></h1>
     } else
     { <h1>No fee</h1> }
     <p>For membership holders</p>
 
 </div>
-@if (ActiveClass.AllowNonMembers)
+@if (activeClass.AllowNonMembers)
 {
     <div class="col-sm-6" style="text-align: center;">
 
         @* NON-MEMBER PRICING *@
-        @if (ActiveClass.NonMemberPrice > 0.0)
+        @if (activeClass.NonMemberPrice > 0.0)
         {
-            <h1>$@((int?)ActiveClass.NonMemberPrice)<sup>@((ActiveClass.NonMemberPrice % 1)
+            <h1>$@((int?)activeClass.NonMemberPrice)<sup>@((activeClass.NonMemberPrice % 1)
                 .ToString(".00").Replace(".", ""))</sup></h1>
         } else
         { <h1>No fee</h1> }
@@ -155,9 +155,9 @@
 <div class="col-sm-7 pt-2">
 
     @* LOCATION AND BASIC SCHEDULE INFO *@
-    <p><strong>Holding sessions</strong><br />@@ @(ActiveClass.Location ?? "TBA")</p>
+    <p><strong>Holding sessions</strong><br />@@ @(activeClass.Location ?? "TBA")</p>
     @{
-        var Sessions = Classes.ClassSchedule_List(ActiveClass.Id).Get()!;
+        var Sessions = Classes.ClassSchedule_List(activeClass.Id).Get()!;
         if (Sessions.Count == 0)
         {
             <p>No schedule available</p>
@@ -174,33 +174,33 @@
 @* PAGES WHICH RE-RENDER                    *@
 @{
     // Calculate window date values for use in display UI
-    var MemberCloseDate = (ActiveClass.MemberEnrollmentStart ?? DateTime.UnixEpoch)
-        .AddDays(ActiveClass.MemberEnrollmentDays ?? 1);
-    var NonMemberCloseDate = (ActiveClass.NonMemberEnrollmentStart ?? DateTime.UnixEpoch)
-        .AddDays(ActiveClass.NonMemberEnrollmentDays ?? 1);
+    var memberCloseDate = (activeClass.MemberEnrollmentStart ?? DateTime.UnixEpoch)
+        .AddDays(activeClass.MemberEnrollmentDays ?? 1);
+    var nonMemberCloseDate = (activeClass.NonMemberEnrollmentStart ?? DateTime.UnixEpoch)
+        .AddDays(activeClass.NonMemberEnrollmentDays ?? 1);
     // Determine the latest close date (for members)
-    var AbsoluteClose = (NonMemberCloseDate > MemberCloseDate)
-        ? NonMemberCloseDate
-        : MemberCloseDate;
-    var MemberOpenDate = ActiveClass.MemberEnrollmentStart ?? DateTime.MaxValue;
-    var NonMemberOpenDate = ActiveClass.NonMemberEnrollmentStart ?? DateTime.MaxValue;
+    var absoluteClose = (nonMemberCloseDate > memberCloseDate)
+        ? nonMemberCloseDate
+        : memberCloseDate;
+    var memberOpenDate = activeClass.MemberEnrollmentStart ?? DateTime.MaxValue;
+    var nonMemberOpenDate = activeClass.NonMemberEnrollmentStart ?? DateTime.MaxValue;
     // Determine the earliest open date (for members)
-    var AbsoluteOpen = (NonMemberOpenDate < MemberOpenDate)
-        ? NonMemberOpenDate
-        : MemberOpenDate;
+    var absoluteOpen = (nonMemberOpenDate < memberOpenDate)
+        ? nonMemberOpenDate
+        : memberOpenDate;
 
     // Determine member/non-member ability to enroll in this class
-    var ThisUserCost = ActiveClass.NonMemberPrice;
+    var thisUserCost = activeClass.NonMemberPrice;
     if (LoggedIn.IsMember)
-        ThisUserCost = ActiveClass.MemberPrice;
-    var CanEnroll = ActiveClass.AllowNonMembers || LoggedIn.IsMember;
-
-    var UserEnrollment = (LoggedIn.Id == 0)
+        thisUserCost = activeClass.MemberPrice;
+    var canEnroll = activeClass.AllowNonMembers || LoggedIn.IsMember;
+    
+    var userEnrollment = (LoggedIn.Id == 0)
         ? new()
         : Classes.ClassEnrollment_GetByUserId(LoggedIn!.Id).Get()!;
-    var _IsEnrolled = UserEnrollment.Find((It) => It.ClassId == ActiveClass.Id) is not null;
+    var _isEnrolled = userEnrollment.Find((It) => It.ClassId == activeClass.Id) is not null;
 }
-@if (_IsEnrolled)
+@if (_isEnrolled)
 {
     @* DISPLAYED WHEN ALREADY ENROLLED IN CLASS *@
 
@@ -208,19 +208,19 @@
         <span style="padding-top: 0.3em;display: inline-block;">You are enrolled in this course!</span>
         <button class="btn btn-success"
             style="float: right;"
-            @onclick="() => DropModal!.Open()">Drop</button>
+            @onclick="() => dropModal!.Open()">Drop</button>
     </span>
-} else if (!ActiveClass.AllowEnrollment)
+} else if (!activeClass.AllowEnrollment)
 {
     @* DISPLAYED WHEN ENROLLMENT IS PAUSED *@
 
     <p>Enrollment is disabled at this time.</p>
 } else if (
-    (LoggedIn.IsMember && ActiveClass.MemberEnrollmentOpen)
-    || ActiveClass.NonMemberEnrollmentOpen
+    (LoggedIn.IsMember && activeClass.MemberEnrollmentOpen)
+    || activeClass.NonMemberEnrollmentOpen
 )
 {
-    if  ((ActiveClass.MaxSeats ?? 0) != 0 && SeatsTaken >= ActiveClass.MaxSeats)
+    if  ((activeClass.MaxSeats ?? 0) != 0 && seatsTaken >= activeClass.MaxSeats)
     { <span class="alert alert-warning">Sorry, all seats are taken for this course!</span>}
     else if ((LoggedIn?.Id ?? 0) == 0)
     { <span class="alert alert-secondary">Please log in to enroll in courses.</span> }
@@ -229,9 +229,9 @@
         @* DISPLAYED IF ALLOWED TO ENROLL AND OPEN *@
 
         <div class="col-sm-5">
-            @if ((ActiveClass.MaxSeats ?? 0) > 0)
+            @if ((activeClass.MaxSeats ?? 0) > 0)
             {
-                <span style="font-size: 1.3em;font-weight: bold;">@(ActiveClass.MaxSeats - SeatsTaken)</span>
+                <span style="font-size: 1.3em;font-weight: bold;">@(activeClass.MaxSeats - seatsTaken)</span>
                 <span style="font-size: 1.2em;">&nbsp;open seats!</span>
                 <br />
             }
@@ -239,9 +239,9 @@
             @if (!string.IsNullOrEmpty(Conflict))
             {
                 @* NO ENROLLMENT DISPLAY *@
-            } else if (CanEnroll)
+            } else if (canEnroll)
             {   
-                <p class="mt-2">Your price: <strong>$@string.Format("{0:0.00}", ThisUserCost)</strong></p>
+                <p class="mt-2">Your price: <strong>$@string.Format("{0:0.00}", thisUserCost)</strong></p>
                 <button class="btn btn-success mt-1 mb-1" @onclick=EnrollClick>Enroll</button>
             } else
             {
@@ -257,19 +257,19 @@
 } else if ((
     // Only check both windows if the logged in user is member
     LoggedIn.IsMember
-    && (ActiveClass.MemberEnrollmentStart != null || ActiveClass.NonMemberEnrollmentStart != null)
-    && DateTime.Now > AbsoluteClose
+    && (activeClass.MemberEnrollmentStart != null || activeClass.NonMemberEnrollmentStart != null)
+    && DateTime.Now > absoluteClose
 ) || (
     // For non-members, check only the non-member window
     !LoggedIn.IsMember
-    && ActiveClass.NonMemberEnrollmentStart != null
-    && DateTime.Now > NonMemberCloseDate
+    && activeClass.NonMemberEnrollmentStart != null
+    && DateTime.Now > nonMemberCloseDate
 ))
 {
     @* DISPLAYED WHEN ENROLLMENT WINDOW HAS ELAPSED *@
 
     <p>Enrollment closed on</p>
-    <h3>@((LoggedIn.IsMember ? AbsoluteClose : NonMemberCloseDate).ToLongDateString())</h3>
+    <h3>@((LoggedIn.IsMember ? absoluteClose : nonMemberCloseDate).ToLongDateString())</h3>
 } else
 {
     @* DISPLAYED WHEN ENROLLMENT IS NOT YET OPEN *@
@@ -280,12 +280,12 @@
     @if (LoggedIn.IsMember) { <span>members</span> }
     else { <span>non-members</span> }
     starting
-    @if (ActiveClass.MemberEnrollmentStart is null && ActiveClass.NonMemberEnrollmentStart is null)
+    @if (activeClass.MemberEnrollmentStart is null && activeClass.NonMemberEnrollmentStart is null)
     { <h3>TBA</h3> }
     else if (LoggedIn.IsMember)
-    { <h3>@(AbsoluteOpen.ToLongDateString())</h3> }
+    { <h3>@(absoluteOpen.ToLongDateString())</h3> }
     else
-    { <h3>@(ActiveClass.NonMemberEnrollmentStart?.ToLongDateString() ?? "TBA")</h3> }
+    { <h3>@(activeClass.NonMemberEnrollmentStart?.ToLongDateString() ?? "TBA")</h3> }
     
     </p>
 }
@@ -294,7 +294,7 @@
 @* CLASS FIRST WEEK SCHEDULE *@
 <h4 class="mt-2">Class Schedule</h4>
 <hr class="margin: 0;" />
-<ClassScheduler Class=ActiveClass ShowEditing=false @ref=Scheduler></ClassScheduler>
+<ClassScheduler Class=activeClass ShowEditing=false @ref=scheduler></ClassScheduler>
 
 </div>
 </div>
@@ -304,7 +304,7 @@
 </div>
 
 @* PAYMENT MODAL COMPONENT *@
-<PaymentModal @ref=PaymentScreen
+<PaymentModal @ref=paymentScreen
     PaymentCallback="(Id) =>
     {
         EnrollWithPayment(Id);
@@ -324,20 +324,20 @@
     [Parameter]
     public string Id { get; set; } = "";
 
-    protected ClassDBO ActiveClass { get; set; } = new();
-    private int SeatsTaken;
-    private PaymentModal? PaymentScreen;
-    private BsModal? DropModal;
-    private ClassScheduler? Scheduler;
+    protected ClassDBO activeClass { get; set; } = new();
+    private int seatsTaken;
+    private PaymentModal? paymentScreen;
+    private BsModal? dropModal;
+    private ClassScheduler? scheduler;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
         // Load open class from database
-        ActiveClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
+        activeClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
         // Count number of taken seats
-        SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
+        seatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
     }
 
     /// <summary>
@@ -349,19 +349,19 @@
         try
         {
             // Load both sets of sessions
-            var UserSchedule = Classes.ClassSchedule_GetByUserId(LoggedIn.Id).Get()!;
-            var ClassSchedule = Classes.ClassSchedule_List(ActiveClass.Id).Get()!;
+            var userSchedule = Classes.ClassSchedule_GetByUserId(LoggedIn.Id).Get()!;
+            var classSchedule = Classes.ClassSchedule_List(activeClass.Id).Get()!;
             // Iterate through class sessions
-            foreach (var Session in ClassSchedule)
+            foreach (var session in classSchedule)
             {
                 // Validate each against user schedule
-                ClassValidation.Validate(Session, UserSchedule);
+                ClassValidation.Validate(session, userSchedule);
             }
             return "";
-        } catch (Exception Ex)
+        } catch (Exception ex)
         {
             // Return exception message as validation warning
-            return Ex.Message;
+            return ex.Message;
         }
     }
 
@@ -371,12 +371,12 @@
     private void EnrollClick()
     {
         // Check what the user owes
-        var ThisUserCost = ActiveClass.NonMemberPrice;
+        var thisUserCost = activeClass.NonMemberPrice;
         if (LoggedIn.IsMember)
-            ThisUserCost = ActiveClass.MemberPrice;
+            thisUserCost = activeClass.MemberPrice;
         // Show modal if costs money, or just enroll
-        if (ThisUserCost > 0.0f)
-            PaymentScreen!.StartProcess(ThisUserCost);
+        if (thisUserCost > 0.0f)
+            paymentScreen!.StartProcess(thisUserCost);
         else
             EnrollWithPayment(null);
     }
@@ -384,14 +384,14 @@
     /// <summary>
     /// Completes the enrollment, associated with a possible payment.
     /// </summary>
-    /// <param name="PaymentId">ID of payment, or null for none.</param>
-    private void EnrollWithPayment(int? PaymentId)
+    /// <param name="paymentId">ID of payment, or null for none.</param>
+    private void EnrollWithPayment(int? paymentId)
     {
         // Count seats to ensure valid enrollment
-        SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
-        var UserEnrollment = Classes.ClassEnrollment_GetByUserId(LoggedIn!.Id).Get()!;
-        var _IsEnrolled = UserEnrollment.Find((It) => It.ClassId == ActiveClass.Id) is not null;
-        if ((ActiveClass.MaxSeats != 0 && SeatsTaken >= ActiveClass.MaxSeats) || _IsEnrolled)
+        seatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
+        var userEnrollment = Classes.ClassEnrollment_GetByUserId(LoggedIn!.Id).Get()!;
+        var _isEnrolled = userEnrollment.Find((It) => It.ClassId == activeClass.Id) is not null;
+        if ((activeClass.MaxSeats != 0 && seatsTaken >= activeClass.MaxSeats) || _isEnrolled)
         {
             // Bail out if can no longer enroll
             StateHasChanged();
@@ -399,8 +399,8 @@
         }
 
         // Perform enrollment and update state
-        Classes.Class_EnrollUser(ActiveClass.Id, LoggedIn!.Id, PaymentId);
-        SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
+        Classes.Class_EnrollUser(activeClass.Id, LoggedIn!.Id, paymentId);
+        seatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
         StateHasChanged();
     }
 
@@ -411,10 +411,10 @@
     private async Task<bool> DropDialogSubmit() => await Task.Run(() =>
     {
         // Drop the user from the class
-        var Result = Classes.Class_DropUser(ActiveClass.Id, LoggedIn!.Id);
+        var result = Classes.Class_DropUser(activeClass.Id, LoggedIn!.Id);
         // Recalculate taken seats
-        SeatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
+        seatsTaken = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!.Count;
         InvokeAsync(() => StateHasChanged());
-        return Result.Success;
+        return result.Success;
     });
 }

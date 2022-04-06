@@ -163,7 +163,7 @@
     {
         <hr style="margin-top: 0;" />
     } @* ELSE ... DISPLAY ALL UNDELETED SCHEDULE ON DAY *@
-    @foreach (var Sched in onDay.FindAll((It) => !DeleteIds!.Contains(It.Id ?? -2)))
+    @foreach (var sched in onDay.FindAll((It) => !DeleteIds!.Contains(It.Id ?? -2)))
     {
         <hr style="margin-top: 0;margin-bottom: 5px;" />
 
@@ -172,37 +172,37 @@
         {
             <i class="oi oi-pencil ms-1"
                 style="float: right;cursor: pointer;"
-                @onclick = "() => OpenAddEdit(Sched)" />
+                @onclick = "() => OpenAddEdit(sched)" />
         }
 
         @* SHOW OR HIDE CLASS TITLE/LINK *@
         @if (DisplayClassTitles)
         {
             @* SHOWING TITLES SHOWS SMALLER RECURRENCE INDICATOR *@
-            @if (Sched.Recurrence > 0)
+            @if (sched.Recurrence > 0)
             {
                 <i class="oi oi-loop-square" style="float: right;"
-                    title="Repeats every @Sched.Recurrence days, @(Sched.Occurrences == 0 ? "indefinitely" : $"{Sched.Occurrences} times")." />
+                    title="Repeats every @sched.Recurrence days, @(sched.Occurrences == 0 ? "indefinitely" : $"{sched.Occurrences} times")." />
             }
 
             @* CLASS NAME LINK TO ENROLL *@
-            <a href="Enroll/@Sched.ClassId"><strong>@(Sched.ClassName)</strong></a>
+            <a href="Enroll/@sched.ClassId"><strong>@(sched.ClassName)</strong></a>
         }
 
         @* CALCULATED BEGIN AND END TIMES *@
         <p>
-            @Sched.FirstDate.ToShortTimeString()&nbsp;-
-            @Sched.FirstDate.AddMinutes(Sched.Duration).ToShortTimeString()
+            @sched.FirstDate.ToShortTimeString()&nbsp;-
+            @sched.FirstDate.AddMinutes(sched.Duration).ToShortTimeString()
         </p>
 
         <p>
             @* DISPLAY LONGER RECURRENCE DATA IF NO TITLES *@
             @if (!DisplayClassTitles)
             {
-                @if (Sched.Recurrence <= 0)
+                @if (sched.Recurrence <= 0)
                 {
                     <i class="oi oi-loop-square" /><i>Never</i>
-                } else if (Sched.Occurrences <= 0)
+                } else if (sched.Occurrences <= 0)
                 {
                     <i class="oi oi-loop-square" /><i>Forever</i>
                 } else
@@ -210,7 +210,7 @@
                     <i class="oi oi-loop-square" />
                     <i>
                         Until
-                        @(Sched.FirstDate.Date.AddDays(Sched.Recurrence * Sched.Occurrences).ToShortDateString())
+                        @(sched.FirstDate.Date.AddDays(sched.Recurrence * sched.Occurrences).ToShortDateString())
                     </i>
                 }
             }

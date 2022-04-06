@@ -21,12 +21,14 @@
 
 <PageTitle>Login</PageTitle>
 
-@if (!string.IsNullOrEmpty(ValidationMessage))
+@* DISPLAY VALIDATION ERROR IF EXISTS *@
+@if (!string.IsNullOrEmpty(validationMessage))
 {
-    <div class="alert alert-danger">@ValidationMessage</div>
+    <div class="alert alert-danger">@validationMessage</div>
 }
 
-@if(string.IsNullOrEmpty(ErrorMessage))
+@* DISPLAY UI IF ERROR IS BLANK *@
+@if(string.IsNullOrEmpty(errorMessage))
 {
     <h2>Login</h2>
 
@@ -35,29 +37,38 @@
         Please provide your credentials to log in.
     </p>
         
-    <EditForm Model=FormBind>
+    <EditForm Model=formBind>
 
+    @* USER EMAIL ("USERNAME") FIELD *@
     <label>Email:</label>
     <InputText class="form-control mb-2"
         type="text"
-        @bind-Value=FormBind.Email />
+        @bind-Value=formBind.Email />
 
+    @* USER PASSWORD FIELD *@
     <label>Password:</label>
     <InputText class="form-control"
         type="password" 
-        @bind-Value=FormBind.Password />
+        @bind-Value=formBind.Password />
 
+    @* PASSWORD RESET LINK *@
     <a href="SiteUser/RequestPasswordResetFlow" style="margin-top: 2em;color: black;float: right;">Forgot password?</a>
+    @* LOG IN BUTTON *@
     <button class="btn btn-primary mt-4 me-2" type="submit" @onclick=SubmitLogin>Log In</button>
+    @* REGISTER LINK *@
     <a class="btn btn-secondary mt-4" type="button" href="SiteUser/RegisterFlow">Register</a>
     
     </EditForm>
 } else
 {
-    <div class="alert alert-danger">@ErrorMessage</div>
+    @* DISPLAY ERROR MESSAGE IF EXISTS *@
+    <div class="alert alert-danger">@errorMessage</div>
 }
 
 @code {
+    /// <summary>
+    /// Layout of bound form data.
+    /// </summary>
     private class FormBinding
     {
         [Required]
@@ -67,34 +78,44 @@
         public string Password = "";
     }
 
-    private FormBinding FormBind = new();
-    private string ErrorMessage = "";
-    private string ValidationMessage = "";
+    /// <summary>
+    /// Form-bound object instance.
+    /// </summary>
+    private FormBinding formBind = new();
 
+    private string errorMessage = "";
+    private string validationMessage = "";
+
+    /// <summary>
+    /// Attempts to log in with the provided user details.
+    /// </summary>
     private void SubmitLogin()
     {
-        if (string.IsNullOrEmpty(FormBind.Email)
-            || string.IsNullOrEmpty(FormBind.Password)
+        // Validate provided details
+        if (string.IsNullOrEmpty(formBind.Email)
+            || string.IsNullOrEmpty(formBind.Password)
         )
         {
-            ValidationMessage = "Please provide all the login details.";
+            validationMessage = "Please provide all the login details.";
             return;
         }
+        // Attempt the login authentication
+        var result = SiteUsers.SiteUser_Authenticate(formBind.Email, formBind.Password.CalculateSha512());
 
-        var Result = SiteUsers.SiteUser_Authenticate(FormBind.Email, FormBind.Password.CalculateSha512());
-
-        if (Result.Success)
+        if (result.Success)
         {
-            var _AuthState = AuthState as AuthStateProvider;
-            _AuthState!.LogIn(FormBind.Email, FormBind.Password);
+            // Set auth state logged in
+            var _authState = AuthState as AuthStateProvider;
+            _authState!.LogIn(formBind.Email, formBind.Password);
+            // Save tokens in local storage
+            ProtectedStorage.SetAsync("SessionName", formBind.Email);
+            ProtectedStorage.SetAsync("SessionKey", formBind.Password);
 
-            ProtectedStorage.SetAsync("SessionName", FormBind.Email);
-            ProtectedStorage.SetAsync("SessionKey", FormBind.Password);
-
+            // Returns to home page
             Nav.NavigateTo(Nav.BaseUri);
         } else
         {
-            ValidationMessage = Result.Error!;
+            validationMessage = result.Error!;
         }
     }
 }
