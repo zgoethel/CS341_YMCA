@@ -12,16 +12,18 @@ BEGIN
 	SET NOCOUNT ON;
 
 	-- Get all schedule records associated with the class
-	SELECT
-		[Id],
+	SELECT cs.[Id],
 		[ClassId],
 		[FirstDate],
 		[Recurrence],
 		[Duration],
-		[Created],
-		[Updated],
-		[Occurrences]
-	FROM [ClassSchedule]
+		cs.[Created],
+		cs.[Updated],
+		[Occurrences],
+		cm.[ClassName],
+		cm.[ShortDescription]
+	FROM [ClassSchedule] cs
+	LEFT JOIN [ClassMain] cm on cm.Id = [ClassId]
 	WHERE
 		[ClassId] = @ClassId
 	ORDER BY [FirstDate];

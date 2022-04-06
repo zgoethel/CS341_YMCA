@@ -7,14 +7,19 @@
 @inject IJSRuntime Js
 
 <h3 style="white-space: break-spaces;">
-    @foreach (var Item in Selected)
+
+    @* SHOW SELECTED ITEMS IN CSV *@
+    @foreach (var Item in selected)
     {
         <span class="badge bg-secondary me-2 mt-2">
             @Item&nbsp;
+
+            @* ITEM DELETE BUTTON *@
             <i class="oi oi-trash" @onclick="() => { OnRemoveClick(Item); }" style="cursor: pointer;"></i>
         </span>
     }
 
+    @* "ADD" SELECT DROPDOWN *@
     <select class="form-control return-to-n1"
         @onchange="(Event) =>
         {
@@ -22,28 +27,36 @@
         }"
         style="width:5em;display: inline-block;padding-bottom: 0.2em;">
         
+        @* HIDDEN DEFAULT FOR DISPLAY *@
         <option value="-1" selected hidden>Add +</option>
+        @* CONTROL OPTION FOR ADDING NEW CSV ITEM *@
         <option value="-2">Create new code</option>
-        @foreach (var Option in NotSelected)
+
+        @* ADD IN ITEMS FROM LIST *@
+        @foreach (var Option in notSelected)
         {
             <option value=@Option>@Option</option>
         }
     </select>
 </h3>
 
-<BsModal @ref=AddCodeModal
+@* ADD CODE MODAL FOR CREATING CSV ENTRY *@
+<BsModal @ref=addCodeModal
     SubmitAction=AddCodeSubmit>
 
     <Title>Add a new requirement code</Title>
     <Body>
 
-    <EditForm Model=_Bind>
-        
-    @if (!string.IsNullOrEmpty(ValidationMessage))
+    <EditForm Model=formBind>
+    
+    @* DISPLAY VALIDATION MESSAGE IF IT EXISTS*@
+    @if (!string.IsNullOrEmpty(validationMessage))
     {
-        <div class="alert alert-danger">@ValidationMessage</div>
+        <div class="alert alert-danger">@validationMessage</div>
     }
-    <InputText class="form-control" @bind-Value=_Bind.Value />
+
+    @* CODE INPUT FIELD *@
+    <InputText class="form-control" @bind-Value=formBind.Value />
     <span><i>(Use alphanumeric characters)</i></span>
 
     </EditForm>
@@ -52,50 +65,82 @@
 
 @code
 {
+    /// <summary>
+    /// Layout of bound form data.
+    /// </summary>
     private class BindModel
     {
         public string Value { get; set; } = "";
     }
-    private BindModel _Bind = new();
 
+    /// <summary>
+    /// Form-bound object instance.
+    /// </summary>
+    private BindModel formBind = new();
+
+    /// <summary>
+    /// Initially selected CSV for the items.
+    /// </summary>
     [Parameter]
     public string? Csv { get; set; }
+
+    /// <summary>
+    /// Items to ignore entirely from the options (e.g., a class shouldn't
+    /// require itself).
+    /// </summary>
     [Parameter]
     public List<string> Exclude { get; set; } = new();
+
+    /// <summary>
+    /// Items from which to select (strings).
+    /// </summary>
     [Parameter]
     public List<string> Items { get; set; } = new();
+
+    /// <summary>
+    /// Called when an item is selected with the name of the item.
+    /// </summary>
     [Parameter]
     public Action? Callback { get; set; }
 
-    public List<string> Selected = new();
-    private List<string> NotSelected = new();
-    private string ValidationMessage = "";
-    private BsModal? AddCodeModal;
+    public List<string> selected = new();
+    private List<string> notSelected = new();
+    private string validationMessage = "";
+    private BsModal? addCodeModal;
 
+    /// <summary>
+    /// Called when the modal is submitted to create a new code.
+    /// </summary>
+    /// <returns>Whether the modal should close.</returns>
     private async Task<bool> AddCodeSubmit() => await Task.Run(() =>
     {
-        if (!Regex.IsMatch(_Bind.Value, "^[A-Za-z0-9]+$"))
+        // Check format of provided item
+        if (!Regex.IsMatch(formBind.Value, "^[A-Za-z0-9]+$"))
         {
-            ValidationMessage = "Please enter an alphanumeric class code.";
+            validationMessage = "Please enter an alphanumeric class code.";
             InvokeAsync(() => StateHasChanged());
 
             return false;
         }
+        // Convert to upper case for consistency
+        var _upper = formBind.Value.ToUpper();
 
-        var _Upper = _Bind.Value.ToUpper();
-
-        if (Selected.Contains(_Upper))
+        // Don't do anythin gif the item is already selected
+        if (selected.Contains(_upper))
         {
             return false;
         }
+        // Add to selected list
+        selected.Add(_upper);
+        // Remove from not-selected list
+        if (notSelected.Contains(_upper)) notSelected.Remove(_upper);
 
-        Selected.Add(_Upper);
-        if (NotSelected.Contains(_Upper)) NotSelected.Remove(_Upper);
+        // Reset modal state
+        validationMessage = "";
+        formBind.Value = "";
+        // Regenerate item CSV from selected list
+        Csv = String.Join(',', selected);
 
-        ValidationMessage = "";
-        _Bind.Value = "";
-        Csv = String.Join(',', Selected);
-        
         InvokeAsync(() => StateHasChanged());
 
         return true;
@@ -103,41 +148,55 @@
 
     protected override void OnInitialized()
     {
-        var _Selected = Csv!.Split(",").ToHashSet();
-        Selected = Items.FindAll((It) => _Selected.Contains(It) && !Exclude.Contains(It));
-        NotSelected = Items.FindAll((It) => !_Selected.Contains(It) && !Exclude.Contains(It));
+        base.OnInitialized();
+
+        // Convert selected list to hash set for "contains" checks
+        var _selected = Csv!.Split(",").ToHashSet();
+        // Create selected/not-selected lists
+        selected = Items.FindAll((It) => _selected.Contains(It) && !Exclude.Contains(It));
+        notSelected = Items.FindAll((It) => !_selected.Contains(It) && !Exclude.Contains(It));
     }
 
-    private void OnRemoveClick(string Item)
+    /// <summary>
+    /// Removes the provided item from the set of selected items.
+    /// </summary>
+    /// <param name="item">CSV item to remove from the selected list.</param>
+    private void OnRemoveClick(string item)
     {
-        Selected.Remove(Item);
-        NotSelected.Add(Item);
-        Csv = string.Join(',', Selected);
+        selected.Remove(item);
+        notSelected.Add(item);
+        // Regenerate CSV from selected list
+        Csv = string.Join(',', selected);
 
         StateHasChanged();
+        // Notify parent of update
         if (Callback != null) Callback();
     }
-
-    private void OnAddSelectorChange(string Item)
+    
+    /// <summary>
+    /// Adds an item to the set of selected items or performs an action.
+    /// </summary>
+    /// <param name="item">CSV item to ad to the selected list.</param>
+    private void OnAddSelectorChange(string item)
     {
-        if (Item == "-1") return;
-        if (Item == "-2")
+        // Handle special actions (-1 = ignore)
+        if (item == "-1") return;
+        // (-2 = open create modal)
+        if (item == "-2")
+            addCodeModal!.Open();
+        else
         {
-            AddCodeModal!.Open();
-
-            Js.InvokeVoidAsync("ReturnSelects");
-            StateHasChanged();
-            if (Callback != null) Callback();
-
-            return;
+            // Normal behavior; add item to list
+            selected.Add(item);
+            notSelected.Remove(item);
+            // Regenerate CSV from selected list
+            Csv = string.Join(',', selected);
         }
 
-        Selected.Add(Item);
-        NotSelected.Remove(Item);
-        Csv = string.Join(',', Selected);
-
-        Js.InvokeVoidAsync("ReturnSelects");
+        // Resets the selector to "Add +"
+        Js.InvokeVoidAsync("InteropImpl.returnSelectsToZero");
         StateHasChanged();
+        // Notify parent of update
         if (Callback != null) Callback();
     }
 }

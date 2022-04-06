@@ -12,15 +12,19 @@ BEGIN
 	SET NOCOUNT ON;
 
 	-- Fetch all payments associated with the user's ID
-	SELECT
-		[UserId],
+	SELECT sup.[Id],
+		sup.[UserId],
 		[Amount],
 		[CardNumber],
 		[SecurityCode],
 		[PostalCode],
 		[HolderName],
-		[CardExpiry]
-	FROM [SiteUserPayments]
+		[CardExpiry],
+		[Paid],
+		cm.[ClassName] AS [Item]
+	FROM [SiteUserPayments] sup
+	LEFT JOIN [ClassEnrollment] ce ON ce.[PaymentId] = sup.[Id]
+	LEFT JOIN [ClassMain] cm ON cm.Id = ce.ClassId
 	WHERE
-		[UserId] = @UserId;
+		sup.[UserId] = @UserId;
 END

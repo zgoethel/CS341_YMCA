@@ -11,15 +11,19 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
-	SELECT [Id],
-		[UserId],
+	SELECT sup.[Id],
+		sup.[UserId],
 		[Amount],
 		[CardNumber],
 		[SecurityCode],
 		[PostalCode],
 		[HolderName],
-		[CardExpiry]
-	FROM [SiteUserPayments]
+		[CardExpiry],
+		[Paid],
+		cm.[ClassName] AS [Item]
+	FROM [SiteUserPayments] sup
+	LEFT JOIN [ClassEnrollment] ce ON ce.[PaymentId] = sup.[Id]
+	LEFT JOIN [ClassMain] cm ON cm.Id = ce.ClassId
 	WHERE
-		[Id] = @Id;
+		sup.[Id] = @Id;
 END

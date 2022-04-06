@@ -97,6 +97,8 @@ public class UserPaymentDBO
     public DateTime CardExpiry { get; set; }
     public int PostalCode { get; set; }
     public string HolderName { get; set; } = "";
+    public DateTime Paid { get; set; }
+    public string? Item { get; set; }
 }
 
 public class UserPaymentEnterResult
@@ -174,6 +176,8 @@ public class ClassScheduleDBO
     public int Recurrence { get; set; }
     public int Duration { get; set; }
     public int Occurrences { get; set; }
+    public string ClassName { get; set; } = "";
+    public string ShortDescription { get; set; } = "";
 }
 
 public class ClassScheduleSetRequest
@@ -222,6 +226,12 @@ public class ClassEnrollmentDBO
     public int? PaymentId { get; set; }
     public DateTime EnrolledDate { get; set; }
     public bool? PassedYN { get; set; }
+    public string ClassName { get; set; } = "";
+    public string ShortDescription { get; set; } = "";
+    public string FirstName { get; set; } = "";
+    public string? LastName { get; set; }
+    public string Email { get; set; } = "";
+    public bool IsMember { get; set; }
 }
 
 #endregion

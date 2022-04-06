@@ -4,65 +4,78 @@
 
 @inject ClassRepository Classes
 
-@if(!string.IsNullOrEmpty(ValidationMessage))
+@if(!string.IsNullOrEmpty(validationMessage))
 {
     <div class="alert alert-warning">
-        @ValidationMessage
+        @validationMessage
     </div>
 }
 
-@if (HasMoreRight)
+@if (hasMoreRight)
 {
+
+    @* "MORE TO RIGHT" HINT BUTTON *@
     <h4 class="ms-4 me-4 text-info"
         style="float: right;cursor: pointer;"
         @onclick="() =>
         {
-            WeekStart = WeekStart.AddDays(7);
-            HasMoreRight = false;
+            weekStart = weekStart.AddDays(7);
+            hasMoreRight = false;
             StateHasChanged();
         }">
     <span class="badge bg-info" style="display: inline;">MORE</span>
     <i class="ms-2 oi oi-chevron-right" /></h4>
+
 } else
 {
+    @* NEXT PAGE BUTTON *@
     <h4 class="ms-4 me-4"
         style="float: right;cursor: pointer;">
     <i class="oi oi-chevron-right"
         style="cursor: pointer;"
-        @onclick="() => { WeekStart = WeekStart.AddDays(7 * NumWeeks); }"
+        @onclick="() => { weekStart = weekStart.AddDays(7 * NumWeeks); }"
     /></h4>
 }
 
+@* LAST PAGE BUTTON *@
 <h4 class="mt-1 me-4">
 <i class="oi oi-chevron-left"
     style="cursor: pointer;"
-    @onclick="() => { WeekStart = WeekStart.AddDays(-7 * NumWeeks); }"
+    @onclick="() => { weekStart = weekStart.AddDays(-7 * NumWeeks); }"
 />
-    Week of @WeekStart.ToLongDateString().Replace("Sunday, ", "")
+@* WEEK TITLE *@
+    Week of @weekStart.ToLongDateString().Replace("Sunday, ", "")
 </h4>
 
 @{
+    // List of weekday labels
     string[] _Days = { "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa" };
 }
-
+@* ITERATE THROUGH WEEKS (DEFAULT 1) *@
 @for (int k = 0; k < NumWeeks; k++)
 {
 <div class="_col-no-margin mt-1">
+    @* ITERATE THROUGH DAYS (7) *@
     @for (int j = 0; j < 7; j++)
     {
         <div style="width: 14%;" class="col">
+
+            @* DISPLAY DAY LABELS ON FIRST ROW ONLY *@
             @if (k == 0) { <h3>@_Days[j]</h3> }
+
+            @* CLASS SCHEDULE DAY COMPONENT *@
             <ClassScheduleDay Class=@Class
-                Schedule=@Schedule
-                Date=@WeekStart.AddDays(k * 7 + j)
+                Schedule=@schedule
+                Date=@weekStart.AddDays(k * 7 + j)
                 ShowEditing=ShowEditing
                 UpdateCallback="() =>
                 {
                     InvokeAsync(() => StateHasChanged());
                 }"
                 DisplayClassTitles=DisplayClassTitles
-                DeleteIds=DeleteIds
+                DeleteIds=deleteIds
             />
+
         </div>
     }
 </div>
@@ -70,12 +83,24 @@
 
 @code
 {
+    /// <summary>
+    /// Class open in the scheduler.
+    /// </summary>
     [Parameter]
     public ClassDBO Class { get; set; } = new();
+
+    /// <summary>
+    /// Whether to show editing controls or just view.
+    /// </summary>
     [Parameter]
     public bool ShowEditing { get; set; } = false;
+
+    /// <summary>
+    /// Number of weeks to display (default 1).
+    /// </summary>
     [Parameter]
     public int NumWeeks { get; set; } = 1;
+
     // Following flags are specific to read-only mode
     [Parameter]
     public int DisplayUserSched { get; set; } = 0;
@@ -84,24 +109,30 @@
     [Parameter]
     public bool OverrideDateFocus { get; set; } = false;
 
-    public List<ClassScheduleDBO> Schedule = new();
-    private string ValidationMessage = "";
-    private DateTime WeekStart = DateTime.Today;
-    private bool HasMoreRight = false;
-    private List<int> DeleteIds = new();
+    public List<ClassScheduleDBO> schedule = new();
+    private string validationMessage = "";
+    private DateTime weekStart = DateTime.Today;
+    private bool hasMoreRight = false;
+    private List<int> deleteIds = new();
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        Schedule = (DisplayUserSched == 0)
+        // Pick different schedule subsets depending on flag
+        schedule = (DisplayUserSched == 0)
+            // Choose class schedule if not for user's schedule
             ? Classes.ClassSchedule_List(Class!.Id).Get()!
+            // Choose user's schedule based on enrollment
             : Classes.ClassSchedule_GetByUserId(DisplayUserSched).Get()!;
 
-        var _WeekStart = Schedule.FirstOrDefault()?.FirstDate ?? DateTime.Today;
-        if (OverrideDateFocus) _WeekStart = DateTime.Today;
-        var Offset = -(int)_WeekStart.DayOfWeek;
-        WeekStart = _WeekStart.AddDays(Offset);
+        // Attempt to target the calendar to the week of class start
+        var _weekStart = schedule.FirstOrDefault()?.FirstDate ?? DateTime.Today;
+        // If overridden, show this week
+        if (OverrideDateFocus) _weekStart = DateTime.Today;
+        // Reset the date to the Sunday of the same week
+        var offset = -(int)_weekStart.DayOfWeek;
+        weekStart = _weekStart.AddDays(offset);
 
         @*
         HasMoreRight = Schedule.Find((It) =>
@@ -111,33 +142,30 @@
         *@
     } 
 
+    /// <summary>
+    /// Saves all schedule entries and actually deletes soft deleted records.
+    /// </summary>
     public void Save()
     {
-        Classes.ClassSchedule_DeleteByIds(string.Join(',', DeleteIds.Select((It) => It.ToString()))).Get();
+        // Delete all schedule entries in CSV
+        Classes.ClassSchedule_DeleteByIds(string.Join(',', deleteIds.Select((It) => It.ToString()))).Get();
 
-        foreach (var Session in Schedule)
+        // Save each session individually
+        foreach (var session in schedule)
         {
             // Remove bogus IDs from new entities
-            if (Session.Id < 0) Session.Id = null;
+            if (session.Id < 0) session.Id = null;
             var Result = Classes.ClassSchedule_Set(
-                Id: Session.Id,
+                Id: session.Id,
                 ClassId: Class.Id,
-                FirstDate: Session.FirstDate,
-                Recurrence: Session.Recurrence,
-                Occurrences: Session.Occurrences,
-                Duration: Session.Duration
+                FirstDate: session.FirstDate,
+                Recurrence: session.Recurrence,
+                Occurrences: session.Occurrences,
+                Duration: session.Duration
             );
-
-            Session.Id = Result.Get()!;
+            // Write back created (or returned) ID
+            session.Id = Result.Get()!;
         }
-    }
-
-    private void OnAddClick()
-    {
-        var Created = new ClassScheduleDBO();
-        Schedule.Add(Created);
-
-        StateHasChanged();
     }
 }
 
