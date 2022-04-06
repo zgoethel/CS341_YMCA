@@ -92,18 +92,27 @@
     private string ErrorMessage = "";
     private bool IsOpen = false;
 
+    /// <summary>
+    /// Displays the modal component by rendering its static content.
+    /// </summary>
     public void Open()
     {
         IsOpen = true;
         InvokeAsync(() => StateHasChanged());
     }
 
+    /// <summary>
+    /// Hides the modal component by removing its static content.
+    /// </summary>
     public void Close()
     {
         IsOpen = false;
         InvokeAsync(() => StateHasChanged());
     }
 
+    /// <summary>
+    /// Invokes the submit action and closes the modal if requested.
+    /// </summary>
     public async void Submit()
     {
         var ShouldClose = SubmitAction is null
@@ -112,6 +121,9 @@
         if (ShouldClose) Close();
     }
 
+    /// <summary>
+    /// Invokes the cancel action and closes the modal if requested.
+    /// </summary>
     public async void Cancel()
     {
         var ShouldClose = CancelAction is null
@@ -120,6 +132,10 @@
         if (ShouldClose) Close();
     }
 
+    /// <summary>
+    /// Displays an error or validation message in the modal body.
+    /// </summary>
+    /// <param name="Message">Error message which is displayed.</param>
     public void Error(string Message)
     {
         this.ErrorMessage = Message;
