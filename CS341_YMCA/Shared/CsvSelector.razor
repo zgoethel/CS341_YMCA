@@ -95,7 +95,7 @@
         ValidationMessage = "";
         _Bind.Value = "";
         Csv = String.Join(',', Selected);
-        
+
         InvokeAsync(() => StateHasChanged());
 
         return true;
@@ -122,21 +122,15 @@
     {
         if (Item == "-1") return;
         if (Item == "-2")
-        {
             AddCodeModal!.Open();
-
-            Js.InvokeVoidAsync("ReturnSelects");
-            StateHasChanged();
-            if (Callback != null) Callback();
-
-            return;
+        else
+        {
+            Selected.Add(Item);
+            NotSelected.Remove(Item);
+            Csv = string.Join(',', Selected);
         }
 
-        Selected.Add(Item);
-        NotSelected.Remove(Item);
-        Csv = string.Join(',', Selected);
-
-        Js.InvokeVoidAsync("ReturnSelects");
+        Js.InvokeVoidAsync("InteropImpl.returnSelectsToZero");
         StateHasChanged();
         if (Callback != null) Callback();
     }

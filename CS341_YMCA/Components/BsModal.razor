@@ -1,13 +1,15 @@
 ﻿@using CS341_YMCA.Helpers
 @using CS341_YMCA.Services
 
-@if (IsOpen)
+@* ONLY RENDER HTML WHEN OPEN *@
+@if (isOpen)
 {
     <div class="modal fade show" style="display: block;background-color: rgba(10, 10, 10, 0.8);">
     <div class="modal-dialog">
     <div class="modal-content">
 
     <div class="modal-header">
+        @* RENDER ONLY NON-NULL SECTIONS *@
         @if (Header is not null)
         { @Header }
         @if (Title is not null)
@@ -16,8 +18,8 @@
         { <button type="button" class="btn btn-close close" @onclick=Cancel></button> }
     </div>
     <div class="modal-body">
-        @if (!string.IsNullOrEmpty(ErrorMessage))
-        { <div class="alert alert-warning">@ErrorMessage</div> }
+        @if (!string.IsNullOrEmpty(errorMessage))
+        { <div class="alert alert-warning">@errorMessage</div> }
         @if (Body is not null)
         { @Body }
     </div>
@@ -89,15 +91,15 @@
     [Parameter]
     public Func<Task<bool>>? CancelAction { get; set; }
 
-    private string ErrorMessage = "";
-    private bool IsOpen = false;
+    private string errorMessage = "";
+    private bool isOpen = false;
 
     /// <summary>
     /// Displays the modal component by rendering its static content.
     /// </summary>
     public void Open()
     {
-        IsOpen = true;
+        isOpen = true;
         InvokeAsync(() => StateHasChanged());
     }
 
@@ -106,7 +108,7 @@
     /// </summary>
     public void Close()
     {
-        IsOpen = false;
+        isOpen = false;
         InvokeAsync(() => StateHasChanged());
     }
 
@@ -138,7 +140,7 @@
     /// <param name="Message">Error message which is displayed.</param>
     public void Error(string Message)
     {
-        this.ErrorMessage = Message;
+        this.errorMessage = Message;
         InvokeAsync(() => StateHasChanged());
     }
 }

@@ -95,7 +95,7 @@
         }
         // Validate the date format; some browsers (Firefox) don't seem to
         // have month pickers built in
-        var ExprDateVal = await Js.InvokeAsync<string>("GetInputVal", "PaymentCardExpiry");
+        var ExprDateVal = await Js.InvokeAsync<string>("InteropImpl.getInputValue", "PaymentCardExpiry");
         if (!Regex.IsMatch(ExprDateVal, "^[0-9]{4}-[0-9]{2}$"))
         {
             Modal!.Error("Please provide the expiration date in the form YYYY-MM.");
