@@ -166,8 +166,8 @@ public class ClassSetRequest
     public bool? AllowNonMembers { get; set; } = false;
     public DateTime? NonMemberEnrollmentStart { get; set; }
     public int? NonMemberEnrollmentDays { get; set; }
-    public float? MemberPrice { get; set; }
-    public float? NonMemberPrice { get; set; }
+    public decimal? MemberPrice { get; set; }
+    public decimal? NonMemberPrice { get; set; }
     public string? Location { get; set; }
     public int? MaxSeats { get; set; }
     public string? FulfillCsv { get; set; }
@@ -209,8 +209,8 @@ public class ClassDBO
     public bool AllowNonMembers { get; set; } = false;
     public DateTime? NonMemberEnrollmentStart { get; set; }
     public int? NonMemberEnrollmentDays { get; set; }
-    public float MemberPrice { get; set; } = 0.0f;
-    public float NonMemberPrice { get; set; } = 0.0f;
+    public decimal MemberPrice { get; set; } = 0.0m;
+    public decimal NonMemberPrice { get; set; } = 0.0m;
     public string? Location { get; set; }
     public int? MaxSeats { get; set; }
     public bool MemberEnrollmentOpen { get; set; }

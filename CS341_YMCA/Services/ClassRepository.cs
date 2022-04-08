@@ -35,13 +35,12 @@ public class ClassRepository : Controller
         DateTime? NonMemberEnrollmentStart = null,
         int? NonMemberEnrollmentDays = null,
         bool? AllowNonMembers = null,
-        float? MemberPrice = null,
-        float? NonMemberPrice = null,
+        decimal? MemberPrice = null,
+        decimal? NonMemberPrice = null,
         string? Location = null,
         int? MaxSeats = null,
         string? FulfillCsv = null,
-        string? RequireCsv = null
-    )
+        string? RequireCsv = null)
     {
         ResultToken<int> Result = new();
 
@@ -90,8 +89,7 @@ public class ClassRepository : Controller
     /// </summary>
     public ResultToken<List<ClassDBO>> Class_List(
         string? NameFilter = null,
-        bool? IncludeDisabled = null
-    )
+        bool? IncludeDisabled = null)
     {
         var Result = new ResultToken<List<ClassDBO>>
         {
@@ -127,8 +125,7 @@ public class ClassRepository : Controller
     /// Gets class data associated with an ID.
     /// </summary>
     public ResultToken<ClassDBO> Class_GetById(
-        int Id
-    )
+        int Id)
     {
         ResultToken<ClassDBO> Result = new();
 
@@ -166,8 +163,7 @@ public class ClassRepository : Controller
     /// Gets class data associated with IDs as CSV.
     /// </summary>
     public ResultToken<List<ClassDBO>> Class_GetByIds(
-        string Csv
-    )
+        string Csv)
     {
         ResultToken<List<ClassDBO>> Result = new();
         Result.Value = new();
@@ -200,8 +196,7 @@ public class ClassRepository : Controller
     /// Lists a class' schedule sessions according to class ID.
     /// </summary>
     public ResultToken<List<ClassScheduleDBO>> ClassSchedule_List(
-        int ClassId
-    )
+        int ClassId)
     {
         var Result = new ResultToken<List<ClassScheduleDBO>>
         {
@@ -241,8 +236,7 @@ public class ClassRepository : Controller
         DateTime? FirstDate = null,
         int? Recurrence = null,
         int? Occurrences = null,
-        int? Duration = null
-    )
+        int? Duration = null)
     {
         ResultToken<int> Result = new();
 
@@ -279,8 +273,7 @@ public class ClassRepository : Controller
     /// Deletes the class with specified ID from the ClassMain table.
     /// </summary>
     public ResultToken<object> Class_DeleteById(
-        int Id
-    )
+        int Id)
     {
         ResultToken<object> Result = new();
 
@@ -349,8 +342,7 @@ public class ClassRepository : Controller
     /// </summary>
     public ResultToken<object> Class_DropUser(
         int ClassId,
-        int UserId
-    )
+        int UserId)
     {
         ResultToken<object> Result = new();
 
@@ -383,8 +375,7 @@ public class ClassRepository : Controller
     public ResultToken<object> Class_EnrollUser(
         int ClassId,
         int UserId,
-        int? PaymentId = null
-    )
+        int? PaymentId = null)
     {
         ResultToken<object> Result = new();
 
@@ -416,8 +407,7 @@ public class ClassRepository : Controller
     /// Retrieve all active enrollment records for a single class.
     /// </summary>
     public ResultToken<List<ClassEnrollmentDBO>> ClassEnrollment_GetByClassId(
-        int ClassId
-    )
+        int ClassId)
     {
         ResultToken<List<ClassEnrollmentDBO>> Result = new();
         Result.Value = new();
@@ -448,8 +438,7 @@ public class ClassRepository : Controller
     /// Retrieves the set of enrollment history associated to a specific user.
     /// </summary>
     public ResultToken<List<ClassEnrollmentDBO>> ClassEnrollment_GetByUserId(
-        int UserId
-    )
+        int UserId)
     {
         ResultToken<List<ClassEnrollmentDBO>> Result = new();
         Result.Value = new();
@@ -480,8 +469,7 @@ public class ClassRepository : Controller
     /// Gets all schedule sessions for all classes in which the user is enrolled.
     /// </summary>
     public ResultToken<List<ClassScheduleDBO>> ClassSchedule_GetByUserId(
-        int UserId
-    )
+        int UserId)
     {
         ResultToken<List<ClassScheduleDBO>> Result = new();
         Result.Value = new();
@@ -512,8 +500,7 @@ public class ClassRepository : Controller
     /// Deletes all class sessions with IDs in the CSV.
     /// </summary>
     public ResultToken<object> ClassSchedule_DeleteByIds(
-        string IdCsv
-    )
+        string IdCsv)
     {
         ResultToken<object> Result = new();
 
@@ -542,8 +529,7 @@ public class ClassRepository : Controller
     /// </summary>
     public ResultToken<ClassCalculateDetailsResult> Class_CalculateDetails(
         int ClassId,
-        int UserId
-    )
+        int UserId)
     {
         ResultToken<ClassCalculateDetailsResult> Result = new();
 

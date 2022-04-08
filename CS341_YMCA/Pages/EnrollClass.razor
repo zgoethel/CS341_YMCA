@@ -110,7 +110,7 @@
     <div class="col-sm-6" style="text-align: center;">
 
         @* MEMBER PRICING *@
-        @if (activeClass.MemberPrice > 0.0)
+        @if (activeClass.MemberPrice > 0.0m)
         {
             <h1>$@((int?)activeClass.MemberPrice)<sup>@((activeClass.MemberPrice % 1)
                 .ToString(".00").Replace(".", ""))</sup></h1>
@@ -124,7 +124,7 @@
         <div class="col-sm-6" style="text-align: center;">
 
             @* NON-MEMBER PRICING *@
-            @if (activeClass.NonMemberPrice > 0.0)
+            @if (activeClass.NonMemberPrice > 0.0m)
             {
                 <h1>$@((int?)activeClass.NonMemberPrice)<sup>@((activeClass.NonMemberPrice % 1)
                     .ToString(".00").Replace(".", ""))</sup></h1>
@@ -168,6 +168,12 @@
         }
 
     </div>
+    
+    @* VALIDATION ERROR MESSAGE IF EXISTS *@
+    @if (!string.IsNullOrEmpty(enrollmentError))
+    {
+        <span class="alert alert-danger">@enrollmentError</span>
+    }
 
     @if (calculations.IsEnrolled)
     {
@@ -296,6 +302,7 @@
     private PaymentModal? paymentScreen;
     private BsModal? dropModal;
     private ClassScheduler? scheduler;
+    private string enrollmentError = "";
 
     /// <summary>
     /// Loads page fields and calculations from the database.
@@ -343,7 +350,7 @@
         if (LoggedIn.IsMember)
             thisUserCost = activeClass.MemberPrice;
         // Show modal if costs money, or just enroll
-        if (thisUserCost > 0.0f)
+        if (thisUserCost > 0.0m)
             paymentScreen!.StartProcess(thisUserCost);
         else
             EnrollWithPayment(null);
@@ -355,15 +362,11 @@
     /// <param name="paymentId">ID of payment, or null for none.</param>
     private void EnrollWithPayment(int? paymentId)
     {
-        ReloadStateData();
-        if ((!calculations.UnlimitedSeats && activeClass.SeatsTaken >= activeClass.MaxSeats) || calculations.IsEnrolled)
-        {
-            // Bail out if can no longer enroll
-            return;
-        }
-
         // Perform enrollment and update state
-        Classes.Class_EnrollUser(activeClass.Id, LoggedIn!.Id, paymentId);
+        var result = Classes.Class_EnrollUser(activeClass.Id, LoggedIn!.Id, paymentId);
+
+        if (!result.Success)
+            enrollmentError = result.Error ?? "An unexpected error occurred.";
         ReloadStateData();
     }
 

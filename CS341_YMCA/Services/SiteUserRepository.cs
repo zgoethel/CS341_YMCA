@@ -63,8 +63,7 @@ public class SiteUserRepository : Controller
     /// </summary>
     public ResultToken<object> SiteUser_Authenticate(
         string Email,
-        string PasswordHash
-    )
+        string PasswordHash)
     {
         ResultToken<object> Result = new();
 
@@ -97,8 +96,7 @@ public class SiteUserRepository : Controller
     public ResultToken<object> SiteUser_Register(
         string FirstName,
         string? LastName,
-        string Email
-    )
+        string Email)
     {
         ResultToken<object> Result = new();
 
@@ -133,8 +131,7 @@ public class SiteUserRepository : Controller
     /// Endpoint which allows the user to request a password reset.
     /// </summary>
     public ResultToken<object> SiteUser_RequestReset(
-        string Email
-    )
+        string Email)
     {
         ResultToken<object> Result = new();
 
@@ -168,8 +165,7 @@ public class SiteUserRepository : Controller
     /// </summary>
     public ResultToken<object> SiteUser_ResetPassword(
         Guid ResetToken,
-        string PasswordHash
-    )
+        string PasswordHash)
     {
         ResultToken<object> Result = new();
 
@@ -199,8 +195,7 @@ public class SiteUserRepository : Controller
     /// Lists users according to provided filters.
     /// </summary>
     public ResultToken<List<SiteUserDBO>> SiteUser_List(
-        string? EmailFilter = null
-    )
+        string? EmailFilter = null)
     {
         var Result = new ResultToken<List<SiteUserDBO>>
         {
@@ -235,8 +230,7 @@ public class SiteUserRepository : Controller
     /// Gets user data associated with an email.
     /// </summary>
     public ResultToken<SiteUserDBO> SiteUser_GetByEmail(
-        string Email
-    )
+        string Email)
     {
         ResultToken<SiteUserDBO> Result = new();
 
@@ -274,8 +268,7 @@ public class SiteUserRepository : Controller
     /// Gets user data associated with an ID.
     /// </summary>
     public ResultToken<SiteUserDBO> SiteUser_GetById(
-        int Id
-    )
+        int Id)
     {
         ResultToken<SiteUserDBO> Result = new();
 
@@ -319,8 +312,7 @@ public class SiteUserRepository : Controller
         string? LastName = null,
         string? Email = null,
         bool? IsAdmin = null,
-        DateTime? MemberThru = null
-    )
+        DateTime? MemberThru = null)
     {
         ResultToken<object> Result = new();
 
@@ -357,8 +349,7 @@ public class SiteUserRepository : Controller
     /// associated payments and enrollments.
     /// </summary>
     public ResultToken<object> SiteUser_DeleteById(
-        int Id
-    )
+        int Id)
     {
         ResultToken<object> Result = new();
         Result.Value = new();
@@ -403,8 +394,7 @@ public class SiteUserRepository : Controller
         int SecurityCode,
         int PostalCode,
         string HolderName,
-        DateTime CardExpiry
-    )
+        DateTime CardExpiry)
     {
         ResultToken<int> Result = new();
 
@@ -442,8 +432,7 @@ public class SiteUserRepository : Controller
     /// Retrieves a payment history record from the database.
     /// </summary>
     public ResultToken<UserPaymentDBO> SiteUserPayments_GetById(
-        int Id
-    )
+        int Id)
     {
         ResultToken<UserPaymentDBO> Result = new();
 
@@ -479,8 +468,7 @@ public class SiteUserRepository : Controller
     /// Retrieves all payment history records associated with an account.
     /// </summary>
     public ResultToken<List<UserPaymentDBO>> SiteUserPayments_GetByUserId(
-        int UserId
-    )
+        int UserId)
     {
         ResultToken<List<UserPaymentDBO>> Result = new();
         Result.Value = new();

@@ -12,6 +12,16 @@ BEGIN
     -- interfering with SELECT statements.
     SET NOCOUNT ON;
 
+    -- Issue error if tring to access disabled class
+    DECLARE @ClassEnabled INT = (
+        SELECT TOP 1 [Enabled] FROM [ClassMain]
+        WHERE [Id] = @ClassId);
+    IF (ISNULL(@ClassEnabled, 0) = 0)
+    BEGIN
+        RAISERROR('Requested class is inactive, so its calculations are disabled.', 18, 1);
+        RETURN;
+    END
+
     -- Attempt to find an enrollment record for the user
     DECLARE @EnrollmentId INT = (
         SELECT TOP 1 [Id] FROM [ClassEnrollment]

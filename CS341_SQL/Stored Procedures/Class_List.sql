@@ -33,8 +33,8 @@ BEGIN
         [MaxSeats],
         [FulfillCsv],
         [RequireCsv],
-		-- Count taken seats in enrollment table
-		(SELECT COUNT(_cm.[Id]) FROM [ClassEnrollment] _cm WHERE [ClassId] = cm.[Id]) AS [SeatsTaken],
+        -- Count taken seats in enrollment table
+        (SELECT COUNT(_cm.[Id]) FROM [ClassEnrollment] _cm WHERE [ClassId] = cm.[Id]) AS [SeatsTaken],
         -- Calculate whether member enrollment is open
         CASE WHEN (
             [AllowEnrollment] = 1

@@ -129,8 +129,7 @@
             SecurityCode: PaymentDetails.SecurityCode,
             PostalCode: PaymentDetails.PostalCode,
             HolderName: PaymentDetails.HolderName,
-            CardExpiry: PaymentDetails.CardExpiry
-        );
+            CardExpiry: PaymentDetails.CardExpiry);
 
         if (!Result.Success)
         {
@@ -150,13 +149,13 @@
     /// Begins the payment process and shows the payment modal.
     /// </summary>
     /// <param name="Amount">Dollar amount of the transaction.</param>
-    public void StartProcess(float Amount)
+    public void StartProcess(decimal Amount)
     {
         Modal!.Error("");
         // Set up form state if necessary
         PaymentDetails = new()
         {
-            Amount = (decimal)Amount,
+            Amount = Amount,
             CardExpiry = DateTime.Now.Date.AddDays(1 - DateTime.Now.Date.Day)
         };
         PostalCode = "";

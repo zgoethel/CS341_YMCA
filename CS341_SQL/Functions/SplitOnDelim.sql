@@ -10,7 +10,7 @@ BEGIN
         INSERT INTO @Results (VALUE)
         SELECT Value = LTRIM(
             RTRIM(
-				SUBSTRING(@List, 1, CHARINDEX(@SplitOn, @List) - 1)
+                SUBSTRING(@List, 1, CHARINDEX(@SplitOn, @List) - 1)
             )
         );
         
