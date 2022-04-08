@@ -4,7 +4,8 @@ using System.Net.Mail;
 namespace CS341_YMCA.Helpers;
 
 /// <summary>
-/// Utility for sending basic emails via an SMTP server.
+/// Utility for sending basic emails via an SMTP server. Development instances
+/// use a throwaway Gmail, and the production noreply is through Private Email.
 /// </summary>
 public class EmailSender
 {

@@ -3,12 +3,18 @@
 // Models bound to the fields required by user SQL procedures
 #region SiteUserActionModels
 
+/// <summary>
+/// Schema for attempting to check credentials' validity.
+/// </summary>
 public class SiteUserAuthenticateRequest
 {
     public string Email { get; set; } = "";
     public string PasswordHash { get; set; } = "";
 }
 
+/// <summary>
+/// Schema for registering a new account.
+/// </summary>
 public class SiteUserRegisterRequest
 {
     public string FirstName { get; set; } = "";
@@ -17,28 +23,43 @@ public class SiteUserRegisterRequest
     public bool IsAdmin { get; set; } = false;
 }
 
+/// <summary>
+/// Schema for results after regering an account.
+/// </summary>
 public class SiteUserRegisterResult
 {
     public int Id { get; set; }
     public Guid ResetToken { get; set; }
 }
 
+/// <summary>
+/// Schema for requesting a password reset by email.
+/// </summary>
 public class UserRequestResetRequest
 {
     public string Email { get; set; } = "";
 }
 
+/// <summary>
+/// Schema for result after requesting a password reset.
+/// </summary>
 public class UserRequestResetResult
 {
     public Guid ResetToken { get; set; }
 }
 
+/// <summary>
+/// Schema for completing the password reset with a new password.
+/// </summary>
 public class SiteUserResetPasswordRequest
 {
     public Guid ResetToken { get; set; }
     public string PasswordHash { get; set; } = "";
 }
 
+/// <summary>
+/// Schema of a single user retrieved from the database.
+/// </summary>
 public class SiteUserDBO
 {
     public int Id { get; set; }
@@ -55,11 +76,17 @@ public class SiteUserDBO
     public string FulfilledCsv { get; set; } = "";
 }
 
+/// <summary>
+/// Schema of input parameters for site user listing.
+/// </summary>
 public class SiteUserListRequest
 {
     public string? EmailFilter { get; set; } = null;
 }
 
+/// <summary>
+/// Schema for a request to modify a site user record.
+/// </summary>
 public class SiteUserSetRequest
 {
     public int Id { get; set; }
@@ -71,11 +98,17 @@ public class SiteUserSetRequest
     public string? FullfilledCsv { get; set; }
 }
 
+/// <summary>
+/// Schema for a request to delete a site user and related records.
+/// </summary>
 public class SiteUserDeleteRequest
 {
     public int Id { get; set; }
 }
 
+/// <summary>
+/// Schema for a request to enter payments into the database.
+/// </summary>
 public class EnterUserPaymentRequest
 {
     public int UserId { get; set; }
@@ -87,6 +120,9 @@ public class EnterUserPaymentRequest
     public DateTime CardExpiry { get; set; }
 }
 
+/// <summary>
+/// Schema for a single payment retrieved from the database.
+/// </summary>
 public class UserPaymentDBO
 {
     public int Id { get; set; }
@@ -101,6 +137,9 @@ public class UserPaymentDBO
     public string? Item { get; set; }
 }
 
+/// <summary>
+/// Schema of the result of entering a new payment record.
+/// </summary>
 public class UserPaymentEnterResult
 {
     public int Id { get; set; }
@@ -111,6 +150,9 @@ public class UserPaymentEnterResult
 // Region bound to request and result parameters for classes
 #region ClassActionModels
 
+/// <summary>
+/// Schema of a request to modify a class detail record.
+/// </summary>
 public class ClassSetRequest
 {
     public int? Id { get; set; }
@@ -132,17 +174,26 @@ public class ClassSetRequest
     public string? RequireCsv { get; set; }
 }
 
+/// <summary>
+/// Schema of the result of creating or modifying a class.
+/// </summary>
 public class ClassSetResult
 {
     public int Id { get; set; }
 }
 
+/// <summary>
+/// Schema of possible filters for a class listing query.
+/// </summary>
 public class ClassListRequest
 {
     public string? NameFilter { get; set; } = null;
     public bool? IncludeDisabled { get; set; } = null;
 }
 
+/// <summary>
+/// Schema of a single class retrieved from the database.
+/// </summary>
 public class ClassDBO
 {
     public int Id { get; set; }
@@ -168,6 +219,9 @@ public class ClassDBO
     public string RequireCsv { get; set; } = "";
 }
 
+/// <summary>
+/// Schema of a single class schedule session record.
+/// </summary>
 public class ClassScheduleDBO
 {
     public int? Id { get; set; }
@@ -180,6 +234,9 @@ public class ClassScheduleDBO
     public string ShortDescription { get; set; } = "";
 }
 
+/// <summary>
+/// Schema of a request to modify a class schedule session.
+/// </summary>
 public class ClassScheduleSetRequest
 {
     public int? Id { get; set; }
@@ -190,27 +247,42 @@ public class ClassScheduleSetRequest
     public int? Duration { get; set; }
 }
 
+/// <summary>
+/// Schema of the reuslt of modifying a class schedule session.
+/// </summary>
 public class ClassScheduleSetResult
 {
     public int Id { get; set; }
 }
 
+/// <summary>
+/// Schema of a request to delete a class and related details.
+/// </summary>
 public class ClassDeleteRequest
 {
     public int Id { get; set; }
 }
 
+/// <summary>
+/// Schema of the result of retrieving all class requirement codes.
+/// </summary>
 public class ClassListReqResult
 {
     public string Value { get; set; } = "";
 }
 
+/// <summary>
+/// Schema of a request to drop a user from a class.
+/// </summary>
 public class ClassDropUserRequest
 {
     public int UserId { get; set; }
     public int ClassId { get; set; }
 }
 
+/// <summary>
+/// Schema of a request to enroll a user in a class.
+/// </summary>
 public class ClassEnrollUserRequest
 {
     public int UserId { get; set; }
@@ -218,6 +290,9 @@ public class ClassEnrollUserRequest
     public int? PaymentId { get; set; }
 }
 
+/// <summary>
+/// Schema of a single class enrollment record in the database.
+/// </summary>
 public class ClassEnrollmentDBO
 {
     public int Id { get; set; }

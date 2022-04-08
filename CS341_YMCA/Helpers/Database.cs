@@ -5,7 +5,8 @@ using System.Data.SqlClient;
 namespace CS341_YMCA.Helpers;
 
 /// <summary>
-/// Interface for calling stored procedures in the database.
+/// Interface for calling stored procedures in the database. Parameters' and
+/// result rows' schema are defined as object class types.
 /// </summary>
 public class Database
 {
@@ -26,12 +27,14 @@ public class Database
 
     public Database(IConfiguration Configuration)
     {
-        // Bind the section of the config to the object
+        // Bind the section of the config to the object for access
         Configuration.GetSection("SqlServer").Bind(configSection);
     }
 
     /// <summary>
-    /// Calls the specified stored procedure in the database.
+    /// Calls the specified stored procedure in the database. The parameters are
+    /// converted into a set of SQL input parameters, and the resulting rows are
+    /// provided individually via invocations of a consumer function.
     /// </summary>
     /// <typeparam name="T">Return value type (parsed from results).</typeparam>
     /// <param name="procName">Name of the stored procedure.</param>

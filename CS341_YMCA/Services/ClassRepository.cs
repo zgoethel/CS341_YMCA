@@ -4,10 +4,10 @@ using System.Data.SqlClient;
 
 namespace CS341_YMCA.Services;
 
-/**
- * Provides access to the internal class management, scheduling, and
- * browsing subsystems within the database.
- */
+/// <summary>
+/// Provides access to the internal class management, scheduling, and browsing
+/// subsystems within the database.
+/// </summary>
 public class ClassRepository : Controller
 {
     private readonly Database Sql;
@@ -20,9 +20,9 @@ public class ClassRepository : Controller
         this.Sql = Sql;
     }
 
-    /**
-     * Allows creation and udpating of basic class data.
-     */
+    /// <summary>
+    /// Allows creation and udpating of basic class data.
+    /// </summary>
     public ResultToken<int> Class_Set(
         int? Id = null,
         string? ClassName = null,
@@ -85,9 +85,9 @@ public class ClassRepository : Controller
         return Result;
     }
 
-    /**
-     * Lists classes according to provided filter parameters.
-     */
+    /// <summary>
+    /// Lists classes according to provided filter parameters.
+    /// </summary>
     public ResultToken<List<ClassDBO>> Class_List(
         string? NameFilter = null,
         bool? IncludeDisabled = null
@@ -123,9 +123,9 @@ public class ClassRepository : Controller
         return Result;
     }
 
-    /**
-     * Gets class data associated with an ID.
-     */
+    /// <summary>
+    /// Gets class data associated with an ID.
+    /// </summary>
     public ResultToken<ClassDBO> Class_GetById(
         int Id
     )
@@ -162,9 +162,9 @@ public class ClassRepository : Controller
         return Result;
     }
 
-    /**
-     * Gets class data associated with IDs as CSV.
-     */
+    /// <summary>
+    /// Gets class data associated with IDs as CSV.
+    /// </summary>
     public ResultToken<List<ClassDBO>> Class_GetByIds(
         string Csv
     )
@@ -196,9 +196,9 @@ public class ClassRepository : Controller
         return Result;
     }
 
-    /**
-     * Lists a class' schedule sessions according to class ID.
-     */
+    /// <summary>
+    /// Lists a class' schedule sessions according to class ID.
+    /// </summary>
     public ResultToken<List<ClassScheduleDBO>> ClassSchedule_List(
         int ClassId
     )
@@ -232,9 +232,9 @@ public class ClassRepository : Controller
         return Result;
     }
 
-    /**
-     * Allows creation and udpating of class schedule data.
-     */
+    /// <summary>
+    /// Allows creation and udpating of class schedule data.
+    /// </summary>
     public ResultToken<int> ClassSchedule_Set(
         int? Id = null,
         int? ClassId = null,
@@ -275,9 +275,9 @@ public class ClassRepository : Controller
         return Result;
     }
 
-    /**
-     * Deletes the class with specified ID from the ClassMain table.
-     */
+    /// <summary>
+    /// Deletes the class with specified ID from the ClassMain table.
+    /// </summary>
     public ResultToken<object> Class_DeleteById(
         int Id
     )
@@ -314,9 +314,9 @@ public class ClassRepository : Controller
         return Result;
     }
 
-    /**
-     * Gets list of all distinct existing prereq codes on classes.
-     */
+    /// <summary>
+    /// Gets list of all distinct existing prereq codes on classes.
+    /// </summary>
     public ResultToken<List<string>> Class_ListReqs()
     {
         ResultToken<List<string>> Result = new();
@@ -344,9 +344,9 @@ public class ClassRepository : Controller
         return Result;
     }
 
-    /**
-     * Drops the specified user from the specified class.
-     */
+    /// <summary>
+    /// Drops the specified user from the specified class.
+    /// </summary>
     public ResultToken<object> Class_DropUser(
         int ClassId,
         int UserId
@@ -377,9 +377,9 @@ public class ClassRepository : Controller
         return Result;
     }
 
-    /**
-     * Enrolls the specified user in the specified class, possibly with a payment.
-     */
+    /// <summary>
+    /// Enrolls the specified user in the specified class, possibly with a payment.
+    /// </summary>
     public ResultToken<object> Class_EnrollUser(
         int ClassId,
         int UserId,
@@ -412,6 +412,9 @@ public class ClassRepository : Controller
         return Result;
     }
 
+    /// <summary>
+    /// Retrieve all active enrollment records for a single class.
+    /// </summary>
     public ResultToken<List<ClassEnrollmentDBO>> ClassEnrollment_GetByClassId(
         int ClassId
     )
@@ -441,6 +444,9 @@ public class ClassRepository : Controller
         return Result;
     }
 
+    /// <summary>
+    /// Retrieves the set of enrollment history associated to a specific user.
+    /// </summary>
     public ResultToken<List<ClassEnrollmentDBO>> ClassEnrollment_GetByUserId(
         int UserId
     )
@@ -470,6 +476,9 @@ public class ClassRepository : Controller
         return Result;
     }
 
+    /// <summary>
+    /// Gets all schedule sessions for all classes in which the user is enrolled.
+    /// </summary>
     public ResultToken<List<ClassScheduleDBO>> ClassSchedule_GetByUserId(
         int UserId
     )
@@ -499,9 +508,9 @@ public class ClassRepository : Controller
         return Result;
     }
 
-    /**
-     * Deletes all class sessions with IDs in the CSV.
-     */
+    /// <summary>
+    /// Deletes all class sessions with IDs in the CSV.
+    /// </summary>
     public ResultToken<object> ClassSchedule_DeleteByIds(
         string IdCsv
     )
