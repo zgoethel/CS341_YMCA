@@ -1,7 +1,6 @@
-﻿CREATE FUNCTION [dbo].[SplitId] (
+﻿CREATE FUNCTION [dbo].[SplitIdOnDelim] (
     @List NVARCHAR(MAX),
-    @SplitOn NVARCHAR(5)
-)
+    @SplitOn NVARCHAR(5))
 RETURNS @Results TABLE (Id NUMERIC)
 AS
 BEGIN

@@ -13,5 +13,5 @@ BEGIN
 
     DELETE FROM [ClassSchedule]
     WHERE
-        [Id] IN (SELECT [Id] FROM [dbo].[SplitId](@IdCsv, ','));
+        [Id] IN (SELECT [Id] FROM [dbo].[SplitIdOnDelim](@IdCsv, ','));
 END

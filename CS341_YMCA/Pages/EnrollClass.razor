@@ -270,11 +270,20 @@
 
 @code
 {
+    private SiteUserDBO _LoggedIn = new();
     /// <summary>
     /// DBO of uUser that is currently logged in.
     /// </summary>
     [CascadingParameter]
-    protected SiteUserDBO LoggedIn { get; set; } = new();
+    protected SiteUserDBO LoggedIn
+    {
+        get => _LoggedIn;
+        set
+        {
+            _LoggedIn = value;
+            ReloadStateData();
+        }
+    }
 
     /// <summary>
     /// ID of class whose details are displayed.
@@ -295,13 +304,6 @@
     {
         activeClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
         calculations = Classes.Class_CalculateDetails(int.Parse(Id!), LoggedIn.Id).Get()!;
-    }
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-
-        ReloadStateData();
     }
 
     /// <summary>

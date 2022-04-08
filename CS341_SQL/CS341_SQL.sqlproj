@@ -68,8 +68,8 @@
     <Build Include="Tables\ClassMain.sql" />
     <Build Include="Tables\SiteUser.sql" />
     <Build Include="Tables\ClassSchedule.sql" />
-    <Build Include="Functions\Split.sql" />
-    <Build Include="Functions\SplitID.sql" />
+    <Build Include="Functions\SplitOnDelim.sql" />
+    <Build Include="Functions\SplitIdOnDelim.sql" />
     <Build Include="Stored Procedures\Class_ListReqs.sql" />
     <Build Include="Stored Procedures\SiteUserPayments_Enter.sql" />
     <Build Include="Stored Procedures\SiteUserPayments_GetByUserId.sql" />
@@ -99,5 +99,8 @@
     <Build Include="Stored Procedures\SiteUser_DeleteById.sql" />
     <Build Include="Stored Procedures\ClassSchedule_DeleteByIds.sql" />
     <Build Include="Stored Procedures\Class_CalculateDetails.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="CS341_SQL.refactorlog" />
   </ItemGroup>
 </Project>

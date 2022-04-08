@@ -52,5 +52,5 @@ BEGIN
         ) THEN 1 ELSE 0 END AS [NonMemberEnrollmentOpen]
     FROM [ClassMain] cm
     WHERE
-        [Id] IN (SELECT [Id] FROM [dbo].[SplitId](@Csv, ','));
+        [Id] IN (SELECT [Id] FROM [dbo].[SplitIdOnDelim](@Csv, ','));
 END

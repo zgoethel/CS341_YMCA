@@ -17,7 +17,7 @@ BEGIN
 
     -- Split it out and select distinct values
     SELECT DISTINCT [Value]
-    FROM [dbo].[Split](@AllValuesCsv, ',')
+    FROM [dbo].[SplitOnDelim](@AllValuesCsv, ',')
     WHERE ISNULL([Value], '') != ''
     ORDER BY [Value];
 END

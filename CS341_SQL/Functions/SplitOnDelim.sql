@@ -1,7 +1,6 @@
-﻿CREATE FUNCTION [dbo].[Split] (
+﻿CREATE FUNCTION [dbo].[SplitOnDelim] (
     @List VARCHAR(MAX),
-    @SplitOn VARCHAR(5)
-)
+    @SplitOn VARCHAR(5))
 RETURNS @Results TABLE (VALUE VARCHAR(MAX))
 AS
 BEGIN

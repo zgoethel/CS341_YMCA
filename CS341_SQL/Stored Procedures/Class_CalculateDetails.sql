@@ -27,20 +27,24 @@ BEGIN
     -- Determine this user's enrollment range
     SELECT
 
-    @EnrollmentOpen = (CASE WHEN @IsMember = 1
-        THEN (CASE WHEN [MemberEnrollmentStart] < ISNULL([NonMemberEnrollmentStart], [MemberEnrollmentStart])
-            THEN [MemberEnrollmentStart]
-            ELSE ISNULL([NonMemberEnrollmentStart], [MemberEnrollmentStart]) END)
-        ELSE [NonMemberEnrollmentStart] END),
+        @EnrollmentOpen = (CASE WHEN @IsMember = 1
+            -- For members, take earliest open date
+            THEN (SELECT MIN(i) FROM (VALUES
+                    ([MemberEnrollmentStart]),
+                    (ISNULL([NonMemberEnrollmentStart], [MemberEnrollmentStart]))
+                ) AS T(i))
+            -- For non-members, take their date
+            ELSE [NonMemberEnrollmentStart] END),
 
-    @EnrollmentClose = (CASE WHEN @IsMember = 1
-        THEN (CASE WHEN DATEADD(DAY, [MemberEnrollmentDays], [MemberEnrollmentStart]) > 
-            DATEADD(DAY, ISNULL([NonMemberEnrollmentDays], [MemberEnrollmentDays]),
-                ISNULL([NonMemberEnrollmentStart], [MemberEnrollmentStart]))
-            THEN DATEADD(DAY, [MemberEnrollmentDays], [MemberEnrollmentStart])
-            ELSE DATEADD(DAY, ISNULL([NonMemberEnrollmentDays], [MemberEnrollmentDays]),
-                ISNULL([NonMemberEnrollmentStart], [MemberEnrollmentStart])) END)
-        ELSE DATEADD(DAY, [NonMemberEnrollmentDays], [NonMemberEnrollmentStart]) END)
+        @EnrollmentClose = (CASE WHEN @IsMember = 1
+            -- For members, take the latest close date
+            THEN (SELECT MAX(i) FROM (VALUES
+                    (DATEADD(DAY, [MemberEnrollmentDays], [MemberEnrollmentStart])), 
+                    (DATEADD(DAY, ISNULL([NonMemberEnrollmentDays], [MemberEnrollmentDays]),
+                        ISNULL([NonMemberEnrollmentStart], [MemberEnrollmentStart])))
+                ) AS T(i))
+            -- For non-members, take their date
+            ELSE DATEADD(DAY, [NonMemberEnrollmentDays], [NonMemberEnrollmentStart]) END)
 
     FROM [ClassMain]
     WHERE [Id] = @ClassId;
