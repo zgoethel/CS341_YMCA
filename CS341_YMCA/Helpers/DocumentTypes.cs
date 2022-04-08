@@ -217,6 +217,7 @@ public class ClassDBO
     public bool NonMemberEnrollmentOpen { get; set; }
     public string FulfillCsv { get; set; } = "";
     public string RequireCsv { get; set; } = "";
+    public int SeatsTaken { get; set; }
 }
 
 /// <summary>
@@ -307,6 +308,30 @@ public class ClassEnrollmentDBO
     public string? LastName { get; set; }
     public string Email { get; set; } = "";
     public bool IsMember { get; set; }
+}
+
+/// <summary>
+/// Schema for a request to calculate user-specific class values.
+/// </summary>
+public class ClassCalculateDetailsRequest
+{
+    public int ClassId { get; set; }
+    public int UserId { get; set; }
+}
+
+/// <summary>
+/// Schema of user-specific calculation results for class.
+/// </summary>
+public class ClassCalculateDetailsResult
+{
+    public bool IsEnrolled { get; set; }
+    public decimal ThisUserCost { get; set; }
+    public bool CanEnroll { get; set; }
+    public bool OpenForUser { get; set; }
+    public bool UnlimitedSeats { get; set; }
+    public bool ClosedForUser { get; set; }
+    public DateTime? EnrollmentOpen { get; set; }
+    public DateTime? EnrollmentClose { get; set; }
 }
 
 #endregion

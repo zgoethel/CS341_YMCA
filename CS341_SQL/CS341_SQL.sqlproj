@@ -98,5 +98,6 @@
     <Build Include="Stored Procedures\Class_DeleteById.sql" />
     <Build Include="Stored Procedures\SiteUser_DeleteById.sql" />
     <Build Include="Stored Procedures\ClassSchedule_DeleteByIds.sql" />
+    <Build Include="Stored Procedures\Class_CalculateDetails.sql" />
   </ItemGroup>
 </Project>

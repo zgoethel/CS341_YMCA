@@ -535,4 +535,39 @@ public class ClassRepository : Controller
 
         return Result;
     }
+
+    /// <summary>
+    /// Calculates user-specific class details based on enrollment and class
+    /// schedule data.
+    /// </summary>
+    public ResultToken<ClassCalculateDetailsResult> Class_CalculateDetails(
+        int ClassId,
+        int UserId
+    )
+    {
+        ResultToken<ClassCalculateDetailsResult> Result = new();
+
+        try
+        {
+            Sql.ExecuteProcedure<ClassCalculateDetailsResult>(
+                "Class_CalculateDetails",
+                new ClassCalculateDetailsRequest()
+                {
+                    ClassId = ClassId,
+                    UserId = UserId
+                }, (_Result) => {
+                    Result.Value = _Result;
+                });
+        } catch (SqlException Ex)
+        {
+            Result.Success = false;
+            Result.Error = Ex.Message;
+        } catch (Exception Ex)
+        {
+            Result.Success = false;
+            Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+        }
+
+        return Result;
+    }
 }

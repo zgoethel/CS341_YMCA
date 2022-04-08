@@ -32,6 +32,8 @@ BEGIN
         [MaxSeats],
         [FulfillCsv],
         [RequireCsv],
+		-- Count taken seats in enrollment table
+		(SELECT COUNT(_cm.[Id]) FROM [ClassEnrollment] _cm WHERE [ClassId] = cm.[Id]) AS [SeatsTaken],
         -- Calculate whether member enrollment is open
         CASE WHEN (
             [AllowEnrollment] = 1
@@ -48,7 +50,7 @@ BEGIN
             AND GETDATE() > [NonMemberEnrollmentStart]
             AND GETDATE() < DATEADD(DAY, [NonMemberEnrollmentDays], [NonMemberEnrollmentStart])
         ) THEN 1 ELSE 0 END AS [NonMemberEnrollmentOpen]
-    FROM [ClassMain]
+    FROM [ClassMain] cm
     WHERE
         [Id] IN (SELECT [Id] FROM [dbo].[SplitId](@Csv, ','));
 END
