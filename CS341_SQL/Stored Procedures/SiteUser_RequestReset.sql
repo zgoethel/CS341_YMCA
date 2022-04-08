@@ -12,11 +12,9 @@ BEGIN
     SET NOCOUNT ON;
 
     -- Attempt to find the user with the right email
-    DECLARE @ResetUser INT =
-    (
+    DECLARE @ResetUser INT = (
         SELECT TOP 1 [Id] FROM [SiteUser]
-        WHERE [Email] = @Email
-    );
+        WHERE [Email] = @Email);
 
     IF (@ResetUser IS NOT NULL)
     BEGIN

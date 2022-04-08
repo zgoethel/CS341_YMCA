@@ -20,7 +20,7 @@ BEGIN
         [PassedYN],
         cm.[ClassName],
         cm.[ShortDescription],
-        (CASE WHEN su.[MemberThru] IS NOT NULL AND su.[MemberThru] > GETDATE() THEN 1 ELSE 0 END) AS [IsMember]
+        [dbo].[UserIsMember]([UserId], su.[MemberThru]) AS [IsMember]
     FROM [ClassEnrollment] ce
     LEFT JOIN [ClassMain] cm on cm.[Id] = [ClassId]
     LEFT JOIN [SiteUser] su on su.[Id] = [UserId]

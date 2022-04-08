@@ -29,7 +29,6 @@ BEGIN
         [ClassId] IN (
             SELECT [ClassId]
             FROM [ClassEnrollment]
-            WHERE [UserId] = @UserId
-        )
+            WHERE [UserId] = @UserId)
     ORDER BY [FirstDate];
 END

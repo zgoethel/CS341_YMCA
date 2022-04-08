@@ -23,8 +23,7 @@ BEGIN
         [Created],
         [Modified],
         [MemberThru],
-        -- Calculate whether membership is valid or expired
-        CASE WHEN (ISNULL([MemberThru], '1900-01-01') >= GETDATE()) THEN 1 ELSE 0 END AS [IsMember]
+        [dbo].[UserIsMember]([Id], [MemberThru]) AS [IsMember]
     FROM [SiteUser]
     WHERE 
         [Email] LIKE '%' + @EmailFilter + '%'

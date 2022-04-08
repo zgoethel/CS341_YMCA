@@ -13,10 +13,7 @@ BEGIN
     SET NOCOUNT ON;
 
     -- Ensure the user was actually enrolled
-    DECLARE @RecordId INT = (
-        SELECT TOP 1 [Id] FROM [ClassEnrollment]
-        WHERE [UserId] = @UserId AND [ClassId] = @ClassId);
-    IF (@RecordId IS NULL)
+    IF ([dbo].UserIsEnrolled(@UserId, @ClassId) = 0)
     BEGIN
         RAISERROR('There is no enrollment record for the specified user and class.', 18, 1);
         RETURN;
@@ -24,5 +21,7 @@ BEGIN
 
     -- Delete the related class enrollment record
     DELETE FROM [ClassEnrollment]
-    WHERE [Id] = @RecordId;
+    WHERE
+        [UserId] = @UserId
+        AND [ClassId] = @ClassId;
 END

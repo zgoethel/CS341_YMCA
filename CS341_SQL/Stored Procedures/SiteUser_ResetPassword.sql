@@ -13,11 +13,9 @@ BEGIN
     SET NOCOUNT ON;
 
     -- Attempt to find the user based on the token
-    DECLARE @ResetUser INT =
-    (
+    DECLARE @ResetUser INT = (
         SELECT TOP 1 [Id] FROM [SiteUser]
-        WHERE [ResetToken] = @ResetToken
-    );
+        WHERE [ResetToken] = @ResetToken);
 
     IF (@ResetUser IS NULL)
     BEGIN

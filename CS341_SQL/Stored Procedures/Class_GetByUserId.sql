@@ -33,30 +33,23 @@ BEGIN
         [FulfillCsv],
         [RequireCsv],
         -- Count taken seats in enrollment table
-        (SELECT COUNT(_cm.[Id]) FROM [ClassEnrollment] _cm WHERE [ClassId] = cm.[Id]) AS [SeatsTaken],
+        [dbo].CountSeatsTaken([Id]) AS [SeatsTaken],
         -- Calculate whether member enrollment is open
-        CASE WHEN (
-            [AllowEnrollment] = 1
-            AND [MemberEnrollmentStart] IS NOT NULL
-            AND [MemberEnrollmentDays] IS NOT NULL
-            AND GETDATE() > [MemberEnrollmentStart]
-            AND GETDATE() < DATEADD(DAY, [MemberEnrollmentDays], [MemberEnrollmentStart])
-        ) THEN 1 ELSE 0 END AS [MemberEnrollmentOpen],
+        [dbo].[CheckWindowOpen](
+            [AllowEnrollment],
+            [MemberEnrollmentStart],
+            [MemberEnrollmentDays]) AS [MemberEnrollmentOpen],
         -- Calculate whether non-member enrollment is open
-        CASE WHEN (
-            [AllowEnrollment] = 1
-            AND [NonMemberEnrollmentStart] IS NOT NULL
-            AND [NonMemberEnrollmentDays] IS NOT NULL
-            AND GETDATE() > [NonMemberEnrollmentStart]
-            AND GETDATE() < DATEADD(DAY, [NonMemberEnrollmentDays], [NonMemberEnrollmentStart])
-        ) THEN 1 ELSE 0 END AS [NonMemberEnrollmentOpen]
+        [dbo].[CheckWindowOpen](
+            [AllowEnrollment],
+            [NonMemberEnrollmentStart],
+            [NonMemberEnrollmentDays]) AS [NonMemberEnrollmentOpen]
     FROM [ClassMain] cm
     WHERE
         -- Check that class is in user's enrollment set
         [Id] IN (
             SELECT [ClassId]
             FROM [ClassEnrollment]
-            WHERE [UserId] = @UserId
-        )
+            WHERE [UserId] = @UserId)
     ORDER BY [Id];
 END

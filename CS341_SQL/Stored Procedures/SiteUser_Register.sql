@@ -15,11 +15,9 @@ BEGIN
     SET NOCOUNT ON;
 
     -- Attempt to find an existing user with the same email
-    DECLARE @ExistingUser INT =
-    (
+    DECLARE @ExistingUser INT = (
         SELECT TOP 1 [Id] FROM [SiteUser]
-        WHERE [Email] = @Email
-    );
+        WHERE [Email] = @Email);
 
     IF (@ExistingUser IS NOT NULL)
     BEGIN

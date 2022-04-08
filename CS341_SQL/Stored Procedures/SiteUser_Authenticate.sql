@@ -25,11 +25,9 @@ BEGIN
     FROM [SiteUser]
     WHERE [Email] = @Email;
 
-    IF (
-        @LoginUser IS NOT NULL AND
+    IF (@LoginUser IS NOT NULL AND
         @LoginPassword = @PasswordHash AND
-        @ExistingToken IS NULL
-    )
+        @ExistingToken IS NULL)
     BEGIN
         -- User exists and successful login
         RETURN;

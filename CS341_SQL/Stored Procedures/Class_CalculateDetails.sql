@@ -12,31 +12,21 @@ BEGIN
     -- interfering with SELECT statements.
     SET NOCOUNT ON;
 
-    -- Issue error if tring to access disabled class
-    DECLARE @ClassEnabled INT = (
-        SELECT TOP 1 [Enabled] FROM [ClassMain]
-        WHERE [Id] = @ClassId);
-    IF (ISNULL(@ClassEnabled, 0) = 0)
+    -- Issue error if trying to access disabled class
+    IF ([dbo].[CheckClassActive](@ClassId) = 0)
     BEGIN
-        RAISERROR('Requested class is inactive, so its calculations are disabled.', 18, 1);
+        RAISERROR('Calculations cannot be completed on an inactive class.', 18, 1);
         RETURN;
     END
 
-    -- Attempt to find an enrollment record for the user
-    DECLARE @EnrollmentId INT = (
-        SELECT TOP 1 [Id] FROM [ClassEnrollment]
-        WHERE [ClassId] = @ClassId AND [UserId] = @UserId);
     -- Fetch provided user's membership
-    DECLARE @UserMemberThru DATETIME = (
-        SELECT TOP 1 [MemberThru] FROM [SiteUser]
-        WHERE [Id] = @UserId);
-    DECLARE @IsMember BIT = CASE WHEN (ISNULL(@UserMemberThru, '1900-01-01') >= GETDATE()) THEN 1 ELSE 0 END;
-
+    DECLARE @IsMember BIT = [dbo].[UserIsMember](@UserId, NULL);
+    -- To store the bounds of the current user's enrollment window
     DECLARE @EnrollmentOpen DATETIME;
     DECLARE @EnrollmentClose DATETIME;
-    -- Determine this user's enrollment range
-    SELECT
 
+    -- Determine this user's enrollment window
+    SELECT
         @EnrollmentOpen = (CASE WHEN @IsMember = 1
             -- For members, take earliest open date
             THEN (SELECT MIN(i) FROM (VALUES
@@ -45,7 +35,6 @@ BEGIN
                 ) AS T(i))
             -- For non-members, take their date
             ELSE [NonMemberEnrollmentStart] END),
-
         @EnrollmentClose = (CASE WHEN @IsMember = 1
             -- For members, take the latest close date
             THEN (SELECT MAX(i) FROM (VALUES
@@ -55,12 +44,11 @@ BEGIN
                 ) AS T(i))
             -- For non-members, take their date
             ELSE DATEADD(DAY, [NonMemberEnrollmentDays], [NonMemberEnrollmentStart]) END)
-
     FROM [ClassMain]
     WHERE [Id] = @ClassId;
 
     SELECT
-        (CASE WHEN @EnrollmentId IS NULL THEN 0 ELSE 1 END) AS [IsEnrolled],
+        [dbo].[UserIsEnrolled](@UserId, @ClassId) AS [IsEnrolled],
         (CASE WHEN @IsMember = 1 THEN [MemberPrice] ELSE [NonMemberPrice] END) AS [ThisUserCost],
         (CASE WHEN @IsMember = 1 OR [AllowNonMembers] = 1 THEN 1 ELSE 0 END) AS [CanEnroll],
         (CASE WHEN GETDATE() >= @EnrollmentOpen AND GETDATE() < @EnrollmentClose THEN 1 ELSE 0 END) AS [OpenForUser],

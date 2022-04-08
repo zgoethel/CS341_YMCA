@@ -14,13 +14,10 @@ BEGIN
     SET NOCOUNT ON;
 
     -- Ensure the user isn't already enrolled
-    DECLARE @EnrollmentRecord INT = (
-        SELECT TOP 1 [Id] FROM [ClassEnrollment]
-        WHERE [UserId] = @UserId AND [ClassId] = @ClassId);
-    IF (@EnrollmentRecord IS NOT NULL)
+    IF ([dbo].[UserIsEnrolled](@UserId, @ClassId) = 1)
     BEGIN
         -- "Revert" payment
-        IF @PaymentId IS NOT NULL DELETE FROM [SiteUserPayments] WHERE [Id] = @PaymentId;
+        IF @PaymentId IS NOT NULL EXEC [dbo].[SiteUserPayments_DeleteById] @PaymentId;
 
         RAISERROR('There already exists an enrollment for this user and class. Any pending payment was canceled.', 18, 1);
         RETURN;
@@ -33,10 +30,11 @@ BEGIN
         @AllowNonMembers = [AllowNonMembers] 
     FROM [ClassMain]
     WHERE [Id] = @ClassId;
+
     -- Fetch enrollment counts
-    DECLARE @TakenSeats INT = (
-        SELECT COUNT([Id]) FROM [ClassEnrollment]
-        WHERE [ClassId] = @ClassId);
+    DECLARE @TakenSeats INT = [dbo].[CountSeatsTaken](@ClassId);
+    -- Fetch user membership data
+    DECLARE @IsMember BIT = [dbo].[UserIsMember](@UserId, NULL);
 
     -- Perform calculations from other procedure
     DECLARE @Calculations TABLE (
@@ -52,16 +50,10 @@ BEGIN
     INSERT INTO @Calculations
     EXEC [dbo].[Class_CalculateDetails] @ClassId, @UserId;
 
-    -- Fetch user membership data
-    DECLARE @UserMemberThru DATETIME = (
-        SELECT TOP 1 [MemberThru] FROM [SiteUser]
-        WHERE [Id] = @UserId);
-    DECLARE @IsMember BIT = CASE WHEN (ISNULL(@UserMemberThru, '1900-01-01') >= GETDATE()) THEN 1 ELSE 0 END;
-
     IF ((SELECT [OpenForUser] FROM @Calculations) = 0)
     BEGIN
         -- "Revert" payment
-        IF @PaymentId IS NOT NULL DELETE FROM [SiteUserPayments] WHERE [Id] = @PaymentId;
+        IF @PaymentId IS NOT NULL EXEC [dbo].[SiteUserPayments_DeleteById] @PaymentId;
 
         RAISERROR('Enrollment failed as the enrollment window is not open. Any pending payment was canceled.', 18, 1);
         RETURN;
@@ -69,7 +61,7 @@ BEGIN
     IF (ISNULL(@IsMember, 0) = 0 AND @AllowNonMembers = 0)
     BEGIN
         -- "Revert" payment
-        IF @PaymentId IS NOT NULL DELETE FROM [SiteUserPayments] WHERE [Id] = @PaymentId;
+        IF @PaymentId IS NOT NULL EXEC [dbo].[SiteUserPayments_DeleteById] @PaymentId;
 
         RAISERROR('Only users with an active membership can enroll in this course. Any pending payment was canceled.', 18, 1);
         RETURN;
@@ -77,7 +69,7 @@ BEGIN
     IF ((SELECT [ThisUserCost] FROM @Calculations) > 0 AND @PaymentId IS NULL)
     BEGIN
         -- "Revert" payment
-        IF @PaymentId IS NOT NULL DELETE FROM [SiteUserPayments] WHERE [Id] = @PaymentId;
+        IF @PaymentId IS NOT NULL EXEC [dbo].[SiteUserPayments_DeleteById] @PaymentId;
 
         RAISERROR('This class is not free, but no payment was provided. Any pending payment was canceled.', 18, 1);
         RETURN;
@@ -85,7 +77,7 @@ BEGIN
     IF (ISNULL(@MaxSeats, 0) != 0 AND @TakenSeats >= @MaxSeats)
     BEGIN
         -- "Revert" payment
-        IF @PaymentId IS NOT NULL DELETE FROM [SiteUserPayments] WHERE [Id] = @PaymentId;
+        IF @PaymentId IS NOT NULL EXEC [dbo].[SiteUserPayments_DeleteById] @PaymentId;
 
         -- Throw error to prevent over-enrollment
         RAISERROR('Enrollment failed as all seats are taken for this course. Any pending payment was canceled.', 18, 1);
