@@ -30,7 +30,7 @@ BEGIN
     DECLARE @UserMemberThru DATETIME = (
         SELECT TOP 1 [MemberThru] FROM [SiteUser]
         WHERE [Id] = @UserId);
-    DECLARE @IsMember BIT = CASE WHEN @UserMemberThru > GETDATE() THEN 1 ELSE 0 END;
+    DECLARE @IsMember BIT = CASE WHEN (ISNULL(@UserMemberThru, '1900-01-01') >= GETDATE()) THEN 1 ELSE 0 END;
 
     DECLARE @EnrollmentOpen DATETIME;
     DECLARE @EnrollmentClose DATETIME;

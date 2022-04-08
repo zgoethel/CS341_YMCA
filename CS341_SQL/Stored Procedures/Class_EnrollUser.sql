@@ -13,6 +13,19 @@ BEGIN
     -- interfering with SELECT statements.
     SET NOCOUNT ON;
 
+    -- Ensure the user isn't already enrolled
+    DECLARE @EnrollmentRecord INT = (
+        SELECT TOP 1 [Id] FROM [ClassEnrollment]
+        WHERE [UserId] = @UserId AND [ClassId] = @ClassId);
+    IF (@EnrollmentRecord IS NOT NULL)
+    BEGIN
+        -- "Revert" payment
+        IF @PaymentId IS NOT NULL DELETE FROM [SiteUserPayments] WHERE [Id] = @PaymentId;
+
+        RAISERROR('There already exists an enrollment for this user and class. Any pending payment was canceled.', 18, 1);
+        RETURN;
+    END
+
     -- Fetch misc. required class data
     DECLARE @MaxSeats INT, @AllowNonMembers BIT;
     SELECT 
@@ -43,7 +56,7 @@ BEGIN
     DECLARE @UserMemberThru DATETIME = (
         SELECT TOP 1 [MemberThru] FROM [SiteUser]
         WHERE [Id] = @UserId);
-    DECLARE @IsMember BIT = CASE WHEN GETDATE() > @UserMemberThru THEN 1 ELSE 0 END;
+    DECLARE @IsMember BIT = CASE WHEN (ISNULL(@UserMemberThru, '1900-01-01') >= GETDATE()) THEN 1 ELSE 0 END;
 
     IF ((SELECT [OpenForUser] FROM @Calculations) = 0)
     BEGIN

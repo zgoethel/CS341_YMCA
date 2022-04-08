@@ -13,7 +13,8 @@ BEGIN
     -- Make one long CSV with all the CSVs
     DECLARE @AllValuesCsv NVARCHAR(MAX);
     SELECT @AllValuesCsv = STRING_AGG([RequireCsv] + ',' + [FulfillCsv], ',')
-    FROM [ClassMain];
+    FROM [ClassMain]
+    WHERE [Enabled] = 1;
 
     -- Split it out and select distinct values
     SELECT DISTINCT [Value]
