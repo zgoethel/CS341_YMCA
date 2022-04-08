@@ -304,6 +304,8 @@
     {
         activeClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
         calculations = Classes.Class_CalculateDetails(int.Parse(Id!), LoggedIn.Id).Get()!;
+
+        InvokeAsync(StateHasChanged);
     }
 
     /// <summary>
@@ -357,14 +359,12 @@
         if ((!calculations.UnlimitedSeats && activeClass.SeatsTaken >= activeClass.MaxSeats) || calculations.IsEnrolled)
         {
             // Bail out if can no longer enroll
-            StateHasChanged();
             return;
         }
 
         // Perform enrollment and update state
         Classes.Class_EnrollUser(activeClass.Id, LoggedIn!.Id, paymentId);
         ReloadStateData();
-        StateHasChanged();
     }
 
     /// <summary>
@@ -376,8 +376,7 @@
         // Drop the user from the class
         var result = Classes.Class_DropUser(activeClass.Id, LoggedIn!.Id);
         ReloadStateData();
-        // Recalculate taken seats
-        InvokeAsync(() => StateHasChanged());
+
         return result.Success;
     });
 }

@@ -98,33 +98,24 @@
             || string.IsNullOrEmpty(PaymentDetails.CardNumber)
             || PaymentDetails.CardExpiry <= DateTime.UnixEpoch
             || string.IsNullOrEmpty(PostalCode)
-            || string.IsNullOrEmpty(SecurityCode)
-        )
+            || string.IsNullOrEmpty(SecurityCode))
         {
-            Modal!.Error("Please provide all payment details in proper format.");
+            Modal!.Error("Please provide all of the payment details shown below.");
+            return false;
+        } else if (!int.TryParse(SecurityCode, out _)
+            || !int.TryParse(PostalCode, out _))
+        {
+            Modal!.Error("There are illegal characters in the security or postal codes.");
             return false;
         }
-        // Validate card number format
-        if (!Regex.IsMatch(PaymentDetails.CardNumber, "^([0-9]{4}[- ]?){4}$"))
-        {
-            Modal!.Error("Please provide a valid credit card number (16 numerical digits, dashes or spaces at groups of 4 are allowed).");
-            return false;
-        }
-        // Validate the date format; some browsers (Firefox) don't seem to
-        // have month pickers built in
-        var ExprDateVal = await Js.InvokeAsync<string>("InteropImpl.getInputValue", "#PaymentCardExpiry");
-        if (!Regex.IsMatch(ExprDateVal, "^[0-9]{4}-[0-9]{2}$"))
+
+        var exprDateVal = await Js.InvokeAsync<string>("InteropImpl.getInputValue", "#PaymentCardExpiry");
+        if (!Regex.IsMatch(exprDateVal, "^[0-9]{4}-[0-9]{2}$"))
         {
             Modal!.Error("Please provide the expiration date in the form YYYY-MM.");
             return false;
-        }
-        // Some browsers allow text characters in number inputs
-        if (!Regex.IsMatch(SecurityCode, "^[0-9]+$") || !Regex.IsMatch(PostalCode, "^[0-9]+$")
-        )
-        {
-            Modal!.Error("Please provide CVC and postal code as numerical values.");
-            return false;
-        }
+        } else
+            PaymentDetails.CardExpiry = DateTime.Parse(exprDateVal);
 
         // Store numerical fields as numbers
         PaymentDetails.SecurityCode = int.Parse(SecurityCode);
