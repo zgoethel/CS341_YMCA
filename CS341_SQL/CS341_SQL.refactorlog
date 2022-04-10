@@ -14,4 +14,18 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[SplitIdOnDelim]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="cbd011ad-9857-45b6-9b72-7aca381404dd" ChangeDateTime="04/10/2022 19:39:32">
+    <Property Name="ElementName" Value="[dbo].[ClassMain].[ClassThumbnail]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[ClassMain]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ClassThumbId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a3b336e6-bf29-43c4-adc6-9f141e747527" ChangeDateTime="04/10/2022 19:43:02">
+    <Property Name="ElementName" Value="[dbo].[Table1].[UploadedBy]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Table1]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Uploaded" />
+  </Operation>
 </Operations>

@@ -1,12 +1,7 @@
 ﻿@page "/Enroll/{Id}"
 
 @using CS341_YMCA.Components
-@using CS341_YMCA.Helpers
 @using CS341_YMCA.Services
-
-@inject ClassRepository Classes
-@inject Database Sql
-@inject ClassValidationService ClassValidation
 
 <PageTitle>@activeClass.ClassName</PageTitle>
 
@@ -157,7 +152,7 @@
         @* LOCATION AND BASIC SCHEDULE INFO *@
         <p><strong>Holding sessions</strong><br />@@ @(string.IsNullOrEmpty(activeClass.Location) ? "TBA" : activeClass.Location)</p>
         @{
-            var Sessions = Classes.ClassSchedule_List(activeClass.Id).Get()!;
+            var Sessions = Classes!.ClassSchedule_List(activeClass.Id).Get()!;
             if (Sessions.Count == 0)
             {
                 <p>No schedule available</p>
@@ -258,7 +253,7 @@
 @* CLASS FIRST WEEK SCHEDULE *@
 <h4 class="mt-2">Class Schedule</h4>
 <hr class="margin: 0;" />
-<ClassScheduler Class=activeClass ShowEditing=false @ref=scheduler></ClassScheduler>
+<ClassScheduler Class=activeClass ShowEditing=false></ClassScheduler>
 
 </div>
 </div>
@@ -273,113 +268,3 @@
     {
         EnrollWithPayment(Id);
     }" />
-
-@code
-{
-    private SiteUserDBO _LoggedIn = new();
-    /// <summary>
-    /// DBO of uUser that is currently logged in.
-    /// </summary>
-    [CascadingParameter]
-    protected SiteUserDBO LoggedIn
-    {
-        get => _LoggedIn;
-        set
-        {
-            _LoggedIn = value;
-            ReloadStateData();
-        }
-    }
-
-    /// <summary>
-    /// ID of class whose details are displayed.
-    /// </summary>
-    [Parameter]
-    public string Id { get; set; } = "";
-
-    protected ClassDBO activeClass = new();
-    protected ClassCalculateDetailsResult calculations = new();
-    private PaymentModal? paymentScreen;
-    private BsModal? dropModal;
-    private ClassScheduler? scheduler;
-    private string enrollmentError = "";
-
-    /// <summary>
-    /// Loads page fields and calculations from the database.
-    /// </summary>
-    private void ReloadStateData()
-    {
-        activeClass = Classes.Class_GetById(int.Parse(Id!)).Get()!;
-        calculations = Classes.Class_CalculateDetails(int.Parse(Id!), LoggedIn.Id).Get()!;
-
-        InvokeAsync(StateHasChanged);
-    }
-
-    /// <summary>
-    /// Validates the user's schedule against the class'.
-    /// </summary>
-    /// <returns>Any conflicts as an error message.</returns>
-    private string DetectConflict()
-    {
-        try
-        {
-            // Load both sets of sessions
-            var userSchedule = Classes.ClassSchedule_GetByUserId(LoggedIn.Id).Get()!;
-            var classSchedule = Classes.ClassSchedule_List(activeClass.Id).Get()!;
-            // Iterate through class sessions
-            foreach (var session in classSchedule)
-            {
-                // Validate each against user schedule
-                ClassValidation.Validate(session, userSchedule);
-            }
-            return "";
-        } catch (Exception ex)
-        {
-            // Return exception message as validation warning
-            return ex.Message;
-        }
-    }
-
-    /// <summary>
-    /// Called when enrollment button clicked to show payment modal.
-    /// </summary>
-    private void EnrollClick()
-    {
-        // Check what the user owes
-        var thisUserCost = activeClass.NonMemberPrice;
-        if (LoggedIn.IsMember)
-            thisUserCost = activeClass.MemberPrice;
-        // Show modal if costs money, or just enroll
-        if (thisUserCost > 0.0m)
-            paymentScreen!.StartProcess(thisUserCost);
-        else
-            EnrollWithPayment(null);
-    }
-
-    /// <summary>
-    /// Completes the enrollment, associated with a possible payment.
-    /// </summary>
-    /// <param name="paymentId">ID of payment, or null for none.</param>
-    private void EnrollWithPayment(int? paymentId)
-    {
-        // Perform enrollment and update state
-        var result = Classes.Class_EnrollUser(activeClass.Id, LoggedIn!.Id, paymentId);
-
-        if (!result.Success)
-            enrollmentError = result.Error ?? "An unexpected error occurred.";
-        ReloadStateData();
-    }
-
-    /// <summary>
-    /// Called when the drop dialog is accepted to perform drop.
-    /// </summary>
-    /// <returns></returns>
-    private async Task<bool> DropDialogSubmit() => await Task.Run(() =>
-    {
-        // Drop the user from the class
-        var result = Classes.Class_DropUser(activeClass.Id, LoggedIn!.Id);
-        ReloadStateData();
-
-        return result.Success;
-    });
-}

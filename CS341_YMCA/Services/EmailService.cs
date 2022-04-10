@@ -7,7 +7,7 @@ namespace CS341_YMCA.Helpers;
 /// Utility for sending basic emails via an SMTP server. Development instances
 /// use a throwaway Gmail, and the production noreply is through Private Email.
 /// </summary>
-public class EmailSender
+public class EmailService
 {
     /// <summary>
     /// Email configuration section field definitions.
@@ -26,7 +26,7 @@ public class EmailSender
     /// </summary>
     private readonly EmailConfigSection configSection = new();
 
-    public EmailSender(IConfiguration Configuration)
+    public EmailService(IConfiguration Configuration)
     {
         // Bind the SMTP section to the config object
         Configuration.GetSection("SmtpServer").Bind(configSection);

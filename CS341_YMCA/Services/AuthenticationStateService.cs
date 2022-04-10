@@ -1,14 +1,14 @@
-﻿using CS341_YMCA.Services;
+﻿namespace CS341_YMCA.Helpers;
+
+using CS341_YMCA.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
-
-namespace CS341_YMCA.Helpers;
 
 /// <summary>
 /// Scoped injected object which tracks a specific session's authentication
 /// state; establishes claims identities to hook into .NET authentication.
 /// </summary>
-public class AuthStateProvider : AuthenticationStateProvider
+public class AuthenticationStateService : AuthenticationStateProvider
 {
     private readonly SiteUserRepository siteUsers;
 
@@ -23,7 +23,7 @@ public class AuthStateProvider : AuthenticationStateProvider
     /// </summary>
     private string passwordHash = "";
 
-    public AuthStateProvider(SiteUserRepository siteUsers)
+    public AuthenticationStateService(SiteUserRepository siteUsers)
     {
         this.siteUsers = siteUsers;
     }

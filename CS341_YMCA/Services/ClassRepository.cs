@@ -10,12 +10,12 @@ namespace CS341_YMCA.Services;
 /// </summary>
 public class ClassRepository : Controller
 {
-    private readonly Database Sql;
+    private readonly DatabaseService Sql;
 
     private readonly string Env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
     private bool IsDevelopment => Env.Equals("Development");
 
-    public ClassRepository(Database Sql)
+    public ClassRepository(DatabaseService Sql)
     {
         this.Sql = Sql;
     }

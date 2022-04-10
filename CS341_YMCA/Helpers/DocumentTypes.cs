@@ -335,3 +335,28 @@ public class ClassCalculateDetailsResult
 }
 
 #endregion
+
+// Region bound to request and result parameters for file storage
+#region FileStorageActionModels
+
+/// <summary>
+/// Schema for a request to record an uploaded file.
+/// </summary>
+public class FileStorageEnterRequest
+{
+    public string StoredName { get; set; } = "";
+    public string OriginalName { get; set; } = "";
+    public int SizeBytes { get; set; }
+    public string MimeType { get; set; } = "";
+    public int? UploadedBy { get; set; }
+}
+
+/// <summary>
+/// Schema for a result after storing an uploaded file.
+/// </summary>
+public class FileStorageEnterResult
+{
+    public int Id { get; set; }
+}
+
+#endregion

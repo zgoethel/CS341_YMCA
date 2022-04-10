@@ -18,6 +18,8 @@
     [MaxSeats]                 INT            NULL,
     [FulfillCsv]               NVARCHAR (MAX) CONSTRAINT [DF_ClassMain_FulfillCsv] DEFAULT ('') NOT NULL,
     [RequireCsv]               NVARCHAR (MAX) CONSTRAINT [DF_ClassMain_RequireCsv] DEFAULT ('') NOT NULL,
+    [ClassThumbId] INT NULL, 
+    [ClassPhotoId] INT NULL, 
     CONSTRAINT [PK_ClassMain] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 

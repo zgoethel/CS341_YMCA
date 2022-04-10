@@ -1,10 +1,11 @@
 ﻿@using CS341_YMCA.Helpers
+@using CS341_YMCA.Services
 
 @inject NavigationManager Nav
 @inject IHttpContextAccessor Con
 @inject LinkGenerator Links
 @inject AuthenticationStateProvider AuthState
-@inject Database Sql
+@inject DatabaseService Sql
 
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject ProtectedLocalStorage ProtectedStorage
@@ -109,7 +110,7 @@
         ProtectedStorage.DeleteAsync("SessionName");
         ProtectedStorage.DeleteAsync("SessionKey");
 
-        var _AuthState = AuthState as AuthStateProvider;
+        var _AuthState = AuthState as AuthenticationStateService;
         _AuthState?.LogOut();
 
         StateHasChanged();

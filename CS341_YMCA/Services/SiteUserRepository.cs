@@ -12,13 +12,13 @@ public class SiteUserRepository : Controller
 {
     private readonly LinkGenerator Links;
     private readonly IHttpContextAccessor Con;
-    private readonly Database Sql;
-    private readonly EmailSender Smtp;
+    private readonly DatabaseService Sql;
+    private readonly EmailService Smtp;
 
     private readonly string Env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
     private bool IsDevelopment => Env.Equals("Development");
 
-    public SiteUserRepository(Database Sql, EmailSender Smtp, IHttpContextAccessor Con, LinkGenerator Links)
+    public SiteUserRepository(DatabaseService Sql, EmailService Smtp, IHttpContextAccessor Con, LinkGenerator Links)
     {
         this.Sql = Sql;
         this.Smtp = Smtp;

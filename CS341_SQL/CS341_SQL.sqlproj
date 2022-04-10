@@ -105,6 +105,8 @@
     <Build Include="Stored Procedures\SiteUserPayments_DeleteById.sql" />
     <Build Include="Functions\CountSeatsTaken.sql" />
     <Build Include="Functions\CheckWindowOpen.sql" />
+    <Build Include="Stored Procedures\FileStorage_Enter.sql" />
+    <Build Include="Tables\FileStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="CS341_SQL.refactorlog" />

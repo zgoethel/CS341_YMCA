@@ -105,7 +105,7 @@
         if (result.Success)
         {
             // Set auth state logged in
-            var _authState = AuthState as AuthStateProvider;
+            var _authState = AuthState as AuthenticationStateService;
             _authState!.LogIn(formBind.Email, formBind.Password);
             // Save tokens in local storage
             ProtectedStorage.SetAsync("SessionName", formBind.Email);
