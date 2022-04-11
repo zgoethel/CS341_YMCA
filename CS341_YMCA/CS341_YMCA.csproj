@@ -8,9 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="FileStorage\**" />
     <Compile Remove="Schema\**" />
+    <Content Remove="FileStorage\**" />
     <Content Remove="Schema\**" />
+    <EmbeddedResource Remove="FileStorage\**" />
     <EmbeddedResource Remove="Schema\**" />
+    <None Remove="FileStorage\**" />
     <None Remove="Schema\**" />
   </ItemGroup>
 

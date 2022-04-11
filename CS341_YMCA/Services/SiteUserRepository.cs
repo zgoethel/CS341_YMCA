@@ -4,21 +4,21 @@ using System.Data.SqlClient;
 
 namespace CS341_YMCA.Services;
 
-/**
- * Provides access to the internal account and authentication
- * subsystems within the database.
- */
+/// <summary>
+/// Provides access to the internal account and authentication subsystems within
+/// the database.
+/// </summary>
 public class SiteUserRepository : Controller
 {
     private readonly LinkGenerator Links;
     private readonly IHttpContextAccessor Con;
-    private readonly Database Sql;
-    private readonly EmailSender Smtp;
+    private readonly DatabaseService Sql;
+    private readonly EmailService Smtp;
 
     private readonly string Env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
     private bool IsDevelopment => Env.Equals("Development");
 
-    public SiteUserRepository(Database Sql, EmailSender Smtp, IHttpContextAccessor Con, LinkGenerator Links)
+    public SiteUserRepository(DatabaseService Sql, EmailService Smtp, IHttpContextAccessor Con, LinkGenerator Links)
     {
         this.Sql = Sql;
         this.Smtp = Smtp;
@@ -26,16 +26,27 @@ public class SiteUserRepository : Controller
         this.Links = Links;
     }
 
+    /// <summary>
+    /// Dispatches a password reset email to the address associated with the
+    /// specified identity.
+    /// </summary>
+    /// <param name="Email">Email address (identity name) of the account.</param>
+    /// <param name="ResetToken">Generated reset token from the database.</param>
+    /// <exception cref="Exception">In case no HTTP session is in scope.</exception>
     private void SendResetEmail(string Email, Guid ResetToken)
     {
+        // Non-null assertion of HTTP context
         var Context = Con.HttpContext ?? throw new Exception("There is no active HTTP context.");
+        // Generate a context-specific absolute link for the reset flow
         var ResetLink = Links.GetUriByAction(
             Context, "ResetPasswordFlow", "SiteUser",
             new
             {
+                // Insert the reset token into the address
                 ResetToken
             });
 
+        // Send the email via the configured SMTP server.
         Smtp.SendEmail(null, Email, "Your account's password reset link",
             @"
                 <p>Thank you for showing interest in our service.</p>
@@ -47,13 +58,12 @@ public class SiteUserRepository : Controller
             ");
     }
 
-    /**
-     * User authentication endpoint to check credentials.
-     */
+    /// <summary>
+    /// User authentication endpoint to check credentials.
+    /// </summary>
     public ResultToken<object> SiteUser_Authenticate(
         string Email,
-        string PasswordHash
-    )
+        string PasswordHash)
     {
         ResultToken<object> Result = new();
 
@@ -79,15 +89,14 @@ public class SiteUserRepository : Controller
         return Result;
     }
 
-    /**
-     * User registration endpoint to make member accounts. Does not expose
-     * ability to create admin users.
-     */
+    /// <summary>
+    /// User registration endpoint to make member accounts. Does not expose
+    /// ability to create admin users.
+    /// </summary>
     public ResultToken<object> SiteUser_Register(
         string FirstName,
         string? LastName,
-        string Email
-    )
+        string Email)
     {
         ResultToken<object> Result = new();
 
@@ -118,12 +127,11 @@ public class SiteUserRepository : Controller
         return Result;
     }
 
-    /**
-     * Endpoint which allows the user to request a password reset.
-     */
+    /// <summary>
+    /// Endpoint which allows the user to request a password reset.
+    /// </summary>
     public ResultToken<object> SiteUser_RequestReset(
-        string Email
-    )
+        string Email)
     {
         ResultToken<object> Result = new();
 
@@ -151,14 +159,13 @@ public class SiteUserRepository : Controller
         return Result;
     }
 
-    /**
-     * Endpoint which allows users to complete their password resets (by
-     * clicking on a link sent via email).
-     */
+    /// <summary>
+    /// Endpoint which allows users to complete their password resets (by
+    /// clicking on a link sent via email).
+    /// </summary>
     public ResultToken<object> SiteUser_ResetPassword(
         Guid ResetToken,
-        string PasswordHash
-    )
+        string PasswordHash)
     {
         ResultToken<object> Result = new();
 
@@ -184,12 +191,11 @@ public class SiteUserRepository : Controller
         return Result;
     }
 
-    /**
-     * Lists users according to provided filters.
-     */
+    /// <summary>
+    /// Lists users according to provided filters.
+    /// </summary>
     public ResultToken<List<SiteUserDBO>> SiteUser_List(
-        string? EmailFilter = null
-    )
+        string? EmailFilter = null)
     {
         var Result = new ResultToken<List<SiteUserDBO>>
         {
@@ -220,12 +226,11 @@ public class SiteUserRepository : Controller
         return Result;
     }
 
-    /**
-     * Gets user data associated with an email.
-     */
+    /// <summary>
+    /// Gets user data associated with an email.
+    /// </summary>
     public ResultToken<SiteUserDBO> SiteUser_GetByEmail(
-        string Email
-    )
+        string Email)
     {
         ResultToken<SiteUserDBO> Result = new();
 
@@ -259,12 +264,11 @@ public class SiteUserRepository : Controller
         return Result;
     }
 
-    /**
-     * Gets user data associated with an ID.
-     */
+    /// <summary>
+    /// Gets user data associated with an ID.
+    /// </summary>
     public ResultToken<SiteUserDBO> SiteUser_GetById(
-        int Id
-    )
+        int Id)
     {
         ResultToken<SiteUserDBO> Result = new();
 
@@ -298,14 +302,17 @@ public class SiteUserRepository : Controller
         return Result;
     }
 
+    /// <summary>
+    /// Action to create or modify a site user record which already exists in
+    /// the database.This action cannot create new users.
+    /// </summary>
     public ResultToken<object> SiteUser_Set(
         int Id,
         string? FirstName = null,
         string? LastName = null,
         string? Email = null,
         bool? IsAdmin = null,
-        DateTime? MemberThru = null
-    )
+        DateTime? MemberThru = null)
     {
         ResultToken<object> Result = new();
 
@@ -337,12 +344,12 @@ public class SiteUserRepository : Controller
         return Result;
     }
 
-    /**
-     * Deletes the user with specified ID from the SiteUsers table.
-     */
+    /// <summary>
+    /// Deletes the user with specified ID from the SiteUsers table, as well as
+    /// associated payments and enrollments.
+    /// </summary>
     public ResultToken<object> SiteUser_DeleteById(
-        int Id
-    )
+        int Id)
     {
         ResultToken<object> Result = new();
         Result.Value = new();
@@ -377,9 +384,9 @@ public class SiteUserRepository : Controller
         return Result;
     }
 
-    /**
-     * Enters a payment into the database, returning the ID with which it was stored.
-     */
+    /// <summary>
+    /// Enters a payment into the database, returning the ID with which it was stored.
+    /// </summary>
     public ResultToken<int> SiteUserPayments_Enter(
         int UserId,
         decimal Amount,
@@ -387,8 +394,7 @@ public class SiteUserRepository : Controller
         int SecurityCode,
         int PostalCode,
         string HolderName,
-        DateTime CardExpiry
-    )
+        DateTime CardExpiry)
     {
         ResultToken<int> Result = new();
 
@@ -422,9 +428,11 @@ public class SiteUserRepository : Controller
         return Result;
     }
 
+    /// <summary>
+    /// Retrieves a payment history record from the database.
+    /// </summary>
     public ResultToken<UserPaymentDBO> SiteUserPayments_GetById(
-        int Id
-    )
+        int Id)
     {
         ResultToken<UserPaymentDBO> Result = new();
 
@@ -456,9 +464,11 @@ public class SiteUserRepository : Controller
         return Result;
     }
 
+    /// <summary>
+    /// Retrieves all payment history records associated with an account.
+    /// </summary>
     public ResultToken<List<UserPaymentDBO>> SiteUserPayments_GetByUserId(
-        int UserId
-    )
+        int UserId)
     {
         ResultToken<List<UserPaymentDBO>> Result = new();
         Result.Value = new();
@@ -485,6 +495,9 @@ public class SiteUserRepository : Controller
         return Result;
     }
 
+    /// <summary>
+    /// Retrieves all payment history records that exist in the database.
+    /// </summary>
     public ResultToken<List<UserPaymentDBO>> SiteUserPayments_List()
     {
         ResultToken<List<UserPaymentDBO>> Result = new();

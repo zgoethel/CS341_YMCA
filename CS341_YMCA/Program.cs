@@ -11,13 +11,14 @@ Builder.Services.AddRazorPages();
 Builder.Services.AddServerSideBlazor();
 Builder.Services.AddAuthorizationCore();
 
-Builder.Services.AddTransient<EmailSender>();
-Builder.Services.AddTransient<Database>();
+Builder.Services.AddTransient<EmailService>();
+Builder.Services.AddTransient<DatabaseService>();
 Builder.Services.AddTransient<SiteUserRepository>();
 Builder.Services.AddTransient<ClassRepository>();
 Builder.Services.AddTransient<ClassValidationService>();
+Builder.Services.AddTransient<FileStorageService>();
 
-Builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
+Builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationStateService>();
 
 var App = Builder.Build();
 
