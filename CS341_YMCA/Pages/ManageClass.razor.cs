@@ -20,6 +20,8 @@ public partial class ManageClass : ComponentBase
     public NavigationManager? Nav { get; set; }
     [Inject]
     public SiteUserRepository? SiteUsers { get; set; }
+    [Inject]
+    public FileStorageService? FileStorage { get; set; }
 
     /// <summary>
     /// DBO of the currently logged in user.
@@ -40,6 +42,9 @@ public partial class ManageClass : ComponentBase
     private ClassScheduler? scheduler;
     private List<ClassEnrollmentDBO> enrolled = new();
     private BsModal? deleteModal;
+    private PhotoPicker? thumbPicker;
+    private PhotoPicker? photoPicker;
+    private bool photosHaveLoaded = false;
 
     private string NonMemberStyle => activeClass.AllowNonMembers
         ? "display: block;"
@@ -53,9 +58,47 @@ public partial class ManageClass : ComponentBase
             activeClass = Classes!.Class_GetById(int.Parse(Id!)).Get()!;
             // Load list of user enrollments
             enrolled = Classes.ClassEnrollment_GetByClassId(int.Parse(Id!)).Get()!;
+            StateHasChanged();
         }
+    }
 
-        StateHasChanged();
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+
+        if (!photosHaveLoaded && thumbPicker is not null
+            && photoPicker is not null)
+        {
+            photosHaveLoaded = true;
+
+            try
+            {
+                // Populate thumbnail picker with existing image
+                if (activeClass.ClassThumbId is not null)
+                {
+                    using var thumbStream = FileStorage!.RetrieveFile(activeClass.ClassThumbId ?? 0).Get()!;
+                    thumbPicker?.PopulatePreview(thumbStream);
+                } else
+                    thumbPicker!.PopulatePreview("images/not_found.svg");
+            } catch (Exception)
+            {
+                thumbPicker!.PopulatePreview("images/error_thumb.svg");
+            }
+
+            try
+            {
+                // Populate photo picker with existing image
+                if (activeClass.ClassPhotoId is not null)
+                {
+                    using var photoStream = FileStorage!.RetrieveFile(activeClass.ClassPhotoId ?? 0).Get()!;
+                    photoPicker!.PopulatePreview(photoStream);
+                } else
+                    photoPicker!.PopulatePreview("images/not_found.svg");
+            } catch (Exception)
+            {
+                photoPicker!.PopulatePreview("images/error_thumb.svg");
+            }
+        }
     }
 
     /// <summary>
@@ -136,8 +179,8 @@ public partial class ManageClass : ComponentBase
                 StateHasChanged();
                 return;
             } else if (activeClass.MemberEnrollmentDays != null
-              && (activeClass.MemberEnrollmentDays != (int)activeClass.MemberEnrollmentDays
-              || activeClass.MemberEnrollmentDays < 0))
+                && (activeClass.MemberEnrollmentDays != (int)activeClass.MemberEnrollmentDays
+                || activeClass.MemberEnrollmentDays < 0))
             {
                 validationMessage = "Specify enrollment window length as a number of whole days.";
                 StateHasChanged();
@@ -194,7 +237,9 @@ public partial class ManageClass : ComponentBase
             Location: activeClass.Location,
             MaxSeats: activeClass.MaxSeats,
             FulfillCsv: fulfillSelector.Csv,
-            RequireCsv: requireSelector.Csv
+            RequireCsv: requireSelector.Csv,
+            ClassThumbId: thumbPicker!.HasValue ? thumbPicker!.SaveImage() : null,
+            ClassPhotoId: photoPicker!.HasValue ? photoPicker!.SaveImage() : null
         );
 
         // Write back created (or returned) ID

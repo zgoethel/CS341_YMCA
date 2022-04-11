@@ -22,6 +22,12 @@ public partial class PhotoPicker : ComponentBase
     [Parameter]
     public string? Label { get; set; }
 
+    /// <summary>
+    /// Whether or not any image has been selected, is stored in memory, and can
+    /// be saved to file.
+    /// </summary>
+    public bool HasValue => data is not null;
+
     private MemoryStream? data;
     private string? fileName;
     private string? previewUri;
@@ -43,13 +49,8 @@ public partial class PhotoPicker : ComponentBase
         await stream.CopyToAsync(data);
         data.Seek(0, SeekOrigin.Begin);
 
-        // Read the file contents from memory into a byte array
-        var bytes = new byte[data.Length];
-        data.Read(bytes, 0, bytes.Length);
-        // Use byte array to build base-64 image URI
-        previewUri = $"data:image/jpeg;base64,{Convert.ToBase64String(bytes)}";
-        StateHasChanged();
-
+        // Re-render preview with new photo data
+        PopulatePreview(data);
         // Return buffer to start after reading contents
         data.Seek(0, SeekOrigin.Begin);
     }
@@ -70,5 +71,29 @@ public partial class PhotoPicker : ComponentBase
             return result.Value;
         else
             throw new Exception(result.Error);
+    }
+
+    /// <summary>
+    /// Replaces the internal preview image with the provided URI data.
+    /// </summary>
+    /// <param name="uri">Encoded image data or image path.</param>
+    public void PopulatePreview(string uri)
+    {
+        previewUri = uri;
+        InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>
+    /// Replaces the internal preview image with the provided stream data.
+    /// </summary>
+    /// <param name="photoData">Stream containing photo's JPEG data.</param>
+    public void PopulatePreview(Stream photoData)
+    {
+        // Read the file contents from memory into a byte array
+        var bytes = new byte[photoData.Length];
+        photoData.Read(bytes, 0, bytes.Length);
+        // Use byte array to build base-64 image URI
+        previewUri = $"data:image/jpeg;base64,{Convert.ToBase64String(bytes)}";
+        InvokeAsync(StateHasChanged);
     }
 }

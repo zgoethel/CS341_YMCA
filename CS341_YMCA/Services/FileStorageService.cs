@@ -57,7 +57,7 @@ public class FileStorageService
                 "FileStorage_Enter",
                 new FileStorageEnterRequest()
                 {
-                    StoredName = storedName,
+                    StoredName = Path.GetFileName(file.Name),
                     OriginalName = originalName,
                     SizeBytes = (int)data.Length,
                     MimeType = mimeType,
@@ -75,6 +75,53 @@ public class FileStorageService
             result.Success = false;
             result.Error = IsDev ? ex.Message : "An unexpected error has occurred.";
         }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Finds the specified file in application storage and returns an in-memory
+    /// buffer of read data.
+    /// </summary>
+    /// <param name="Id">File record unique identifier.</param>
+    /// <returns>Stream containing requested file data.</returns>
+    public ResultToken<Stream> RetrieveFile(int Id)
+    {
+        var result = new ResultToken<Stream>();
+        FileStorageDBO? file = null;
+
+        try
+        {
+            Sql.ExecuteProcedure<FileStorageDBO>(
+                "FileStorage_GetById",
+                new { Id },
+                (_result) =>
+                {
+                    file = _result;
+                });
+        } catch (SqlException ex)
+        {
+            result.Success = false;
+            result.Error = ex.Message;
+
+            return result;
+        } catch (Exception ex)
+        {
+            result.Success = false;
+            result.Error = IsDev ? ex.Message : "An unexpected error has occurred.";
+
+            return result;
+        }
+        // Throw a "file not found" type of exception
+        if (file is null)
+            throw new Exception("Could not find the file specified.");
+
+        // Open stored file for reading
+        using var handle = File.OpenRead(Path.Combine(configSection.FolderPath, file!.StoredName));
+        result.Value = new MemoryStream();
+        // Copy into returned memory stream
+        handle.CopyTo(result.Value);
+        result.Value.Seek(0, SeekOrigin.Begin);
 
         return result;
     }

@@ -18,6 +18,8 @@ public partial class EnrollClass : ComponentBase
     public DatabaseService? Sql { get; set; }
     [Inject]
     public ClassValidationService? ClassValidation { get; set; }
+    [Inject]
+    public FileStorageService? FileStorage { get; set; }
 
     private SiteUserDBO _LoggedIn = new();
     /// <summary>
@@ -45,6 +47,7 @@ public partial class EnrollClass : ComponentBase
     private PaymentModal? paymentScreen;
     private BsModal? dropModal;
     private string enrollmentError = "";
+    private string photoUri = "";
 
     /// <summary>
     /// Loads page fields and calculations from the database.
@@ -53,6 +56,24 @@ public partial class EnrollClass : ComponentBase
     {
         activeClass = Classes!.Class_GetById(int.Parse(Id!)).Get()!;
         calculations = Classes!.Class_CalculateDetails(int.Parse(Id!), LoggedIn.Id).Get()!;
+
+        try
+        {
+            // Load photo if one is set
+            if (activeClass.ClassThumbId is not null)
+            {
+                using var stream = FileStorage!.RetrieveFile(activeClass.ClassPhotoId ?? 0).Get()!;
+                var bytes = new byte[stream.Length];
+                stream.Read(bytes, 0, bytes.Length);
+                // Use byte array to build base-64 image URI
+                photoUri = $"data:image/jpeg;base64,{Convert.ToBase64String(bytes)}";
+            }
+            else
+                photoUri = "images/not_found.svg";
+        } catch (Exception)
+        {
+            photoUri = "images/error_thumb.svg";
+        }
 
         InvokeAsync(StateHasChanged);
     }

@@ -43,7 +43,9 @@ BEGIN
         [dbo].[CheckWindowOpen](
             [AllowEnrollment],
             [NonMemberEnrollmentStart],
-            [NonMemberEnrollmentDays]) AS [NonMemberEnrollmentOpen]
+            [NonMemberEnrollmentDays]) AS [NonMemberEnrollmentOpen],
+        [ClassThumbId],
+        [ClassPhotoId]
     FROM [ClassMain] cm
     WHERE
         [Id] IN (SELECT [Id] FROM [dbo].[SplitIdOnDelim](@Csv, ','));

@@ -40,7 +40,9 @@ public class ClassRepository : Controller
         string? Location = null,
         int? MaxSeats = null,
         string? FulfillCsv = null,
-        string? RequireCsv = null)
+        string? RequireCsv = null,
+        int? ClassThumbId = null,
+        int? ClassPhotoId = null)
     {
         ResultToken<int> Result = new();
 
@@ -66,7 +68,9 @@ public class ClassRepository : Controller
                     Location = Location,
                     MaxSeats = MaxSeats,
                     FulfillCsv = FulfillCsv,
-                    RequireCsv = RequireCsv
+                    RequireCsv = RequireCsv,
+                    ClassThumbId = ClassThumbId,
+                    ClassPhotoId = ClassPhotoId
                 }, (_Result) =>
                 {
                     Result.Value = _Result.Id;

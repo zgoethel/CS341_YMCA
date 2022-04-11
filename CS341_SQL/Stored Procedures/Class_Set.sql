@@ -21,7 +21,9 @@ CREATE PROCEDURE [dbo].[Class_Set]
     @Location NVARCHAR(100) = NULL,
     @MaxSeats INT = NULL,
     @FulfillCsv NVARCHAR(MAX) = NULL,
-    @RequireCsv NVARCHAR(MAX) = NULL
+    @RequireCsv NVARCHAR(MAX) = NULL,
+    @ClassThumbId INT = NULL,
+    @ClassPhotoId INT = NULL
 AS
 BEGIN
     -- SET NOCOUNT ON added to prevent extra result sets from
@@ -48,7 +50,9 @@ BEGIN
             [Location],
             [MaxSeats],
             [FulfillCsv],
-            [RequireCsv]
+            [RequireCsv],
+            [ClassThumbId],
+            [ClassPhotoId]
         ) VALUES
         (
             ISNULL(@ClassName, ''),
@@ -66,7 +70,9 @@ BEGIN
             ISNULL(@Location, ''),
             @MaxSeats,
             ISNULL(@FulfillCsv, ''),
-            ISNULL(@RequireCsv, '')
+            ISNULL(@RequireCsv, ''),
+            @ClassThumbId,
+            @ClassPhotoId
         );
         -- Return the newly created ID
         SELECT CAST(SCOPE_IDENTITY() AS INT) AS [Id];
@@ -92,7 +98,9 @@ BEGIN
             [Location] = ISNULL(@Location, [Location]),
             [MaxSeats] = ISNULL(@MaxSeats, [MaxSeats]),
             [FulfillCsv] = ISNULL(@FulfillCsv, [FulfillCsv]),
-            [RequireCsv] = ISNULL(@RequireCsv, [RequireCsv])
+            [RequireCsv] = ISNULL(@RequireCsv, [RequireCsv]),
+            [ClassThumbId] = ISNULL(@ClassThumbId, [ClassThumbId]),
+            [ClassPhotoId] = ISNULL(@ClassPhotoId, [ClassPhotoId])
         WHERE
             [Id] = @Id;
         -- Return the same existing ID

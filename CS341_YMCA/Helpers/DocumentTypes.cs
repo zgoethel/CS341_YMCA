@@ -172,6 +172,8 @@ public class ClassSetRequest
     public int? MaxSeats { get; set; }
     public string? FulfillCsv { get; set; }
     public string? RequireCsv { get; set; }
+    public int? ClassThumbId { get; set; }
+    public int? ClassPhotoId { get; set; }
 }
 
 /// <summary>
@@ -218,6 +220,8 @@ public class ClassDBO
     public string FulfillCsv { get; set; } = "";
     public string RequireCsv { get; set; } = "";
     public int SeatsTaken { get; set; }
+    public int? ClassThumbId { get; set; }
+    public int? ClassPhotoId { get; set; }
 }
 
 /// <summary>
@@ -342,6 +346,7 @@ public class ClassCalculateDetailsResult
 /// <summary>
 /// Schema for a request to record an uploaded file.
 /// </summary>
+/// 
 public class FileStorageEnterRequest
 {
     public string StoredName { get; set; } = "";
@@ -357,6 +362,20 @@ public class FileStorageEnterRequest
 public class FileStorageEnterResult
 {
     public int Id { get; set; }
+}
+
+/// <summary>
+/// Schema of a file storage record in the database.
+/// </summary>
+public class FileStorageDBO
+{
+    public int Id { get; set; }
+    public string StoredName { get; set; } = "";
+    public string OriginalName { get; set; } = "";
+    public int SizeBytes { get; set; }
+    public string MimeType { get; set; } = "";
+    public DateTime Uploaded { get; set; }
+    public int? UploadedBy { get; set; }
 }
 
 #endregion

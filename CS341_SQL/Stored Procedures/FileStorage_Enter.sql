@@ -5,7 +5,7 @@
 -- =============================================
 CREATE PROCEDURE [dbo].[FileStorage_Enter]
     -- Provide ID of zero or `NULL` to insert a new record
-    @StoredName NVARCHAR(36),
+    @StoredName NVARCHAR(50),
     @OriginalName NVARCHAR(50),
     @SizeBytes INT,
     @MimeType NVARCHAR(50),
