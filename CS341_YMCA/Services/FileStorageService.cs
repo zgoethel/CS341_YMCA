@@ -57,7 +57,7 @@ public class FileStorageService
                 "FileStorage_Enter",
                 new FileStorageEnterRequest()
                 {
-                    StoredName = Path.GetFileName(file.Name),
+                    StoredName = storedName,
                     OriginalName = originalName,
                     SizeBytes = (int)data.Length,
                     MimeType = mimeType,
