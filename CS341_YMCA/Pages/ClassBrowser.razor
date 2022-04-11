@@ -7,23 +7,49 @@
 
 <PageTitle>Browse and Enroll</PageTitle>
 
+@* BOUND SEARCH "EDIT" FORM *@
+<EditForm Model=formBind style="position: absolute;right: 3em;">
+    <div class="row mt-2">
+        @* NAME SEARCH FILTER LABEL *@
+        <div class="col-sm-3 pt-2"><label>Name: </label></div>
+        @* NAME SEARCH FILTER FIELD *@
+        <div class="col-sm-9">
+            <input type="text" @bind=formBind.NameFilter
+                class="form-control shadow"
+                @bind:event="oninput" />
+        </div>
+    </div>
+</EditForm>
+
 <h1>Browse and Enroll</h1>
+<br style="display: block;height: 0;"/>
 <hr />
 <h3>Find fun new classes to add to your schedule</h3>
 
+@* RENDER CLASS CARDS *@
 @foreach (var c in classList!)
 {
     <ClassListEntry Class=@c></ClassListEntry>
 }
 
 @code {
-    private List<ClassDBO>? classList;
-
-    protected override void OnInitialized()
+    /// <summary>
+    /// Schema of data binding for the search fields.
+    /// </summary>
+    private class FormBind
     {
-        base.OnInitialized();
-
-        // Load class list from database
-        classList = Classes.Class_List(IncludeDisabled: false).Get()!;
+        public string NameFilter { get; set; } = "";
     }
+
+    /// <summary>
+    /// Bound object instance for the search fields.
+    /// </summary>
+    private readonly FormBind formBind = new();
+
+    /// <summary>
+    /// Generate list of classes from databaes query on state change.
+    /// </summary>
+    private List<ClassDBO>? classList => Classes.Class_List(
+        IncludeDisabled: false,
+        NameFilter: formBind.NameFilter).Get()!;
 }

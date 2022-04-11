@@ -4,7 +4,9 @@ using System.Text;
 namespace CS341_YMCA.Helpers;
 
 /// <summary>
-/// Misc. convenience functions and helper extensions.
+/// Misc. convenience functions and helper extensions. When imported, these
+/// methods can "add on" to class definitions, and the methods have a `this`
+/// keyword in scope. Very neat!
 /// </summary>
 public static class Extensions
 {

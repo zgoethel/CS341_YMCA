@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[SiteUserPayments] (
     [Id]           INT            IDENTITY (1, 1) NOT NULL,
     [UserId]       INT            NOT NULL,
-    [Amount]       DECIMAL (18)   NOT NULL,
+    [Amount]       DECIMAL (10, 2)   NOT NULL,
     [Paid]         DATETIME       CONSTRAINT [DF_SiteUser_Payments_Paid] DEFAULT (getdate()) NOT NULL,
     [CardNumber]   NVARCHAR (50)  NOT NULL,
     [SecurityCode] INT            NOT NULL,

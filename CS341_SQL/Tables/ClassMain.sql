@@ -12,12 +12,14 @@
     [NonMemberEnrollmentStart] DATETIME       NULL,
     [NonMemberEnrollmentDays]  INT            CONSTRAINT [DF_ClassMain_NonMemberEnrollmentDays] DEFAULT ((7)) NOT NULL,
     [AllowNonMembers]          BIT            CONSTRAINT [DF_ClassMain_AllowNonMembers] DEFAULT ((0)) NOT NULL,
-    [MemberPrice]              FLOAT (53)     CONSTRAINT [DF_ClassMain_MemberPrice] DEFAULT ((0)) NOT NULL,
-    [NonMemberPrice]           FLOAT (53)     CONSTRAINT [DF_ClassMain_NonMemberPrice] DEFAULT ((0)) NOT NULL,
+    [MemberPrice]              DECIMAL(10, 2)     CONSTRAINT [DF_ClassMain_MemberPrice] DEFAULT ((0)) NOT NULL,
+    [NonMemberPrice]           DECIMAL(10, 2)     CONSTRAINT [DF_ClassMain_NonMemberPrice] DEFAULT ((0)) NOT NULL,
     [Location]                 NVARCHAR (100) NULL,
     [MaxSeats]                 INT            NULL,
     [FulfillCsv]               NVARCHAR (MAX) CONSTRAINT [DF_ClassMain_FulfillCsv] DEFAULT ('') NOT NULL,
     [RequireCsv]               NVARCHAR (MAX) CONSTRAINT [DF_ClassMain_RequireCsv] DEFAULT ('') NOT NULL,
+    [ClassThumbId] INT NULL, 
+    [ClassPhotoId] INT NULL, 
     CONSTRAINT [PK_ClassMain] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 

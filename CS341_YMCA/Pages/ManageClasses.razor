@@ -7,6 +7,20 @@
 
 <PageTitle>Manage Classes</PageTitle>
 
+@* BOUND SEARCH "EDIT" FORM *@
+<EditForm Model=formBind style="position: absolute;right: 3em;">
+    <div class="row mt-2">
+        @* NAME SEARCH FILTER LABEL *@
+        <div class="col-sm-3 pt-2"><label>Name: </label></div>
+        @* NAME SEARCH FILTER FIELD *@
+        <div class="col-sm-9">
+            <input type="text" @bind=formBind.NameFilter
+                class="form-control shadow"
+                @bind:event="oninput" />
+        </div>
+    </div>
+</EditForm>
+
 @if (LoggedIn.IsAdmin)
 {
 
@@ -18,7 +32,9 @@
     <a class="btn btn-primary" href="ManageClasses/Create" style="float: right;"><span class="oi oi-plus" style="margin-top: 0.4em;"></span></a>
 
     @* GRAB LIST OF CLASSES INLINE *@
-    var classList = Classes.Class_List(IncludeDisabled: true).Get()!;
+    var classList = Classes.Class_List(
+        IncludeDisabled: true,
+        NameFilter: formBind.NameFilter).Get()!;
     
     @* TABLE SCROLL PANE *@
     <div class="overflow-auto">
@@ -79,8 +95,20 @@
     <div class="alert alert-danger">You are <strong>not</strong> an admin user and cannot access this page.</div>
 }
 
-@code
-{
+@code {
+    /// <summary>
+    /// Schema of data binding for the search fields.
+    /// </summary>
+    private class FormBind
+    {
+        public string NameFilter { get; set; } = "";
+    }
+
+    /// <summary>
+    /// Bound object instance for the search fields.
+    /// </summary>
+    private readonly FormBind formBind = new();
+
     /// <summary>
     /// DBO of the currently logged in user.
     /// </summary>

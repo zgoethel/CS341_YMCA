@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="558a1cb3-5650-4d4a-8de3-1e5c912a120a" ChangeDateTime="04/08/2022 14:22:12">
+    <Property Name="ElementName" Value="[dbo].[Split]" />
+    <Property Name="ElementType" Value="SqlMultiStatementTableValuedFunction" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[SplitOnDelim]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="19f274fe-a682-4b01-9fbf-6ce9ebefbdc9" ChangeDateTime="04/08/2022 14:22:37">
+    <Property Name="ElementName" Value="[dbo].[SplitId]" />
+    <Property Name="ElementType" Value="SqlMultiStatementTableValuedFunction" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[SplitIdOnDelim]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="cbd011ad-9857-45b6-9b72-7aca381404dd" ChangeDateTime="04/10/2022 19:39:32">
+    <Property Name="ElementName" Value="[dbo].[ClassMain].[ClassThumbnail]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[ClassMain]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ClassThumbId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a3b336e6-bf29-43c4-adc6-9f141e747527" ChangeDateTime="04/10/2022 19:43:02">
+    <Property Name="ElementName" Value="[dbo].[Table1].[UploadedBy]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Table1]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Uploaded" />
+  </Operation>
+</Operations>

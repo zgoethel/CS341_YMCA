@@ -5,7 +5,7 @@
 
 @inject LinkGenerator Links
 @inject NavigationManager Nav
-@inject Database Sql
+@inject DatabaseService Sql
 @inject AuthenticationStateProvider AuthState
 @inject IHttpContextAccessor Con
 @inject SiteUserRepository SiteUsers
@@ -62,7 +62,7 @@
                 if (sessionKey.Value != null)
                 {
                     var sessionName = await ProtectedStorage.GetAsync<string>("SessionName");
-                    ((AuthStateProvider)AuthState).LogIn(sessionName.Value!, sessionKey.Value!);
+                    ((AuthenticationStateService)AuthState).LogIn(sessionName.Value!, sessionKey.Value!);
                 }
             } catch (Exception ex)
             {
