@@ -44,18 +44,30 @@
         {
             @* DISPLAY SHADOWED CARD FOR EACH CLASS *@
             <div class="m-2 p-2 bg-light shadow">
-                <div style="display: block;height: 9.5em;" class="overflow-auto">
+                
+                <div style="display: block;height: 9.5em;" class="overflow-auto @(Class.CanceledDate is null ? "" : "text-decoration-line-through")">
                     <a href="Enroll/@(Class.ClassId)"><h5>@(Class.ClassName)</h5></a>
+                    
                     <p>@Class.ShortDescription</p>
                 </div>
                 <div style="display: block;">
                     <hr class="mt-2 mb-2" />
 
-                    @* CLASS VIEW LINK *@
-                    <a class="btn btn-primary me-1" href="Enroll/@(Class.ClassId)">View</a>
-                    @* CLASS DROP BUTTON *@
-                    <a class="btn btn-danger" @onclick="() => OpenDropModal(Class)">Drop</a>
-                
+                    @if (Class.CanceledDate is null)
+                    {
+                        @* CLASS VIEW LINK *@
+                        <a class="btn btn-primary me-1" href="Enroll/@(Class.ClassId)">View</a>
+                        @* CLASS DROP BUTTON *@
+                        <a class="btn btn-danger" @onclick="() => OpenDropModal(Class)">Drop</a>
+                    } else
+                    {
+                        <div class="alert alert-danger p-1">
+                            Canceled; click to
+                            @* CLASS DROP BUTTON *@
+                            <a role="button" class="text-decoration-underline" @onclick="() => OpenDropModal(Class)">drop</a>.
+                        </div>
+                    }
+                    
                 </div>
             </div>
         }

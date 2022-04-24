@@ -45,7 +45,8 @@ BEGIN
             [NonMemberEnrollmentStart],
             [NonMemberEnrollmentDays]) AS [NonMemberEnrollmentOpen],
         [ClassThumbId],
-        [ClassPhotoId]
+        [ClassPhotoId],
+        [CanceledDate]
     FROM [ClassMain] cm
     WHERE
         [Id] = @Id;

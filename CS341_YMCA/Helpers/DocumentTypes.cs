@@ -222,6 +222,7 @@ public class ClassDBO
     public int SeatsTaken { get; set; }
     public int? ClassThumbId { get; set; }
     public int? ClassPhotoId { get; set; }
+    public DateTime? CanceledDate { get; set; }
 }
 
 /// <summary>
@@ -237,6 +238,7 @@ public class ClassScheduleDBO
     public int Occurrences { get; set; }
     public string ClassName { get; set; } = "";
     public string ShortDescription { get; set; } = "";
+    public DateTime? CanceledDate { get; set; }
 }
 
 /// <summary>
@@ -312,6 +314,7 @@ public class ClassEnrollmentDBO
     public string? LastName { get; set; }
     public string Email { get; set; } = "";
     public bool IsMember { get; set; }
+    public DateTime? CanceledDate { get; set; }
 }
 
 /// <summary>

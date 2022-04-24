@@ -3,7 +3,7 @@
 
 @inject ClassRepository Classes
 
-<tr>
+<tr class="@(Class.CanceledDate is null ? "" : "text-decoration-line-through text-secondary")">
 <td style="white-space: nowrap;">@Class.ClassName</td>
 <td>
     <h5>

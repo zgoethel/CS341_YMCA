@@ -51,5 +51,7 @@
     /// </summary>
     private List<ClassDBO>? classList => Classes.Class_List(
         IncludeDisabled: false,
-        NameFilter: formBind.NameFilter).Get()!;
+        NameFilter: formBind.NameFilter)
+        .Get()!
+        .FindAll((it) => it.CanceledDate is null);
 }

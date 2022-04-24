@@ -45,7 +45,8 @@ BEGIN
             [NonMemberEnrollmentStart],
             [NonMemberEnrollmentDays]) AS [NonMemberEnrollmentOpen],
         [ClassThumbId],
-        [ClassPhotoId]
+        [ClassPhotoId],
+        [CanceledDate]
     FROM [ClassMain] cm
     WHERE
         -- Check that class is in user's enrollment set

@@ -20,6 +20,7 @@
     [RequireCsv]               NVARCHAR (MAX) CONSTRAINT [DF_ClassMain_RequireCsv] DEFAULT ('') NOT NULL,
     [ClassThumbId] INT NULL, 
     [ClassPhotoId] INT NULL, 
+    [CanceledDate] DATETIME NULL, 
     CONSTRAINT [PK_ClassMain] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 

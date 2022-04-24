@@ -42,6 +42,7 @@ public partial class ManageClass : ComponentBase
     private ClassScheduler? scheduler;
     private List<ClassEnrollmentDBO> enrolled = new();
     private BsModal? deleteModal;
+    private BsModal? cancelModal;
     private PhotoPicker? thumbPicker;
     private PhotoPicker? photoPicker;
     private bool photosHaveLoaded = false;
@@ -104,7 +105,6 @@ public partial class ManageClass : ComponentBase
     /// <summary>
     /// Called after delete dialog accepted to perform deletion.
     /// </summary>
-    /// <returns></returns>
     private async Task<bool> DeleteDialogSubmit() => await Task.Run(() =>
     {
         // Delete class and related details
@@ -112,6 +112,19 @@ public partial class ManageClass : ComponentBase
         Nav!.NavigateTo("ManageClasses");
 
         return false;
+    });
+
+    /// <summary>
+    /// Called after cancel dialog accepted to perform cancelation.
+    /// </summary>
+    private async Task<bool> CancelDialogSubmit() => await Task.Run(() =>
+    {
+        // Delete class and related details
+        var result = Classes!.Class_Cancel(activeClass.Id);
+        activeClass.CanceledDate = DateTime.Now;
+        InvokeAsync(StateHasChanged);
+
+        return true;
     });
 
     /// <summary>

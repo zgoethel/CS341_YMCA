@@ -27,18 +27,46 @@
     </Body>
 </BsModal>
 
+@* CANCEL CONFIRM MODAL *@
+<BsModal @ref=cancelModal
+    SubmitText="Continue"
+    SubmitAction=CancelDialogSubmit
+    SubmitClass="danger"
+    CancelText="Go Back">
+
+    <Title>You are about to cancel the class <strong>'@(activeClass.ClassName)'</strong></Title>
+    <Body>
+        <p class="font-weight-bold">You will be able to reverse this action as long as the class is not deleted.</p>
+        <ul class="text-danger">
+            <li>Payments for this course will <strong>not</strong> be automatically refunded.</li>
+            <li>All who are enrolled in the course will be able to see that it is canceled.</li>
+            <li><strong>Ensure all patrons have been refunded accordingly prior to canceling any course for good.</strong></li>
+        </ul>
+    </Body>
+</BsModal>
+
 @* ALLOW ONLY ADMINS TO VIEW SETTINGS *@
 @if (LoggedIn.IsAdmin)
 {
-    <div style="float: right;">
+    <div style="float: left;">
 
         @* BACK BUTTON *@
-        <a class="btn btn-outline-secondary m-2" href="javascript:history.back()">Cancel</a>
+        <i role="button" class="oi oi-chevron-left m-3" onclick="history.back()"></i>
+
+    </div>
+    <div style="float: right;">
+
         
-        @* DELETE BUTTON IF NOT NEW *@
         @if (Id != "Create")
         {
-            <button class="btn btn-danger m-2" @onclick="() => deleteModal!.Open()">Delete Class</button>
+            @if (activeClass.CanceledDate is null)
+            {
+                 @* CANCEL BUTTON IF NOT NEW *@
+                <button class="btn btn-outline-danger m-2" @onclick="() => cancelModal!.Open()">Cancel Class</button>
+            }
+           
+            @* DELETE BUTTON IF NOT NEW *@
+            <button class="btn btn-outline-danger m-2" @onclick="() => deleteModal!.Open()">Delete Class</button>
         }
 
         @* SAVE BUTTON *@
@@ -57,6 +85,22 @@
     @* PAGE LEFT COLUMN BEGINS HERE *@
 
     <h3>Manage details for '@activeClass.ClassName'</h3>
+
+    @if (activeClass.CanceledDate is not null)
+    {
+        <div class="alert alert-danger mt-3">
+            <button class="btn btn-outline-danger float-end" @onclick="() =>
+            {
+                Classes!.Class_Cancel(activeClass.Id, IsUndo: true);
+                activeClass.CanceledDate = null;
+                StateHasChanged();
+            }">Undo Cancelation</button>
+
+            <div class="m-1">
+                An admin has canceled this class. Enrollment is disabled unless it is reinstated.
+            </div>
+        </div>
+    }
 
     @* CLASS NAME/LOCATION LABELS *@
     <div class="row">

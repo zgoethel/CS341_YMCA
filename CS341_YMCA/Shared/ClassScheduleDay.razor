@@ -165,7 +165,7 @@
     } @* ELSE ... DISPLAY ALL UNDELETED SCHEDULE ON DAY *@
     @foreach (var sched in onDay.FindAll((It) => !DeleteIds!.Contains(It.Id ?? -2)))
     {
-        <hr style="margin-top: 0;margin-bottom: 5px;" />
+        <hr style="margin-top: 0;margin-bottom: 5px;"/>
 
         @* SHOW OR HIDE EDITING CONTROLS *@
         @if (ShowEditing)
@@ -186,15 +186,15 @@
             }
 
             @* CLASS NAME LINK TO ENROLL *@
-            <a href="Enroll/@sched.ClassId"><strong>@(sched.ClassName)</strong></a>
+            <a href="Enroll/@sched.ClassId" class="@(sched.CanceledDate is null ? "" : "text-decoration-line-through")"><strong>@(sched.ClassName)</strong></a>
         }
 
         @* CALCULATED BEGIN AND END TIMES *@
-        <p>
+        <p class="@(sched.CanceledDate is null ? "" : "text-decoration-line-through")">
             @sched.FirstDate.ToShortTimeString()&nbsp;-
             @sched.FirstDate.AddMinutes(sched.Duration).ToShortTimeString()
         </p>
-
+        
         <p>
             @* DISPLAY LONGER RECURRENCE DATA IF NO TITLES *@
             @if (!DisplayClassTitles)

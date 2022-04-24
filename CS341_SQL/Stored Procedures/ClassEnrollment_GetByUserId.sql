@@ -20,7 +20,8 @@ BEGIN
         [PassedYN],
         cm.[ClassName],
         cm.[ShortDescription],
-        [dbo].[UserIsMember]([UserId], su.[MemberThru]) AS [IsMember]
+        [dbo].[UserIsMember]([UserId], su.[MemberThru]) AS [IsMember],
+        cm.[CanceledDate]
     FROM [ClassEnrollment] ce
     LEFT JOIN [ClassMain] cm on cm.[Id] = [ClassId]
     LEFT JOIN [SiteUser] su on su.[Id] = [UserId]

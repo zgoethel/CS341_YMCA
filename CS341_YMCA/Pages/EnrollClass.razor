@@ -21,6 +21,11 @@
     </Body>
 </BsModal>
 
+@if (activeClass.CanceledDate is not null)
+{
+    <div class="alert alert-danger">This class has been canceled and is no longer available for enrollment.</div>
+}
+
 <h1>@activeClass.ClassName</h1>
 <hr />
 
@@ -170,7 +175,10 @@
         <span class="alert alert-danger">@enrollmentError</span>
     }
 
-    @if (calculations.IsEnrolled)
+    @if (activeClass.CanceledDate is not null)
+    {
+        <alert class="alert alert-danger">This class has been canceled by an admin.</alert>
+    } else if (calculations.IsEnrolled)
     {
         @* DISPLAYED WHEN ALREADY ENROLLED IN CLASS *@
 
