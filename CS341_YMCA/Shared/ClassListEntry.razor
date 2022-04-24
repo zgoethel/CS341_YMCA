@@ -58,28 +58,35 @@
     [CascadingParameter]
     public SiteUserDBO? LoggedIn { get; set; }
 
+    private int? loadedThumbId = -1;
     private string photoUri = "";
 
-    protected override void OnInitialized()
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        base.OnInitialized();
-
-        try
+        if (Class.ClassThumbId != loadedThumbId)
         {
-            // Load photo if one is set
-            if (Class.ClassThumbId is not null)
+            try
             {
-                using var stream = FileStorage!.RetrieveFile(Class.ClassThumbId ?? 0).Get()!;
-                var bytes = new byte[stream.Length];
-                stream.Read(bytes, 0, bytes.Length);
-                // Use byte array to build base-64 image URI
-                photoUri = $"data:image/jpeg;base64,{Convert.ToBase64String(bytes)}";
-            } else
-                photoUri = "images/not_found.svg";
-        } catch (Exception)
-        {
-            photoUri = "images/error_thumb.svg";
+                loadedThumbId = Class.ClassThumbId;
+                // Load photo if one is set
+                if (Class.ClassThumbId is not null)
+                {
+                    using var stream = FileStorage!.RetrieveFile(Class.ClassThumbId ?? 0).Get()!;
+                    var bytes = new byte[stream.Length];
+                    stream.Read(bytes, 0, bytes.Length);
+                    // Use byte array to build base-64 image URI
+                    photoUri = $"data:image/jpeg;base64,{Convert.ToBase64String(bytes)}";
+                } else
+                    photoUri = "images/not_found.svg";
+            } catch (Exception)
+            {
+                photoUri = "images/error_thumb.svg";
+            }
+
+            StateHasChanged();
         }
+
+        return base.OnAfterRenderAsync(firstRender);
     }
 }
 
