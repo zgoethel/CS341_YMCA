@@ -20,6 +20,8 @@ public partial class EnrollClass : ComponentBase
     public ClassValidationService? ClassValidation { get; set; }
     [Inject]
     public FileStorageService? FileStorage { get; set; }
+    [Inject]
+    public PrereqValidationService? Prereqs { get; set; }
 
     private SiteUserDBO _LoggedIn = new();
     /// <summary>

@@ -89,6 +89,38 @@ public class ClassRepository : Controller
     }
 
     /// <summary>
+    /// Allows canceling or undoing cancelation of a class.
+    /// </summary>
+    public ResultToken<int> Class_Cancel(
+        int Id,
+        bool IsUndo = false)
+    {
+        ResultToken<int> Result = new();
+
+        try
+        {
+            Sql.ExecuteProcedure<object>(
+                "Class_Cancel",
+                new
+                {
+                    Id,
+                    IsUndo
+                }, (_) =>
+                {  });
+        } catch (SqlException Ex)
+        {
+            Result.Success = false;
+            Result.Error = Ex.Message;
+        } catch (Exception Ex)
+        {
+            Result.Success = false;
+            Result.Error = IsDevelopment ? Ex.Message : "An unexpected error has occurred.";
+        }
+
+        return Result;
+    }
+
+    /// <summary>
     /// Lists classes according to provided filter parameters.
     /// </summary>
     public ResultToken<List<ClassDBO>> Class_List(

@@ -21,6 +21,11 @@
     </Body>
 </BsModal>
 
+@if (activeClass.CanceledDate is not null)
+{
+    <div class="alert alert-danger">This class has been canceled and is no longer available for enrollment.</div>
+}
+
 <h1>@activeClass.ClassName</h1>
 <hr />
 
@@ -170,7 +175,10 @@
         <span class="alert alert-danger">@enrollmentError</span>
     }
 
-    @if (calculations.IsEnrolled)
+    @if (activeClass.CanceledDate is not null)
+    {
+        <alert class="alert alert-danger">This class has been canceled by an admin.</alert>
+    } else if (calculations.IsEnrolled)
     {
         @* DISPLAYED WHEN ALREADY ENROLLED IN CLASS *@
 
@@ -202,6 +210,13 @@
             @* DISPLAYED IF OPEN BUT USER IS GUEST *@
 
             <span class="alert alert-secondary">Please log in to enroll in courses.</span>
+        } else if (!Prereqs!.HasPrereqs(LoggedIn?.Id ?? 0,
+            Array.FindAll(activeClass.RequireCsv.Split(","), (it) => !string.IsNullOrEmpty(it))
+            .ToList()))
+        {
+            @* DISPLAYED IF OPEN BUT USER DOESN'T HAVE PREREQS *@
+
+            <span class="alert alert-secondary">Unfortunately, you have not met all of the prerequisites for this class. If you believe this is a mistake, please contact us.</span>
         } else
         {
             @* DISPLAYED IF ALLOWED TO ENROLL AND OPEN *@

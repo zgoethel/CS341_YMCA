@@ -4,6 +4,7 @@
 -- Description: Lists all of the site users in the database.
 -- =============================================
 CREATE PROCEDURE [dbo].[SiteUser_List]
+    @NameFilter NVARCHAR(100) = '',
     @EmailFilter NVARCHAR(100) = ''
 AS
 BEGIN
@@ -23,10 +24,12 @@ BEGIN
         [Created],
         [Modified],
         [MemberThru],
-        [dbo].[UserIsMember]([Id], [MemberThru]) AS [IsMember]
+        [dbo].[UserIsMember]([Id], [MemberThru]) AS [IsMember],
+        [FulfilledCsv]
     FROM [SiteUser]
     WHERE 
-        [Email] LIKE '%' + @EmailFilter + '%'
+        [FirstName] + ' ' + [LastName] LIKE '%' + @NameFilter + '%'
+        AND [Email] LIKE '%' + @EmailFilter + '%'
     ORDER BY [Id];
 
     END

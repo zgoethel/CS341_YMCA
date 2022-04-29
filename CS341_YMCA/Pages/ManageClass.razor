@@ -27,18 +27,58 @@
     </Body>
 </BsModal>
 
+@* CANCEL CONFIRM MODAL *@
+<BsModal @ref=cancelModal
+    SubmitText="Continue"
+    SubmitAction=CancelDialogSubmit
+    SubmitClass="danger"
+    CancelText="Go Back">
+
+    <Title>You are about to cancel the class <strong>'@(activeClass.ClassName)'</strong></Title>
+    <Body>
+        <p class="font-weight-bold">You will be able to reverse this action as long as the class is not deleted.</p>
+        <ul class="text-danger">
+            <li>Payments for this course will <strong>not</strong> be automatically refunded.</li>
+            <li>All who are enrolled in the course will be able to see that it is canceled.</li>
+            <li><strong>Ensure all patrons have been refunded accordingly prior to canceling any course for good.</strong></li>
+        </ul>
+    </Body>
+</BsModal>
+
+@* MARK GRADE CONFIRM MODAL *@
+<BsModal @ref=gradeModal
+    SubmitText="Submit Grade"
+    SubmitAction=GradeDialogSubmit
+    SubmitClass="primary">
+
+    <Title>Submitting Class Grade</Title>
+    <Body>
+        <p class="font-weight-bold">Class grades are final and cannot be easily reversed. Are you sure you wish to continue?</p>
+    </Body>
+</BsModal>
+
 @* ALLOW ONLY ADMINS TO VIEW SETTINGS *@
 @if (LoggedIn.IsAdmin)
 {
-    <div style="float: right;">
+    <div style="float: left;">
 
         @* BACK BUTTON *@
-        <a class="btn btn-outline-secondary m-2" href="javascript:history.back()">Cancel</a>
+        <i role="button" class="oi oi-chevron-left m-3" onclick="history.back()"></i>
+
+    </div>
+    <div style="float: right;">
+
         
-        @* DELETE BUTTON IF NOT NEW *@
         @if (Id != "Create")
         {
-            <button class="btn btn-danger m-2" @onclick="() => deleteModal!.Open()">Delete Class</button>
+            @if (activeClass.CanceledDate is null)
+            {
+                 @* CANCEL BUTTON IF NOT NEW *@
+                <button class="btn btn-outline-danger m-2" @onclick="() => cancelModal!.Open()">Cancel Class</button>
+            }
+           
+            @* DELETE BUTTON IF NOT NEW *@
+            <button class="btn btn-outline-danger m-2" @onclick="() => deleteModal!.Open()">Delete Class</button>
         }
 
         @* SAVE BUTTON *@
@@ -57,6 +97,22 @@
     @* PAGE LEFT COLUMN BEGINS HERE *@
 
     <h3>Manage details for '@activeClass.ClassName'</h3>
+
+    @if (activeClass.CanceledDate is not null)
+    {
+        <div class="alert alert-danger mt-3">
+            <button class="btn btn-outline-danger float-end" @onclick="() =>
+            {
+                Classes!.Class_Cancel(activeClass.Id, IsUndo: true);
+                activeClass.CanceledDate = null;
+                StateHasChanged();
+            }">Undo Cancelation</button>
+
+            <div class="m-1">
+                An admin has canceled this class. Enrollment is disabled unless it is reinstated.
+            </div>
+        </div>
+    }
 
     @* CLASS NAME/LOCATION LABELS *@
     <div class="row">
@@ -129,16 +185,20 @@
             
     <h3 class="mt-4">Custom Course Photos</h3>
     <div class="row">
-    <div class="col-lg-6">
+    <div class="col-lg-6 p-2">
 
-        @* REQ. CODE FULFILLMENT EDITING *@
-        <PhotoPicker Label="Thumbnail" @ref=thumbPicker />
+        <div class="border border-dark p-2 rounded-3">
+            @* REQ. CODE FULFILLMENT EDITING *@
+            <PhotoPicker Label="Thumbnail" @ref=thumbPicker />
+        </div>
 
     </div>
-    <div class="col-lg-6">
-
-        @* REQ. CODE REQUIREMENT EDITING *@
-        <PhotoPicker Label="Page Photo" @ref=photoPicker />
+    <div class="col-lg-6 p-2">
+        
+        <div class="border border-dark p-2 rounded-2">
+            @* REQ. CODE REQUIREMENT EDITING *@
+            <PhotoPicker Label="Page Photo" @ref=photoPicker />
+        </div>
 
     </div>
     </div>
@@ -163,7 +223,7 @@
     <h3 class="mb-4">Pricing and Enrollment</h3>
 
     @* MEMBER PRICING CARD *@
-    <div class="card mb-4">
+    <div class="card mb-4 shadow">
     <div class="card-header">Settings for Members</div>
     <div class="card-body">
 
@@ -204,7 +264,7 @@
     </div>
 
     @* NON-MEMBER PRICING CARD *@
-    <div class="card mb-4">
+    <div class="card mb-4 shadow">
     <div class="card-header">Settings for non-members</div>
     <div class="card-body">
 
@@ -258,7 +318,7 @@
     <h3 class="mb-4 mt-4">Enrolled Patrons</h3>
 
     @* ENROLLMENT LIST CARD *@
-    <div class="card mb-4">
+    <div class="card mb-4 shadow">
     <div class="card-header">Enrollment status</div>
     <div class="card-body">
 
@@ -270,16 +330,49 @@
         @foreach (var Enrollment in enrolled)
         {
             <div class="alert alert-secondary mt-3">
-                @* DISPLAY USER DETAILS *@
-                <h5><i class="oi oi-person me-1" /> @Enrollment.FirstName @Enrollment.LastName <i>(@Enrollment.Email)</i></h5>
+                <div>
+
                 @* DISPLAY USER MEMBERSHIP STATUS *@
                 @if (Enrollment.IsMember)
                 {
-                    <h5 class="badge bg-success">Member</h5>
+                    <h5 class="badge bg-success" style="float: right;">Member</h5>
                 } else
                 {
-                    <h5 class="badge bg-info">Non-member</h5>
+                    <h5 class="badge bg-info" style="float: right;">Non-member</h5>
                 }
+
+                @* DISPLAY USER DETAILS *@
+                <span><i class="oi oi-person me-1" /> <a href="ManageUsers/@Enrollment.UserId">@Enrollment.FirstName @Enrollment.LastName</a> <i>(@Enrollment.Email)</i></span>
+                
+                </div>
+                <div class="mt-2">
+
+                @if (Enrollment.PassedYN is null)
+                {
+                    <label class="me-2">Mark grade:</label>
+                    <button class="btn btn-success"
+                        @onclick="() =>
+                        {
+                            gradeToMark = true;
+                            userToGrade = Enrollment.UserId;
+                            gradeModal!.Open();
+                        }">Pass</button>
+                    <button class="btn btn-danger"
+                        @onclick="() =>
+                        {
+                            gradeToMark = false;
+                            userToGrade = Enrollment.UserId;
+                            gradeModal!.Open();
+                        }">Fail</button>
+                } else if (Enrollment.PassedYN == true)
+                {
+                    <button class="btn btn-success" disabled>Passed</button>
+                } else
+                {
+                    <button class="btn btn-danger" disabled>Failed</button>
+                }
+
+                </div>
             </div>
         }
 

@@ -81,6 +81,7 @@ public class SiteUserDBO
 /// </summary>
 public class SiteUserListRequest
 {
+    public string? NameFilter { get; set; } = null;
     public string? EmailFilter { get; set; } = null;
 }
 
@@ -95,7 +96,7 @@ public class SiteUserSetRequest
     public string? Email { get; set; }
     public bool? IsAdmin { get; set; }
     public DateTime? MemberThru { get; set; }
-    public string? FullfilledCsv { get; set; }
+    public string? FulfilledCsv { get; set; }
 }
 
 /// <summary>
@@ -222,6 +223,7 @@ public class ClassDBO
     public int SeatsTaken { get; set; }
     public int? ClassThumbId { get; set; }
     public int? ClassPhotoId { get; set; }
+    public DateTime? CanceledDate { get; set; }
 }
 
 /// <summary>
@@ -237,6 +239,7 @@ public class ClassScheduleDBO
     public int Occurrences { get; set; }
     public string ClassName { get; set; } = "";
     public string ShortDescription { get; set; } = "";
+    public DateTime? CanceledDate { get; set; }
 }
 
 /// <summary>
@@ -312,6 +315,7 @@ public class ClassEnrollmentDBO
     public string? LastName { get; set; }
     public string Email { get; set; } = "";
     public bool IsMember { get; set; }
+    public DateTime? CanceledDate { get; set; }
 }
 
 /// <summary>

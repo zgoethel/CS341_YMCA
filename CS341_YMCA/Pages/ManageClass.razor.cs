@@ -22,6 +22,8 @@ public partial class ManageClass : ComponentBase
     public SiteUserRepository? SiteUsers { get; set; }
     [Inject]
     public FileStorageService? FileStorage { get; set; }
+    [Inject]
+    public PrereqValidationService? Prereqs { get; set; }
 
     /// <summary>
     /// DBO of the currently logged in user.
@@ -42,9 +44,11 @@ public partial class ManageClass : ComponentBase
     private ClassScheduler? scheduler;
     private List<ClassEnrollmentDBO> enrolled = new();
     private BsModal? deleteModal;
+    private BsModal? cancelModal;
     private PhotoPicker? thumbPicker;
     private PhotoPicker? photoPicker;
     private bool photosHaveLoaded = false;
+    private BsModal? gradeModal;
 
     private string NonMemberStyle => activeClass.AllowNonMembers
         ? "display: block;"
@@ -104,7 +108,6 @@ public partial class ManageClass : ComponentBase
     /// <summary>
     /// Called after delete dialog accepted to perform deletion.
     /// </summary>
-    /// <returns></returns>
     private async Task<bool> DeleteDialogSubmit() => await Task.Run(() =>
     {
         // Delete class and related details
@@ -112,6 +115,39 @@ public partial class ManageClass : ComponentBase
         Nav!.NavigateTo("ManageClasses");
 
         return false;
+    });
+
+    /// <summary>
+    /// Called after cancel dialog accepted to perform cancelation.
+    /// </summary>
+    private async Task<bool> CancelDialogSubmit() => await Task.Run(() =>
+    {
+        // Delete class and related details
+        var result = Classes!.Class_Cancel(activeClass.Id);
+        activeClass.CanceledDate = DateTime.Now;
+        InvokeAsync(StateHasChanged);
+
+        return true;
+    });
+
+    // Temp. storage for confirmation
+    private int userToGrade;
+    private bool gradeToMark;
+
+    /// <summary>
+    /// Called after grade dialog accepted to enter a grade.
+    /// </summary>
+    private async Task<bool> GradeDialogSubmit() => await Task.Run(() =>
+    {
+        if (gradeToMark)
+            Prereqs!.MarkPassed(userToGrade, activeClass.Id);
+        else
+            Prereqs!.MarkFailed(userToGrade, activeClass.Id);
+
+        enrolled.Find((it) => it.UserId == userToGrade)!.PassedYN = gradeToMark;
+        InvokeAsync(StateHasChanged);
+
+        return true;
     });
 
     /// <summary>

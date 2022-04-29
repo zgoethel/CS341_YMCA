@@ -21,7 +21,8 @@ BEGIN
         cs.[Updated],
         [Occurrences],
         cm.[ClassName],
-        cm.[ShortDescription]
+        cm.[ShortDescription],
+        cm.[CanceledDate]
     FROM [ClassSchedule] cs
     LEFT JOIN [ClassMain] cm on cm.[Id] = [ClassId]
     WHERE
