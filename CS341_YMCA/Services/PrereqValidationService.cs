@@ -54,8 +54,8 @@ public class PrereqValidationService
     public void MarkPassed(int userId, int classId)
     {
         var course = classes.Class_GetById(classId).Get()!;
-        if (!string.IsNullOrEmpty(course.RequireCsv))
-            GrantPrereqs(userId, course.RequireCsv.Split(",").ToList());
+        if (!string.IsNullOrEmpty(course.FulfillCsv))
+            GrantPrereqs(userId, course.FulfillCsv.Split(",").ToList());
 
         MarkResult(userId, classId, true);
     }

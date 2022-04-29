@@ -210,6 +210,13 @@
             @* DISPLAYED IF OPEN BUT USER IS GUEST *@
 
             <span class="alert alert-secondary">Please log in to enroll in courses.</span>
+        } else if (!Prereqs!.HasPrereqs(LoggedIn?.Id ?? 0,
+            Array.FindAll(activeClass.RequireCsv.Split(","), (it) => !string.IsNullOrEmpty(it))
+            .ToList()))
+        {
+            @* DISPLAYED IF OPEN BUT USER DOESN'T HAVE PREREQS *@
+
+            <span class="alert alert-secondary">Unfortunately, you have not met all of the prerequisites for this class. If you believe this is a mistake, please contact us.</span>
         } else
         {
             @* DISPLAYED IF ALLOWED TO ENROLL AND OPEN *@
