@@ -5,6 +5,7 @@
 @using CS341_YMCA.Services
 
 @inject SiteUserRepository SiteUsers
+@inject ClassRepository Classes
 @inject DatabaseService Sql
 @inject NavigationManager Nav
 
@@ -74,8 +75,9 @@
     <EditForm Model=ActiveUser>
 
     <div class="row">
-        <div class="col-lg-7">
+        <div class="col-lg-7 mb-4">
 
+            @* EXPIRATION DATE EDITING CARD *@
             <div class="card shadow p-3 mt-4">
                 <div class="row">
                     <div class="col-sm-8">
@@ -116,8 +118,34 @@
                 </div>
             </div>
 
+
+
         </div>
         <div class="col-lg-5">
+
+            <h4>Class Enrollment</h4>
+            <hr />
+
+            @foreach (var enroll in classEnrollment!)
+            {
+                @*<div class="alert alert-success">*@
+                    <p style="float: right;" class="me-2">Enrolled on <strong>@enroll.EnrolledDate.ToShortDateString()</strong></p>
+                    <a href="ManageClasses/@(enroll.ClassId)" class="ms-2 me-2">@enroll.ClassName</a>;
+
+                    @if (enroll.PassedYN is null)
+                    {
+                        <span class="badge bg-secondary">No Grade</span>
+                    } else if (enroll.PassedYN == true)
+                    {
+                        <span class="badge bg-success">Passed</span>
+                    } else
+                    {
+                        <span class="badge bg-danger">Failed</span>
+                    }
+
+                    <hr />
+                @*</div>*@
+            }
 
         </div>
     </div>
@@ -151,12 +179,16 @@
     private string? ValidationMessage;
     private BsModal? DeleteModal;
     private BsModal? MakeAdminModal;
+    private List<ClassEnrollmentDBO>? classEnrollment;
 
     protected override void OnInitialized()
     {
         // Load the existing user record
         ActiveUser = SiteUsers.SiteUser_GetById(int.Parse(Id!)).Get()!;
         editingDate = ActiveUser.MemberThru;
+
+        // Load the class enrollment for the user
+        classEnrollment = Classes.ClassEnrollment_GetByUserId(ActiveUser.Id).Get()!;
     }
 
     /// <summary>

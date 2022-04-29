@@ -27,7 +27,8 @@ BEGIN
             [Email] = ISNULL(@Email, [Email]),
             [IsAdmin] = ISNULL(@IsAdmin, [IsAdmin]),
             [MemberThru] = ISNULL(@MemberThru, [MemberThru]),
-            [FulfilledCsv] = ISNULL(@FulfilledCsv, [FulfilledCsv])
+            [FulfilledCsv] = ISNULL(@FulfilledCsv, [FulfilledCsv]),
+            [Modified] = GETDATE()
         WHERE
             [Id] = @Id;
     END
