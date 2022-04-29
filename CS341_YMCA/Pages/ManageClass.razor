@@ -45,6 +45,18 @@
     </Body>
 </BsModal>
 
+@* MARK GRADE CONFIRM MODAL *@
+<BsModal @ref=gradeModal
+    SubmitText="Submit Grade"
+    SubmitAction=GradeDialogSubmit
+    SubmitClass="primary">
+
+    <Title>Submitting Class Grade</Title>
+    <Body>
+        <p class="font-weight-bold">Class grades are final and cannot be easily reversed. Are you sure you wish to continue?</p>
+    </Body>
+</BsModal>
+
 @* ALLOW ONLY ADMINS TO VIEW SETTINGS *@
 @if (LoggedIn.IsAdmin)
 {
@@ -173,16 +185,20 @@
             
     <h3 class="mt-4">Custom Course Photos</h3>
     <div class="row">
-    <div class="col-lg-6">
+    <div class="col-lg-6 p-2">
 
-        @* REQ. CODE FULFILLMENT EDITING *@
-        <PhotoPicker Label="Thumbnail" @ref=thumbPicker />
+        <div class="border border-dark p-2 rounded-3">
+            @* REQ. CODE FULFILLMENT EDITING *@
+            <PhotoPicker Label="Thumbnail" @ref=thumbPicker />
+        </div>
 
     </div>
-    <div class="col-lg-6">
-
-        @* REQ. CODE REQUIREMENT EDITING *@
-        <PhotoPicker Label="Page Photo" @ref=photoPicker />
+    <div class="col-lg-6 p-2">
+        
+        <div class="border border-dark p-2 rounded-2">
+            @* REQ. CODE REQUIREMENT EDITING *@
+            <PhotoPicker Label="Page Photo" @ref=photoPicker />
+        </div>
 
     </div>
     </div>
@@ -314,16 +330,49 @@
         @foreach (var Enrollment in enrolled)
         {
             <div class="alert alert-secondary mt-3">
-                @* DISPLAY USER DETAILS *@
-                <h5><i class="oi oi-person me-1" /> @Enrollment.FirstName @Enrollment.LastName <i>(@Enrollment.Email)</i></h5>
+                <div>
+
                 @* DISPLAY USER MEMBERSHIP STATUS *@
                 @if (Enrollment.IsMember)
                 {
-                    <h5 class="badge bg-success">Member</h5>
+                    <h5 class="badge bg-success" style="float: right;">Member</h5>
                 } else
                 {
-                    <h5 class="badge bg-info">Non-member</h5>
+                    <h5 class="badge bg-info" style="float: right;">Non-member</h5>
                 }
+
+                @* DISPLAY USER DETAILS *@
+                <span><i class="oi oi-person me-1" /> <a href="ManageUsers/@Enrollment.UserId">@Enrollment.FirstName @Enrollment.LastName</a> <i>(@Enrollment.Email)</i></span>
+                
+                </div>
+                <div class="mt-2">
+
+                @if (Enrollment.PassedYN is null)
+                {
+                    <label class="me-2">Mark grade:</label>
+                    <button class="btn btn-success"
+                        @onclick="() =>
+                        {
+                            gradeToMark = true;
+                            userToGrade = Enrollment.UserId;
+                            gradeModal!.Open();
+                        }">Pass</button>
+                    <button class="btn btn-danger"
+                        @onclick="() =>
+                        {
+                            gradeToMark = false;
+                            userToGrade = Enrollment.UserId;
+                            gradeModal!.Open();
+                        }">Fail</button>
+                } else if (Enrollment.PassedYN == true)
+                {
+                    <button class="btn btn-success" disabled>Passed</button>
+                } else
+                {
+                    <button class="btn btn-danger" disabled>Failed</button>
+                }
+
+                </div>
             </div>
         }
 

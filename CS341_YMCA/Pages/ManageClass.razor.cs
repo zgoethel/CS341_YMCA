@@ -22,6 +22,8 @@ public partial class ManageClass : ComponentBase
     public SiteUserRepository? SiteUsers { get; set; }
     [Inject]
     public FileStorageService? FileStorage { get; set; }
+    [Inject]
+    public PrereqValidationService? Prereqs { get; set; }
 
     /// <summary>
     /// DBO of the currently logged in user.
@@ -46,6 +48,7 @@ public partial class ManageClass : ComponentBase
     private PhotoPicker? thumbPicker;
     private PhotoPicker? photoPicker;
     private bool photosHaveLoaded = false;
+    private BsModal? gradeModal;
 
     private string NonMemberStyle => activeClass.AllowNonMembers
         ? "display: block;"
@@ -122,6 +125,26 @@ public partial class ManageClass : ComponentBase
         // Delete class and related details
         var result = Classes!.Class_Cancel(activeClass.Id);
         activeClass.CanceledDate = DateTime.Now;
+        InvokeAsync(StateHasChanged);
+
+        return true;
+    });
+
+    // Temp. storage for confirmation
+    private int userToGrade;
+    private bool gradeToMark;
+
+    /// <summary>
+    /// Called after grade dialog accepted to enter a grade.
+    /// </summary>
+    private async Task<bool> GradeDialogSubmit() => await Task.Run(() =>
+    {
+        if (gradeToMark)
+            Prereqs!.MarkPassed(userToGrade, activeClass.Id);
+        else
+            Prereqs!.MarkFailed(userToGrade, activeClass.Id);
+
+        enrolled.Find((it) => it.UserId == userToGrade)!.PassedYN = gradeToMark;
         InvokeAsync(StateHasChanged);
 
         return true;

@@ -26,5 +26,6 @@ BEGIN
     LEFT JOIN [ClassMain] cm on cm.[Id] = [ClassId]
     LEFT JOIN [SiteUser] su on su.[Id] = [UserId]
     WHERE
-        [UserId] = @UserId;
+        [UserId] = @UserId
+    ORDER BY [EnrolledDate] DESC;
 END

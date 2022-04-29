@@ -35,7 +35,7 @@
     SubmitAction=MakeAdminDialogSubmit
     SubmitClass="danger">
 
-    <Title>You are about to make <strong>'@ActiveUser!.FirstName'</strong> @(ActiveUser.IsAdmin ? "a regular user" : "an admin").</Title>
+    <Title>You are about to make <strong>@ActiveUser!.FirstName</strong> @(ActiveUser.IsAdmin ? "a regular user" : "an admin").</Title>
     <Body>
         <p class="font-weight-bold">This will affect their ability to control class details and access sensitive user data.
             Are you sure you wish to continue?</p>
@@ -75,10 +75,13 @@
     <EditForm Model=ActiveUser>
 
     <div class="row">
-        <div class="col-lg-7 mb-4">
+        <div class="col-lg-6 mb-4">
 
             @* EXPIRATION DATE EDITING CARD *@
-            <div class="card shadow p-3 mt-4">
+            <div class="card shadow mt-4">
+                <div class="card-header">Membership Expiration</div>
+                <div class="card-body">
+
                 <div class="row">
                     <div class="col-sm-8">
 
@@ -112,41 +115,80 @@
                                 ActiveUser.MemberThru = editingDate;
                                 SiteUsers.SiteUser_Set(Id: ActiveUser.Id, MemberThru: editingDate).Get();
                                 StateHasChanged();
-                            }">Save Expiration</button>
+                            }">Submit</button>
                     
                     </div>
                 </div>
+
+                </div>
+            </div>
+            
+            @* FULFILLED PREREQ EDITING CARD *@
+            <div class="card shadow mt-4">
+                <div class="card-header">Fulfilled Prereqs</div>
+                <div class="card-body">
+                
+                <div class="row">
+                    <div class="col-sm-8">
+
+                        <CsvSelector Csv=@ActiveUser.FulfilledCsv
+                            Exclude=@(new())
+                            @ref=fulfillSelector
+                            Items=@(Classes!.Class_ListReqs().Get()!)
+                            Callback="() =>
+                            {
+                                ActiveUser.FulfilledCsv = fulfillSelector!.Csv!;
+                            }" />
+
+                    </div>
+                    <div class="col-sm-4 border-start ps-4">
+
+                        <button class="btn btn-primary mt-2"
+                            @onclick="() =>
+                            {
+                                SiteUsers.SiteUser_Set(Id: ActiveUser.Id, FulfilledCsv: ActiveUser.FulfilledCsv).Get();
+                                StateHasChanged();
+                            }">Submit</button>
+
+                    </div>
+                </div>
+                
+
+                </div>
             </div>
 
-
-
         </div>
-        <div class="col-lg-5">
+        <div class="col-lg-6">
 
-            <h4>Class Enrollment</h4>
-            <hr />
+            <div class="card shadow mt-4">
+                <div class="card-header">Class Enrollment</div>
+                <div class="card-body p-0">
 
-            @foreach (var enroll in classEnrollment!)
-            {
-                @*<div class="alert alert-success">*@
-                    <p style="float: right;" class="me-2">Enrolled on <strong>@enroll.EnrolledDate.ToShortDateString()</strong></p>
-                    <a href="ManageClasses/@(enroll.ClassId)" class="ms-2 me-2">@enroll.ClassName</a>;
+                @foreach (var enroll in classEnrollment!)
+                {
+                    @*<div class="alert alert-success">*@
+                        <br />
+                        <p style="float: right;" class="me-3">Enrolled on <strong>@enroll.EnrolledDate.ToShortDateString()</strong></p>
+                        <a href="ManageClasses/@(enroll.ClassId)" class="ms-3 me-2">@enroll.ClassName</a>;
 
-                    @if (enroll.PassedYN is null)
-                    {
-                        <span class="badge bg-secondary">No Grade</span>
-                    } else if (enroll.PassedYN == true)
-                    {
-                        <span class="badge bg-success">Passed</span>
-                    } else
-                    {
-                        <span class="badge bg-danger">Failed</span>
-                    }
+                        @if (enroll.PassedYN is null)
+                        {
+                            <span class="badge bg-secondary">No Grade</span>
+                        } else if (enroll.PassedYN == true)
+                        {
+                            <span class="badge bg-success">Passed</span>
+                        } else
+                        {
+                            <span class="badge bg-danger">Failed</span>
+                        }
 
-                    <hr />
-                @*</div>*@
-            }
-
+                        <hr class="mb-0" />
+                    @*</div>*@
+                }
+                
+                </div>
+            </div>
+            
         </div>
     </div>
 
@@ -180,6 +222,7 @@
     private BsModal? DeleteModal;
     private BsModal? MakeAdminModal;
     private List<ClassEnrollmentDBO>? classEnrollment;
+    private CsvSelector? fulfillSelector;
 
     protected override void OnInitialized()
     {

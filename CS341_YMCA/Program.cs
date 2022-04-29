@@ -17,6 +17,7 @@ Builder.Services.AddTransient<SiteUserRepository>();
 Builder.Services.AddTransient<ClassRepository>();
 Builder.Services.AddTransient<ClassValidationService>();
 Builder.Services.AddTransient<FileStorageService>();
+Builder.Services.AddTransient<PrereqValidationService>();
 
 Builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationStateService>();
 
