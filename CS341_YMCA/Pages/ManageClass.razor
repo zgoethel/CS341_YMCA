@@ -45,6 +45,18 @@
     </Body>
 </BsModal>
 
+@* MARK GRADE CONFIRM MODAL *@
+<BsModal @ref=gradeModal
+    SubmitText="Submit Grade"
+    SubmitAction=GradeDialogSubmit
+    SubmitClass="primary">
+
+    <Title>Submitting Class Grade</Title>
+    <Body>
+        <p class="font-weight-bold">Class grades are final and cannot be easily reversed. Are you sure you wish to continue?</p>
+    </Body>
+</BsModal>
+
 @* ALLOW ONLY ADMINS TO VIEW SETTINGS *@
 @if (LoggedIn.IsAdmin)
 {
@@ -318,6 +330,8 @@
         @foreach (var Enrollment in enrolled)
         {
             <div class="alert alert-secondary mt-3">
+                <div>
+
                 @* DISPLAY USER MEMBERSHIP STATUS *@
                 @if (Enrollment.IsMember)
                 {
@@ -328,7 +342,37 @@
                 }
 
                 @* DISPLAY USER DETAILS *@
-                <span><i class="oi oi-person me-1" /> <a href="/ManageUsers/@Enrollment.UserId">@Enrollment.FirstName @Enrollment.LastName</a> <i>(@Enrollment.Email)</i></span>
+                <span><i class="oi oi-person me-1" /> <a href="ManageUsers/@Enrollment.UserId">@Enrollment.FirstName @Enrollment.LastName</a> <i>(@Enrollment.Email)</i></span>
+                
+                </div>
+                <div class="mt-2">
+
+                @if (Enrollment.PassedYN is null)
+                {
+                    <label class="me-2">Mark grade:</label>
+                    <button class="btn btn-success"
+                        @onclick="() =>
+                        {
+                            gradeToMark = true;
+                            userToGrade = Enrollment.UserId;
+                            gradeModal!.Open();
+                        }">Pass</button>
+                    <button class="btn btn-danger"
+                        @onclick="() =>
+                        {
+                            gradeToMark = false;
+                            userToGrade = Enrollment.UserId;
+                            gradeModal!.Open();
+                        }">Fail</button>
+                } else if (Enrollment.PassedYN == true)
+                {
+                    <button class="btn btn-success" disabled>Passed</button>
+                } else
+                {
+                    <button class="btn btn-danger" disabled>Failed</button>
+                }
+
+                </div>
             </div>
         }
 
