@@ -88,7 +88,11 @@ public partial class CsvSelector : ComponentBase
         // Regenerate item CSV from selected list
         Csv = String.Join(',', selected);
 
-        InvokeAsync(StateHasChanged);
+        InvokeAsync(() =>
+        {
+            StateHasChanged();
+            Callback?.Invoke();
+        });
 
         return true;
     });
@@ -100,7 +104,8 @@ public partial class CsvSelector : ComponentBase
         // Convert selected list to hash set for "contains" checks
         var csvLookup = Csv!.Split(",").ToHashSet();
         // Create selected/not-selected lists
-        selected = Items.FindAll((It) => csvLookup.Contains(It) && !Exclude.Contains(It));
+        selected = Csv!.Split(",").ToList();
+        if (string.IsNullOrEmpty(Csv!)) selected.Clear();
         notSelected = Items.FindAll((It) => !csvLookup.Contains(It) && !Exclude.Contains(It));
     }
 

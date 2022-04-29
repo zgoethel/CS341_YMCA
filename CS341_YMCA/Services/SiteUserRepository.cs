@@ -314,7 +314,8 @@ public class SiteUserRepository : Controller
         string? LastName = null,
         string? Email = null,
         bool? IsAdmin = null,
-        DateTime? MemberThru = null)
+        DateTime? MemberThru = null,
+        string? FulfilledCsv = null)
     {
         ResultToken<object> Result = new();
 
@@ -329,7 +330,8 @@ public class SiteUserRepository : Controller
                     LastName = LastName,
                     Email = Email,
                     IsAdmin = IsAdmin,
-                    MemberThru = MemberThru
+                    MemberThru = MemberThru,
+                    FulfilledCsv = FulfilledCsv
                 }, (_) => {  });
 
             Result.Success = true;
