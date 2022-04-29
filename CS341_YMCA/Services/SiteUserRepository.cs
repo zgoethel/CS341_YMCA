@@ -195,6 +195,7 @@ public class SiteUserRepository : Controller
     /// Lists users according to provided filters.
     /// </summary>
     public ResultToken<List<SiteUserDBO>> SiteUser_List(
+        string? NameFilter = null,
         string? EmailFilter = null)
     {
         var Result = new ResultToken<List<SiteUserDBO>>
@@ -208,7 +209,8 @@ public class SiteUserRepository : Controller
                 "SiteUser_List",
                 new SiteUserListRequest()
                 {
-                    EmailFilter = EmailFilter,
+                    NameFilter = NameFilter,
+                    EmailFilter = EmailFilter
                 }, (_Result) =>
                 {
                     Result.Value.Add(_Result);

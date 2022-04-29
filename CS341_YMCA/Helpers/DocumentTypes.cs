@@ -81,6 +81,7 @@ public class SiteUserDBO
 /// </summary>
 public class SiteUserListRequest
 {
+    public string? NameFilter { get; set; } = null;
     public string? EmailFilter { get; set; } = null;
 }
 
@@ -95,7 +96,7 @@ public class SiteUserSetRequest
     public string? Email { get; set; }
     public bool? IsAdmin { get; set; }
     public DateTime? MemberThru { get; set; }
-    public string? FullfilledCsv { get; set; }
+    public string? FulfilledCsv { get; set; }
 }
 
 /// <summary>

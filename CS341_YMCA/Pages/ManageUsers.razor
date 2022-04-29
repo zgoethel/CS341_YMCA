@@ -7,6 +7,30 @@
 
 <PageTitle>Member Accounts</PageTitle>
 
+@* BOUND SEARCH "EDIT" FORM *@
+<EditForm Model=formBind style="position: absolute;right: 3em;top: 0.5em;">
+    <div class="row mt-2">
+        @* NAME SEARCH FILTER LABEL *@
+        <div class="col-sm-3 pt-2"><label>Name: </label></div>
+        @* NAME SEARCH FILTER FIELD *@
+        <div class="col-sm-9">
+            <input type="text" @bind=formBind.NameFilter
+                class="form-control shadow"
+                @bind:event="oninput" />
+        </div>
+    </div>
+    <div class="row mt-2">
+        @* EMAIL SEARCH FILTER LABEL *@
+        <div class="col-sm-3 pt-2"><label>Email: </label></div>
+        @* EMAIL SEARCH FILTER FIELD *@
+        <div class="col-sm-9">
+            <input type="text" @bind=formBind.EmailFilter
+                class="form-control shadow"
+                @bind:event="oninput" />
+        </div>
+    </div>
+</EditForm>
+
 @if (LoggedIn.IsAdmin)
 {
 
@@ -15,7 +39,7 @@
     <h3>Manage patron account, membership, and payment details</h3>
     
     @* LOAD LIST OF USERS INLINE *@
-    var userList = Users.SiteUser_List().Get()!;
+    var userList = Users.SiteUser_List(formBind.NameFilter, formBind.EmailFilter).Get()!;
 
     @* TABLE SCROLL PANE *@
     <div class="overflow-auto" style="max-width: 70em;">
@@ -60,6 +84,20 @@
 }
 
 @code {
+    /// <summary>
+    /// Schema of data binding for the search fields.
+    /// </summary>
+    private class FormBind
+    {
+        public string NameFilter { get; set; } = "";
+        public string EmailFilter { get; set; } = "";
+    }
+
+    /// <summary>
+    /// Bound object instance for the search fields.
+    /// </summary>
+    private readonly FormBind formBind = new();
+
     /// <summary>
     /// DBO of the currently logged in user.
     /// </summary>

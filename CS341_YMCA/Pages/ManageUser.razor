@@ -36,14 +36,75 @@
 
 @if (LoggedIn!.IsAdmin)
 {
+    <div style="float: left;">
+
+        @* BACK BUTTON *@
+        <i role="button" class="oi oi-chevron-left m-3" onclick="history.back()"></i>
+
+    </div>
+    <div style="float: right;">
+
+        @* USER DELETE BUTTON *@
+        <button class="btn btn-outline-danger m-2" @onclick="() => DeleteModal!.Open()">Delete User</button>
+        
+    </div>
 
     @* HEAD AREA*@
     <h1>User Account Editor</h1>
+    <br style="height: 0;display: block;">
     <hr />
     <h3>Managing details for <strong>@ActiveUser!.FirstName @ActiveUser.LastName</strong> ('@ActiveUser.Email')</h3>
 
-    @* USER DELETE BUTTON *@
-    <button class="btn btn-danger mt-4" @onclick="() => DeleteModal!.Open()">Delete User</button>
+    <EditForm Model=ActiveUser>
+
+    <div class="row">
+        <div class="col-lg-7">
+
+            <div class="card shadow p-3 mt-4">
+                <div class="row">
+                    <div class="col-sm-8">
+
+                        @* CURRENT EXPIRATION DATE PUT HERE *@
+                        @if (ActiveUser.MemberThru is null)
+                        {
+                            <p>@ActiveUser.FirstName is not a member</p>
+                        } else if (ActiveUser.MemberThru > DateTime.Now)
+                        {
+                            <p>@ActiveUser.FirstName is a member through</p>
+                            <h3>@ActiveUser.MemberThru?.ToLongDateString()</h3>
+                        } else
+                        {
+                            <p class="text-danger">@ActiveUser.FirstName's membership expired on</p>
+                            <h3 class="text-danger">@ActiveUser.MemberThru?.ToLongDateString()</h3>
+                        }
+
+                    </div>
+                    <div class="col-sm-4 border-start ps-4">
+
+                        @* EXPIRATION DATE OF MEMBERSHIP FIELD *@
+                        <label>Expiration Date:</label>
+                        <InputDate @bind-Value=editingDate class="form-control" style="max-width: 150px;" />
+                        
+                        @* EXPIRATION "SAVE" BUTTON *@
+                        <button class="btn btn-primary mt-2"
+                            @onclick="() =>
+                            {
+                                ActiveUser.MemberThru = editingDate;
+                                SiteUsers.SiteUser_Set(Id: ActiveUser.Id, MemberThru: editingDate).Get();
+                                StateHasChanged();
+                            }">Save Expiration</button>
+                    
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-lg-5">
+
+        </div>
+    </div>
+
+    </EditForm>
 
 } else
 {
@@ -63,6 +124,11 @@
     [Parameter]
     public string? Id { get; set; }
 
+    /// <summary>
+    /// Date bound to the datepicker element.
+    /// </summary>
+    private DateTime? editingDate;
+
     private SiteUserDBO? ActiveUser;
     private string? ValidationMessage;
     private BsModal? DeleteModal;
@@ -70,8 +136,8 @@
     protected override void OnInitialized()
     {
         // Load the existing user record
-        if (Id != "Create")
-            ActiveUser = SiteUsers.SiteUser_GetById(int.Parse(Id!)).Get()!;
+        ActiveUser = SiteUsers.SiteUser_GetById(int.Parse(Id!)).Get()!;
+        editingDate = ActiveUser.MemberThru;
     }
 
     /// <summary>
