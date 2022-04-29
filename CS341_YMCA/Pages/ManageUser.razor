@@ -169,7 +169,12 @@
                     @*<div class="alert alert-success">*@
                         <br />
                         <p style="float: right;" class="me-3">Enrolled on <strong>@enroll.EnrolledDate.ToShortDateString()</strong></p>
-                        <a href="ManageClasses/@(enroll.ClassId)" class="ms-3 me-2">@enroll.ClassName</a>;
+                        <a href="ManageClasses/@(enroll.ClassId)" class="ms-3 me-2 @(enroll.CanceledDate is null ? "" : "text-decoration-line-through")">@enroll.ClassName</a>;
+
+                        @if (enroll.CanceledDate is not null)
+                        {
+                            <i class="me-2">(Canceled)</ij>
+                        }
 
                         @if (enroll.PassedYN is null)
                         {
