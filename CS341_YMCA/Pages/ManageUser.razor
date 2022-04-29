@@ -28,6 +28,19 @@
     </Body>
 </BsModal>
 
+@* MAKE ADMIN CONFIRMATION MODAL*@
+<BsModal @ref=MakeAdminModal
+    SubmitText="Continue"
+    SubmitAction=MakeAdminDialogSubmit
+    SubmitClass="danger">
+
+    <Title>You are about to make <strong>'@ActiveUser!.FirstName'</strong> @(ActiveUser.IsAdmin ? "a regular user" : "an admin").</Title>
+    <Body>
+        <p class="font-weight-bold">This will affect their ability to control class details and access sensitive user data.
+            Are you sure you wish to continue?</p>
+    </Body>
+</BsModal>
+
 @* DISPLAY VALIDATION MESSAGE IF EXISTS *@
 @if (!string.IsNullOrEmpty(ValidationMessage))
 {
@@ -46,6 +59,9 @@
 
         @* USER DELETE BUTTON *@
         <button class="btn btn-outline-danger m-2" @onclick="() => DeleteModal!.Open()">Delete User</button>
+        
+        @* USER TOGGLE ADMIN BUTTON *@
+        <button class="btn btn-outline-warning m-2" @onclick="() => MakeAdminModal!.Open()">Make @(ActiveUser!.IsAdmin ? "Not" : "") Admin</button>
         
     </div>
 
@@ -67,15 +83,17 @@
                         @* CURRENT EXPIRATION DATE PUT HERE *@
                         @if (ActiveUser.MemberThru is null)
                         {
-                            <p>@ActiveUser.FirstName is not a member</p>
+                            <p>@ActiveUser.FirstName is not a member.</p>
+                            <p>To make them a member, enter and save an expiration date.</p>
                         } else if (ActiveUser.MemberThru > DateTime.Now)
                         {
                             <p>@ActiveUser.FirstName is a member through</p>
                             <h3>@ActiveUser.MemberThru?.ToLongDateString()</h3>
                         } else
                         {
-                            <p class="text-danger">@ActiveUser.FirstName's membership expired on</p>
-                            <h3 class="text-danger">@ActiveUser.MemberThru?.ToLongDateString()</h3>
+                            <p class="text-danger mb-0">@ActiveUser.FirstName's membership expired on</p>
+                            <h3 class="text-danger mb-4">@ActiveUser.MemberThru?.ToLongDateString()</h3>
+                            <p>To renew their membership, enter and save a new expiration date.</p>
                         }
 
                     </div>
@@ -132,6 +150,7 @@
     private SiteUserDBO? ActiveUser;
     private string? ValidationMessage;
     private BsModal? DeleteModal;
+    private BsModal? MakeAdminModal;
 
     protected override void OnInitialized()
     {
@@ -152,5 +171,16 @@
 
         // Leave dialog open; can mess with redirect to close
         return false;
+    });
+
+    private async Task<bool> MakeAdminDialogSubmit() => await Task.Run(() =>
+    {
+        // Perform the change
+        SiteUsers.SiteUser_Set(Id: ActiveUser!.Id, IsAdmin: !ActiveUser.IsAdmin).Get();
+        ActiveUser!.IsAdmin = !ActiveUser!.IsAdmin;
+        InvokeAsync(StateHasChanged);
+
+        // Close the dialog after confirming
+        return true;
     });
 }
