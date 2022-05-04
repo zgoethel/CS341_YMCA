@@ -329,11 +329,14 @@
         @* ITERATE THROUGH ENROLLED USERS *@
         @foreach (var Enrollment in enrolled)
         {
-            <div class="alert alert-secondary mt-3">
+            <div class="alert alert-secondary mt-3 @(Enrollment.UserEnabled ? "" : "text-decoration-line-through")">
                 <div>
 
                 @* DISPLAY USER MEMBERSHIP STATUS *@
-                @if (Enrollment.IsMember)
+                @if (!Enrollment.UserEnabled)
+                {
+                    <h5 class="badge bg-secondary" style="float: right;">Disabled</h5>
+                } else if (Enrollment.IsMember)
                 {
                     <h5 class="badge bg-success" style="float: right;">Member</h5>
                 } else
@@ -347,7 +350,8 @@
                 </div>
                 <div class="mt-2">
 
-                @if (Enrollment.PassedYN is null)
+                @if (!Enrollment.UserEnabled) {  }
+                else if (Enrollment.PassedYN is null)
                 {
                     <label class="me-2">Mark grade:</label>
                     <button class="btn btn-success"
