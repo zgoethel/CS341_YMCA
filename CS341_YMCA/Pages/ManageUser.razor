@@ -29,6 +29,30 @@
     </Body>
 </BsModal>
 
+@* DISABLE CONFIRMATION MODAL*@
+<BsModal @ref=DeactivateModal
+    SubmitText="@(ActiveUser!.Enabled ? "Deactivate" : "Re-activate")"
+    SubmitAction=DeactivateDialogSubmit
+    SubmitClass="danger">
+
+    <Title>You are about to @(ActiveUser!.Enabled ? "deactivate" : "re-activate") the account <strong>'@ActiveUser!.Email'</strong></Title>
+    <Body>
+        @if (ActiveUser!.Enabled)
+        {
+            <p class="font-weight-bold">Are you sure you wish to continue? This action can be reversed later, but</p>
+            <ul class="text-danger">
+                <li>The user will no longer be able to log in to the system while their account is disabled.</li>
+                <li>Payments for this account will <strong>not</strong> be automatically refunded.</li>
+            </ul>
+        } else {
+            <p class="font-weight-bold">Are you sure you wish to continue?</p>
+            <ul>
+                <li>The user will be able to log in to their account again.</li>
+            </ul>
+        }
+        </Body>
+</BsModal>
+
 @* MAKE ADMIN CONFIRMATION MODAL*@
 <BsModal @ref=MakeAdminModal
     SubmitText="Continue"
@@ -57,13 +81,16 @@
 
     </div>
     <div style="float: right;">
-
-        @* USER DELETE BUTTON *@
-        <button class="btn btn-outline-danger m-2" @onclick="() => DeleteModal!.Open()">Delete User</button>
         
         @* USER TOGGLE ADMIN BUTTON *@
         <button class="btn btn-outline-warning m-2" @onclick="() => MakeAdminModal!.Open()">Make @(ActiveUser!.IsAdmin ? "Not" : "") Admin</button>
-        
+
+        @* USER DEACTIVATE BUTTON *@
+        <button class="btn btn-outline-danger m-2" @onclick="() => DeactivateModal!.Open()">@(ActiveUser!.Enabled ? "Deactivate" : "Re-activate") User</button>
+
+        @* USER DELETE BUTTON *@
+        <button class="btn btn-outline-danger m-2" @onclick="() => DeleteModal!.Open()">Delete User</button>
+
     </div>
 
     @* HEAD AREA*@
@@ -225,6 +252,7 @@
     private SiteUserDBO? ActiveUser;
     private string? ValidationMessage;
     private BsModal? DeleteModal;
+    private BsModal? DeactivateModal;
     private BsModal? MakeAdminModal;
     private List<ClassEnrollmentDBO>? classEnrollment;
     private CsvSelector? fulfillSelector;
@@ -251,6 +279,17 @@
 
         // Leave dialog open; can mess with redirect to close
         return false;
+    });
+
+    private async Task<bool> DeactivateDialogSubmit() => await Task.Run(() =>
+    {
+        // Perform the change
+        SiteUsers.SiteUser_Set(Id: ActiveUser!.Id, Enabled: !ActiveUser.Enabled).Get();
+        ActiveUser!.Enabled = !ActiveUser!.Enabled;
+        InvokeAsync(StateHasChanged);
+
+        // Close the dialog after confirming
+        return true;
     });
 
     private async Task<bool> MakeAdminDialogSubmit() => await Task.Run(() =>
