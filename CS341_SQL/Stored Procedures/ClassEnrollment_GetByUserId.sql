@@ -21,7 +21,8 @@ BEGIN
         cm.[ClassName],
         cm.[ShortDescription],
         [dbo].[UserIsMember]([UserId], su.[MemberThru]) AS [IsMember],
-        cm.[CanceledDate]
+        cm.[CanceledDate],
+        ISNULL(su.[Enabled], 1) AS [UserEnabled]
     FROM [ClassEnrollment] ce
     LEFT JOIN [ClassMain] cm on cm.[Id] = [ClassId]
     LEFT JOIN [SiteUser] su on su.[Id] = [UserId]
