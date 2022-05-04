@@ -7,7 +7,8 @@ CREATE PROCEDURE [dbo].[SiteUser_Register]
     @FirstName NVARCHAR(50),
     @LastName NVARCHAR(50) = NULL,
     @Email NVARCHAR(100),
-    @IsAdmin BIT = 0
+    @IsAdmin BIT = 0,
+    @Enabled BIT = 1
 AS
 BEGIN
     -- SET NOCOUNT ON added to prevent extra result sets from
@@ -34,14 +35,16 @@ BEGIN
             [LastName],
             [Email],
             [ResetToken],
-            [IsAdmin]
+            [IsAdmin],
+            [Enabled]
         ) VALUES
         (
             @FirstName,
             @LastName,
             @Email,
             NEWID(),
-            @IsAdmin
+            @IsAdmin,
+            @Enabled
         );
 
         -- Return generated account ID and reset token

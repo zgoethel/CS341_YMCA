@@ -21,6 +21,7 @@ public class SiteUserRegisterRequest
     public string? LastName { get; set; }
     public string Email { get; set; } = "";
     public bool IsAdmin { get; set; } = false;
+    public bool Enabled { get; set; } = true;
 }
 
 /// <summary>
@@ -74,6 +75,7 @@ public class SiteUserDBO
     public DateTime? MemberThru { get; set; }
     public bool IsMember { get; set; }
     public string FulfilledCsv { get; set; } = "";
+    public bool Enabled { get; set; }
 }
 
 /// <summary>
@@ -97,6 +99,7 @@ public class SiteUserSetRequest
     public bool? IsAdmin { get; set; }
     public DateTime? MemberThru { get; set; }
     public string? FulfilledCsv { get; set; }
+    public bool? Enabled { get; set; }
 }
 
 /// <summary>

@@ -25,7 +25,8 @@ BEGIN
         [Modified],
         [MemberThru],
         [dbo].[UserIsMember]([Id], [MemberThru]) AS [IsMember],
-        [FulfilledCsv]
+        [FulfilledCsv],
+        ISNULL([Enabled], 1) AS [Enabled]
     FROM [SiteUser]
     WHERE 
         [FirstName] + ' ' + [LastName] LIKE '%' + @NameFilter + '%'

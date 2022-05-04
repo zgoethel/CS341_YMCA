@@ -11,7 +11,8 @@ CREATE PROCEDURE [dbo].[SiteUser_Set]
     @Email NVARCHAR(100) = NULL,
     @IsAdmin BIT = NULL,
     @MemberThru DATETIME = NULL,
-    @FulfilledCsv NVARCHAR(MAX) = NULL
+    @FulfilledCsv NVARCHAR(MAX) = NULL,
+    @Enabled BIT = NULL
 AS
 BEGIN
     -- SET NOCOUNT ON added to prevent extra result sets from
@@ -28,7 +29,8 @@ BEGIN
             [IsAdmin] = ISNULL(@IsAdmin, [IsAdmin]),
             [MemberThru] = ISNULL(@MemberThru, [MemberThru]),
             [FulfilledCsv] = ISNULL(@FulfilledCsv, [FulfilledCsv]),
-            [Modified] = GETDATE()
+            [Modified] = GETDATE(),
+            [Enabled] = ISNULL(@Enabled, [Enabled])
         WHERE
             [Id] = @Id;
     END

@@ -25,7 +25,8 @@ BEGIN
         [MemberThru],
         -- Calculate whether membership is valid or expired
         [dbo].[UserIsMember]([Id], [MemberThru]) AS [IsMember],
-        [FulfilledCsv]
+        [FulfilledCsv],
+        ISNULL([Enabled], 1) AS [Enabled]
     FROM [SiteUser]
     WHERE
         [Id] = @Id;
