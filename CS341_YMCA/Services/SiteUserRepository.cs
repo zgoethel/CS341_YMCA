@@ -109,7 +109,8 @@ public class SiteUserRepository : Controller
                     FirstName = FirstName,
                     LastName = LastName,
                     Email = Email,
-                    IsAdmin = false
+                    IsAdmin = false,
+                    Enabled = true
                 }, (Result) =>
                 {
                     this.SendResetEmail(Email, Result.ResetToken);
@@ -315,7 +316,8 @@ public class SiteUserRepository : Controller
         string? Email = null,
         bool? IsAdmin = null,
         DateTime? MemberThru = null,
-        string? FulfilledCsv = null)
+        string? FulfilledCsv = null,
+        bool? Enabled = null)
     {
         ResultToken<object> Result = new();
 
@@ -331,7 +333,8 @@ public class SiteUserRepository : Controller
                     Email = Email,
                     IsAdmin = IsAdmin,
                     MemberThru = MemberThru,
-                    FulfilledCsv = FulfilledCsv
+                    FulfilledCsv = FulfilledCsv,
+                    Enabled = Enabled
                 }, (_) => {  });
 
             Result.Success = true;

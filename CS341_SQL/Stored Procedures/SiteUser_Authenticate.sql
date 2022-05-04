@@ -17,17 +17,20 @@ BEGIN
     DECLARE @LoginUser INT;
     DECLARE @LoginPassword NVARCHAR(100);
     DECLARE @ExistingToken UNIQUEIDENTIFIER;
+    DECLARE @Enabled BIT;
     -- Select user record with correct email, set variables
     SELECT TOP 1 
         @LoginUser = [Id],
         @LoginPassword = [PasswordHash],
-        @ExistingToken = [ResetToken]
+        @ExistingToken = [ResetToken],
+        @Enabled = [Enabled]
     FROM [SiteUser]
     WHERE [Email] = @Email;
 
     IF (@LoginUser IS NOT NULL AND
         @LoginPassword = @PasswordHash AND
-        @ExistingToken IS NULL)
+        @ExistingToken IS NULL AND
+        @Enabled = 1)
     BEGIN
         -- User exists and successful login
         RETURN;

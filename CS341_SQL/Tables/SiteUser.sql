@@ -10,6 +10,9 @@
     [Modified]     DATETIME         CONSTRAINT [DF_SiteUser_Modified] DEFAULT (getdate()) NOT NULL,
     [MemberThru]   DATETIME         NULL,
     [FulfilledCsv] NVARCHAR (MAX)   CONSTRAINT [DF_SiteUser_FulfilledCsv] DEFAULT ('') NOT NULL,
+    [Enabled]      BIT              NULL,
     CONSTRAINT [PK_SiteUser] PRIMARY KEY CLUSTERED ([Id] ASC)
 );
+
+
 
