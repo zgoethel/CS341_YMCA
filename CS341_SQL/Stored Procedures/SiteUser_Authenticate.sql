@@ -23,7 +23,7 @@ BEGIN
         @LoginUser = [Id],
         @LoginPassword = [PasswordHash],
         @ExistingToken = [ResetToken],
-        @Enabled = [Enabled]
+        @Enabled = ISNULL([Enabled], 1)
     FROM [SiteUser]
     WHERE [Email] = @Email;
 
