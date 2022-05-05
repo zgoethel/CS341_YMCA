@@ -224,7 +224,7 @@
             <div class="col-sm-5">
                 @if (!calculations.UnlimitedSeats)
                 {
-                    <span style="font-size: 1.3em;font-weight: bold;">@(activeClass.MaxSeats - activeClass.SeatsTaken)</span>
+                    <span style="font-size: 1.3em;font-weight: bold;">@Math.Max(activeClass.MaxSeats!.Value - activeClass.SeatsTaken, 0)</span>
                     <span style="font-size: 1.2em;">&nbsp;open seats!</span>
                     <br />
                 }
