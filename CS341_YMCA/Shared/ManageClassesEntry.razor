@@ -24,9 +24,9 @@
 </td>
 
 @* DISPLAY # SEATS TAKEN OR DISPLAY DASH *@
-@if (CalculatedSeatsTaken > 0)
+@if (Class.SeatsTaken > 0)
 {
-    <td>@CalculatedSeatsTaken</td>
+    <td>@Class.SeatsTaken</td>
 } else
 {
     <td>&mdash;</td>
@@ -35,7 +35,7 @@
 @* DISPLAY SEATS TAKEN VS. AVAILABLE *@
 @if ((Class.MaxSeats ?? 0) != 0)
 {
-    <td>@(Class.MaxSeats - CalculatedSeatsTaken)</td>
+    <td>@Math.Max(Class.MaxSeats!.Value - Class.SeatsTaken, 0)</td>
     <td>@Class.MaxSeats</td>
 } else
 {
@@ -71,16 +71,6 @@
     /// </summary>
     [CascadingParameter]
     public SiteUserDBO? LoggedIn { get; set; }
-
-    private int CalculatedSeatsTaken;
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-
-        // Count the number of taken seats
-        CalculatedSeatsTaken = Classes.ClassEnrollment_GetByClassId(Class.Id).Get()!.Count;
-    }
 }
 
 <style>
