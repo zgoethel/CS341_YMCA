@@ -319,6 +319,7 @@ public class ClassEnrollmentDBO
     public string Email { get; set; } = "";
     public bool IsMember { get; set; }
     public DateTime? CanceledDate { get; set; }
+    public bool UserEnabled { get; set; }
 }
 
 /// <summary>

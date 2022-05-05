@@ -1,7 +1,7 @@
 ﻿@using CS341_YMCA.Helpers
 
 @* MANAGE USERS SCREEN TABLE ROW *@
-<tr>
+<tr class="@((User?.Enabled ?? true) ? "" : "text-secondary text-decoration-line-through")">
     <td>@User?.FirstName</td>
     <td>@User?.LastName</td>
     <td>@User?.Email</td>
