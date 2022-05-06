@@ -1,4 +1,8 @@
-﻿var InteropImpl =
+﻿/**
+ * Javascript file for accessing jQuery methods.
+ * @author Zach Goethel
+ */
+var InteropImpl =
 {
     /**
      * Retrieves the field value of an input DOM element.

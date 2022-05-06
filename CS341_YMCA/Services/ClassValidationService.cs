@@ -1,4 +1,10 @@
-﻿namespace CS341_YMCA.Services;
+﻿/**
+ * Offers utility methods to validate that schedules do not overlap and cause
+ * conflicts.
+ * @author Zach Goethel
+ */
+
+namespace CS341_YMCA.Services;
 
 using CS341_YMCA.Helpers;
 

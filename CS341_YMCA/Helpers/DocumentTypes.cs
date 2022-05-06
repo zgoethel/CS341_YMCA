@@ -1,4 +1,13 @@
-﻿namespace CS341_YMCA.Helpers;
+﻿/**
+ * Collection of data structures used throughout the application to interface
+ * with the database and make requests.
+ * @author Zach Goethel
+ * @author Matthew Krings
+ * @author Cristoph Meyer
+ * @author Tyler Vernezze
+ */
+
+namespace CS341_YMCA.Helpers;
 
 // Models bound to the fields required by user SQL procedures
 #region SiteUserActionModels

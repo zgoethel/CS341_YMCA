@@ -1,4 +1,10 @@
-﻿namespace CS341_YMCA.Services;
+﻿/**
+ * Set of functions to enable class grades and validation that users have met
+ * prerequisites for a class.
+ * @author Zach Goethel
+ */
+
+namespace CS341_YMCA.Services;
 
 using System.Collections.Generic;
 

@@ -1,4 +1,9 @@
-﻿namespace CS341_YMCA.Helpers;
+﻿/**
+ * Wrapper class for a result and the status of an operation.
+ * @author Zach Goethel
+ */
+
+namespace CS341_YMCA.Helpers;
 
 /// <summary>
 /// Contains basic data about the results and return value of an API call.

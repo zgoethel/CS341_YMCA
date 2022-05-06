@@ -1,4 +1,10 @@
-﻿using CS341_YMCA.Helpers;
+﻿/**
+ * Collection of operations related to users, including payments.
+ * @author Zach Goethel
+ * @author Matthew Krings
+ */
+
+using CS341_YMCA.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 

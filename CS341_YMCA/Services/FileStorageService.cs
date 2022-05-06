@@ -1,4 +1,9 @@
-﻿namespace CS341_YMCA.Services;
+﻿/**
+ * Allows the storing and retrieval of file data based on ID or name.
+ * @author Zach Goethel
+ */
+
+namespace CS341_YMCA.Services;
 
 using CS341_YMCA.Helpers;
 using Newtonsoft.Json;

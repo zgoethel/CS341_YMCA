@@ -1,4 +1,11 @@
-﻿using CS341_YMCA.Helpers;
+﻿/**
+ * Set of operations related to classes and class enrollment.
+ * @author Zach Goethel
+ * @author Matthew Krings
+ * @author Cristoph Meyer
+ */
+
+using CS341_YMCA.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 

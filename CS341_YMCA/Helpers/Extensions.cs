@@ -1,4 +1,9 @@
-﻿using System.Security.Cryptography;
+﻿/**
+ * Collection of utility functions which build on top of existing classes.
+ * @author Zach Goethel
+ */
+
+using System.Security.Cryptography;
 using System.Text;
 
 namespace CS341_YMCA.Helpers;

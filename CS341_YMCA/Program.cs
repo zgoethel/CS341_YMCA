@@ -1,3 +1,8 @@
+/**
+ * Program configuration and startup, initializes services.
+ * @author Zach Goethel
+ */
+
 using Microsoft.AspNetCore.Components.Authorization;
 
 using CS341_YMCA.Helpers;

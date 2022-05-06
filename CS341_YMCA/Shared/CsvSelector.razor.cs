@@ -1,4 +1,9 @@
-﻿namespace CS341_YMCA.Shared;
+﻿/**
+ * Logic which enables the prerequisite selector component.
+ * @author Zach Goethel
+ */
+
+namespace CS341_YMCA.Shared;
 
 using CS341_YMCA.Components;
 using Microsoft.AspNetCore.Components;

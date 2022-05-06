@@ -1,4 +1,8 @@
-﻿var BsTimePicker =
+﻿/**
+ * Javascript file for the timepicker component.
+ * @author Zach Goethel
+ */
+var BsTimePicker =
 {
     /**
      * Sets up the Bootstrap `datetimepicker` library to work with Blazor

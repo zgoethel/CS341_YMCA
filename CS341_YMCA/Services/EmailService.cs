@@ -1,4 +1,9 @@
-﻿using System.Net;
+﻿/**
+ * Utility functions for interacting with an SMTP email server.
+ * @author Zach Goethel
+ */
+
+using System.Net;
 using System.Net.Mail;
 
 namespace CS341_YMCA.Helpers;

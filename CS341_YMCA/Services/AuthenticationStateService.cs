@@ -1,4 +1,10 @@
-﻿namespace CS341_YMCA.Helpers;
+﻿/**
+ * An object which manages the user's authentication state (whether they are
+ * logged in or not).
+ * @author Zach Goethel
+ */
+
+namespace CS341_YMCA.Helpers;
 
 using CS341_YMCA.Services;
 using Microsoft.AspNetCore.Components.Authorization;

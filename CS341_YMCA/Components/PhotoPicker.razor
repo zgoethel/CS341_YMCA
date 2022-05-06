@@ -1,4 +1,7 @@
-﻿<fieldset>
+﻿@* PHOTO PICKER COMPONENT FOR UPLOADING/PREVIEWING A PHOTO *@
+@* ZACH GOETHEL *@
+
+<fieldset>
     <legend>@Label</legend>
     <div class="control-group">
         <img src="@(string.IsNullOrEmpty(previewUri) ? "images/not_found.svg" : previewUri)"

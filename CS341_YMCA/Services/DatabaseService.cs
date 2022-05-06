@@ -1,4 +1,9 @@
-﻿namespace CS341_YMCA.Services;
+﻿/**
+ * Utility functions for interacting with the SQL Server database.
+ * @author Zach Goethel
+ */
+
+namespace CS341_YMCA.Services;
 
 using Newtonsoft.Json;
 using System.Data;

@@ -1,4 +1,10 @@
-﻿namespace CS341_YMCA.Pages;
+﻿/**
+ * Code which enables the class enrollment page actions.
+ * @author Zach Goethel
+ * @author Matthew Krings
+ */
+
+namespace CS341_YMCA.Pages;
 
 using CS341_YMCA.Components;
 using CS341_YMCA.Helpers;
